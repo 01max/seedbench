@@ -1,9 +1,10 @@
 # Integration validation
 
 Discovery performed on 2026-11-07. C411 category reads and an isolated draft
-lifecycle have been verified. Publication, other provider credentials, and
-seeding remain unverified. See [the API observations](c411-api.md) for measured
-responses, concurrency limitations, and unresolved policy checks.
+lifecycle have been verified. Synthetic Postimages/OpenAI checks and Linux
+tooling checks are recorded in [provider and tooling observations](provider-tooling.md).
+Publication and seeding remain unverified. See [the API observations](c411-api.md)
+for measured responses, concurrency limitations, and unresolved policy checks.
 
 ## Connection inventory
 
@@ -11,8 +12,8 @@ responses, concurrency limitations, and unresolved policy checks.
 | --- | --- | --- |
 | C411 | The production API key is configured as `C411_API_KEY` in the ignored `.env`. Category/options reads and isolated draft create/read/update/delete succeeded. | Profile access returned HTTP 403; API account identity could not be independently confirmed through that endpoint. Publication is forbidden by the operator. |
 | Deluge | The `george-basics` Windmill workspace contains a secret variable and an existing torrent-inbox script referencing it. | Verify authentication and daemon identity with a bounded diagnostic before testing torrent operations. |
-| OpenAI | The same workspace contains an OpenAI resource and a secret-variable reference. | Establish whether the code-generation connection is intended for Seedbench, and verify the selected model and structured output using synthetic evidence. |
-| Postimages | The upload helper's local key file exists with owner-only `0600` permissions. | Verify upload and direct-image retrieval with an identified test image. File presence does not prove a valid key. |
+| OpenAI | The same workspace contains an OpenAI resource and a secret-variable reference. A synthetic strict-schema request succeeded, and an invalid schema was rejected. | Make a deliberate application connection assignment; the probe does not select production defaults. |
+| Postimages | The upload helper authenticated and returned a loadable direct PNG for a synthetic image. | Hosting reduced 600 × 900 to 512 × 768; actual cover quality and C411 host policy remain to be verified. |
 
 No credential values were printed or added to tracked files. The private
 inventory records actual connection references outside version control. The
@@ -37,10 +38,11 @@ Read-only inspection of the deployed Windmill torrent-inbox script found:
   client initialization can connect the web UI to a daemon if disconnected;
   inspect connection state before relying on it as a strictly read-only probe.
 
-These are configuration observations, not verified host/container mount
-mappings. No app mount, same-filesystem staging directory, daemon UID/GID,
-LAN/Tailscale binding, or shared payload hash has been verified. Keep disposable
-probe artifacts outside the watched inbox until their import is intended.
+The worker's inbox mount was observed with a read-only probe, but its
+`/data/completed/uploads` path is absent. No app mount, same-filesystem staging
+directory, daemon UID/GID, LAN/Tailscale binding, or shared payload hash has been
+verified. Keep disposable probe artifacts outside the watched inbox until their
+import is intended.
 
 ## Test-data boundary
 
@@ -54,7 +56,8 @@ explicitly prohibited publication because this is a production API key. Use
 only a newly created, clearly identified test draft for mutation tests. Existing
 browser uploads, drafts, published submissions, and torrents are outside that
 mutation scope. One isolated test draft was created, updated, and deleted; the
-original six drafts were preserved. No publication, image upload, torrent
+original six drafts were preserved. One generated checkerboard was uploaded to
+Postimages for verification. No ebook cover upload, C411 publication, torrent
 import, or seeding operation was performed during discovery.
 
 Record the selected draft's identity and any remote identifiers in the private
@@ -67,7 +70,7 @@ publication or personalized torrent retrieval.
 
 - Verify attachment round trips and handle actual production slot-limit errors
   without filling the account's slots merely for a test.
-- Resolve which OpenAI connection Seedbench should use.
+- Make a deliberate OpenAI application connection assignment.
 - Read current authenticated API, ebook, naming, description/NFO, image, and
   publication rules before encoding provider behavior.
 - Exercise draft lifecycle, concurrency and failures only against the identified
@@ -77,8 +80,9 @@ publication or personalized torrent retrieval.
 - Verify George's host/app/Deluge path identity and access with synthetic bytes.
 - Verify paused import, per-torrent options, full recheck, resume, and bounded
   tracker acceptance against the identified test torrent.
-- Verify Postimages, structured output, and Linux inspection/OCR/torrent tools.
+- Carry the measured provider limitations and selected Linux tools into the
+  application image, with separate real-file, parser-bound, and hostile-input
+  checks.
 
-The checkout has an `origin` remote, and its main branch matches the initial
-local commit. There is no Rails application, spec runner, or linter yet;
-application verification cannot run at this stage.
+The checkout has an `origin` remote. There is no Rails application, spec runner,
+or linter yet; application verification cannot run at this stage.
