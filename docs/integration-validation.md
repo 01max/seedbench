@@ -1,13 +1,15 @@
 # Integration validation
 
-Discovery performed on 2026-11-07. C411 category and draft reads have been
-verified. Publication, other provider credentials, and seeding remain unverified.
+Discovery performed on 2026-11-07. C411 category reads and an isolated draft
+lifecycle have been verified. Publication, other provider credentials, and
+seeding remain unverified. See [the API observations](c411-api.md) for measured
+responses, concurrency limitations, and unresolved policy checks.
 
 ## Connection inventory
 
 | Provider | Observed configuration | Verification still needed |
 | --- | --- | --- |
-| C411 | The production API key is configured as `C411_API_KEY` in the ignored `.env`. Category listing, book options, draft listing, and an existing draft read returned HTTP 200. | Draft mutations remain to be checked. Profile access returned HTTP 403; API account identity could not be independently confirmed through that endpoint. Publication is forbidden by the operator. |
+| C411 | The production API key is configured as `C411_API_KEY` in the ignored `.env`. Category/options reads and isolated draft create/read/update/delete succeeded. | Profile access returned HTTP 403; API account identity could not be independently confirmed through that endpoint. Publication is forbidden by the operator. |
 | Deluge | The `george-basics` Windmill workspace contains a secret variable and an existing torrent-inbox script referencing it. | Verify authentication and daemon identity with a bounded diagnostic before testing torrent operations. |
 | OpenAI | The same workspace contains an OpenAI resource and a secret-variable reference. | Establish whether the code-generation connection is intended for Seedbench, and verify the selected model and structured output using synthetic evidence. |
 | Postimages | The upload helper's local key file exists with owner-only `0600` permissions. | Verify upload and direct-image retrieval with an identified test image. File presence does not prove a valid key. |
@@ -51,8 +53,9 @@ The operator authorized inspection and draft tests with these files and
 explicitly prohibited publication because this is a production API key. Use
 only a newly created, clearly identified test draft for mutation tests. Existing
 browser uploads, drafts, published submissions, and torrents are outside that
-mutation scope. No publication, image upload, torrent import, or seeding
-operation was performed during discovery.
+mutation scope. One isolated test draft was created, updated, and deleted; the
+original six drafts were preserved. No publication, image upload, torrent
+import, or seeding operation was performed during discovery.
 
 Record the selected draft's identity and any remote identifiers in the private
 inventory before subsequent changes. Use synthetic evidence for the AI check
@@ -62,7 +65,8 @@ publication or personalized torrent retrieval.
 
 ## Remaining prerequisites
 
-- Create an isolated test draft within the recorded authorization boundary.
+- Verify attachment round trips and handle actual production slot-limit errors
+  without filling the account's slots merely for a test.
 - Resolve which OpenAI connection Seedbench should use.
 - Read current authenticated API, ebook, naming, description/NFO, image, and
   publication rules before encoding provider behavior.
