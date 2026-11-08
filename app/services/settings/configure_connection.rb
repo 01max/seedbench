@@ -3,6 +3,7 @@ module Settings
     def self.call(connection_id:, expected_version:, options:)
       connection = ProviderConnection.find(connection_id)
       raise ConnectionConfig::Invalid, "Aucune option modifiable pour ce rôle." unless connection.role == "ai"
+      raise ConnectionConfig::Invalid, "Complétez d’abord la configuration de cette connexion." if connection.configuration_incomplete?
 
       attributes = ConnectionConfig.call(role: connection.role, label: connection.label, identity_key: connection.identity_key,
         endpoint: connection.endpoint, credentials: connection.credentials, options: options)

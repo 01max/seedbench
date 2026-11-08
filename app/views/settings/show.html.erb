@@ -18,12 +18,13 @@
     <section class="mt-6 rounded border p-5" aria-labelledby="role-<%= role %>">
       <h2 id="role-<%= role %>" class="text-lg font-semibold"><%= definition.title %> · <%= definition.name %></h2>
       <% @connections.fetch(role, []).each do |connection| %>
+        <% incomplete = connection.configuration_incomplete? %>
         <article class="mt-4 border-t pt-4" aria-label="<%= connection.label %>">
           <h3 class="font-semibold"><%= connection.label %></h3>
           <p class="text-sm"><%= connection.endpoint %> · Identité : <%= connection.identity_key %></p>
           <p>Secret : <%= connection.credentials.present? ? "•••••••• (configuré)" : "non configuré" %></p>
           <% if connection.options["model"] %><p>Modèle : <%= connection.options["model"] %></p><% end %>
-          <% if role == "ai" %>
+          <% if role == "ai" && !incomplete %>
             <%= form_with url: configure_provider_connection_path(connection), method: :patch, scope: :configuration, namespace: "configure_#{connection.id}", class: "my-3 flex flex-wrap items-center gap-2" do |form| %>
               <%= form.hidden_field :expected_version, value: connection.credentials_version %>
               <%= form.fields_for :options do |fields| %>
@@ -35,19 +36,23 @@
           <p>Test : <%= { "untested" => "non effectué", "passed" => "réussi", "limited" => "portée limitée", "failed" => "échec" }.fetch(connection.check_status) %></p>
           <% if connection.checked_at %><p class="text-sm"><%= connection.checked_at.utc.iso8601 %> · <%= connection.check_message %></p><% end %>
           <%= button_to "Tester #{connection.label}", check_provider_connection_path(connection), class: "mt-2 underline" %>
-          <details class="mt-3">
-            <summary class="cursor-pointer">Remplacer le secret de la même identité</summary>
-            <p class="mt-2 text-sm">Pour un autre compte, démon ou endpoint, créez une nouvelle connexion et affectez-la explicitement aux livres concernés.</p>
-            <%= form_with url: rotate_provider_connection_path(connection), method: :patch, scope: :rotation, namespace: "rotate_#{connection.id}", class: "mt-3 grid gap-2" do |form| %>
-              <%= form.hidden_field :expected_version, value: connection.credentials_version %>
-              <%= form.fields_for :credentials do |fields| %>
-                <%= fields.label definition.secret, "Nouveau secret" %>
-                <%= fields.password_field definition.secret, required: true, autocomplete: "new-password", class: "rounded border p-2" %>
+          <% if incomplete %>
+            <%= render "provider_connections/completion", connection: connection, definition: definition %>
+          <% else %>
+            <details class="mt-3">
+              <summary class="cursor-pointer">Remplacer le secret de la même identité</summary>
+              <p class="mt-2 text-sm">Pour un autre compte, démon ou endpoint, créez une nouvelle connexion et affectez-la explicitement aux livres concernés.</p>
+              <%= form_with url: rotate_provider_connection_path(connection), method: :patch, scope: :rotation, namespace: "rotate_#{connection.id}", class: "mt-3 grid gap-2" do |form| %>
+                <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+                <%= form.fields_for :credentials do |fields| %>
+                  <%= fields.label definition.secret, "Nouveau secret" %>
+                  <%= fields.password_field definition.secret, required: true, autocomplete: "new-password", class: "rounded border p-2" %>
+                <% end %>
+                <label><%= form.check_box :confirm_identity, required: true %> Je confirme la même identité de compte ou de démon.</label>
+                <%= form.submit "Remplacer le secret", class: "justify-self-start rounded border px-3 py-2" %>
               <% end %>
-              <label><%= form.check_box :confirm_identity, required: true %> Je confirme la même identité de compte ou de démon.</label>
-              <%= form.submit "Remplacer le secret", class: "justify-self-start rounded border px-3 py-2" %>
-            <% end %>
-          </details>
+            </details>
+          <% end %>
         </article>
       <% end %>
       <details class="mt-4">

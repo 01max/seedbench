@@ -31,6 +31,17 @@ class ProviderConnection < ApplicationRecord
   has_many :remote_snapshots, foreign_key: [ :provider_role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :provider_connection, dependent: :restrict_with_exception
   has_many :ai_runs, foreign_key: [ :provider_role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :provider_connection, dependent: :restrict_with_exception
   has_many :provider_assignments, foreign_key: [ :role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :provider_connection, dependent: :restrict_with_exception
-  attr_readonly :role, :provider, :identity_key, :endpoint
+  attr_readonly :role, :provider, :identity_key
   validates :role, :provider, :identity_key, :label, presence: true
+  validate :preserve_recorded_endpoint, on: :update
+
+  def configuration_incomplete?
+    endpoint.nil? || credentials.blank? || (role == "ai" && options["model"].blank?)
+  end
+
+  private
+
+  def preserve_recorded_endpoint
+    errors.add(:endpoint, "ne peut pas être modifiée une fois configurée") if will_save_change_to_endpoint? && endpoint_in_database
+  end
 end

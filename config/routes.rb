@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     member do
       patch :rotate
       patch :configure
+      patch :complete
       post :check
     end
   end

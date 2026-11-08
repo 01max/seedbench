@@ -13,6 +13,15 @@ host ID from the WebUI. The Deluge address is its HTTP(S) WebUI root, including
 an optional reverse-proxy prefix, without `/json`, credentials, or query
 parameters. Other providers use their official addresses.
 
+Connections retained from earlier versions may have only their identity and
+label. Use **Compléter la configuration** on the existing connection to save its
+secret, required model, and missing Deluge address together. Confirm that these
+details belong to the recorded identity. Fixed providers receive their official
+address. This keeps connection IDs, release assignments, and history intact;
+once recorded, an address cannot be changed or cleared. Connection checks report
+incomplete configuration until setup succeeds, and stale completion forms are
+rejected.
+
 The four checks report their actual scope:
 
 | Provider | Checked | Still unverified by this action |

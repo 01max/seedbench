@@ -13,7 +13,7 @@ module Settings
     end
 
     def self.check(connection)
-      raise Providers::Failure.new("unconfigured", "Secret non configuré pour cette connexion.") if connection.credentials.blank?
+      raise Providers::Failure.new("unconfigured", "Configuration incomplète pour cette connexion.") if connection.configuration_incomplete?
 
       Providers::Catalog.adapter(connection).check(connection: connection)
     rescue Providers::Failure => error

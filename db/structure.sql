@@ -247,7 +247,6 @@ CREATE UNIQUE INDEX "index_login_throttles_on_client_hash" ON "login_throttles" 
 CREATE TABLE IF NOT EXISTS "provider_connections" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "role" varchar NOT NULL, "provider" varchar NOT NULL, "identity_key" varchar NOT NULL, "label" varchar NOT NULL, "endpoint" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "credentials" text, "options" json DEFAULT '{}' NOT NULL, "credentials_version" integer DEFAULT 0 NOT NULL, "check_status" varchar DEFAULT 'untested' NOT NULL, "check_code" varchar, "check_message" varchar, "checked_at" datetime(6), CONSTRAINT provider_role_matches CHECK ((role = 'publishing' AND provider = 'c411') OR (role = 'torrent_client' AND provider = 'deluge') OR (role = 'ai' AND provider = 'openai') OR (role = 'image_host' AND provider = 'postimages')), CONSTRAINT connection_options_object CHECK (json_valid(options) AND json_type(options) = 'object'), CONSTRAINT connection_version_valid CHECK (credentials_version >= 0), CONSTRAINT connection_check_valid CHECK (check_status IN ('untested', 'passed', 'limited', 'failed')));
 CREATE UNIQUE INDEX "index_provider_connections_on_role_and_identity_key" ON "provider_connections" ("role", "identity_key");
 CREATE UNIQUE INDEX "index_provider_connections_on_role_and_id" ON "provider_connections" ("role", "id");
-CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key, endpoint ON provider_connections BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
 CREATE TRIGGER "provider_connections_no_replace_0" BEFORE INSERT ON "provider_connections" WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.id'); END;
 CREATE TRIGGER "provider_connections_no_replace_1" BEFORE INSERT ON "provider_connections" WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "role" = NEW."role" AND "identity_key" = NEW."identity_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.role, provider_connections.identity_key'); END;
 CREATE TABLE IF NOT EXISTS "operator_preferences" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "automatic_ai" boolean DEFAULT TRUE NOT NULL, "revision" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT operator_preferences_valid CHECK (id = 1 AND revision >= 0 AND automatic_ai IN (0, 1)));
@@ -256,7 +255,10 @@ FOREIGN KEY ("role", "provider_connection_id")
   REFERENCES "provider_connections" ("role", "id")
 , CONSTRAINT default_role_valid CHECK (role IN ('publishing', 'torrent_client', 'ai', 'image_host')));
 CREATE UNIQUE INDEX "index_provider_defaults_on_role" ON "provider_defaults" ("role");
+CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key ON provider_connections BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
+CREATE TRIGGER provider_endpoint_no_update BEFORE UPDATE OF endpoint ON provider_connections WHEN OLD.endpoint IS NOT NULL OR NEW.endpoint IS NULL BEGIN SELECT RAISE(ABORT, 'Provider endpoint is immutable once configured'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261108200000'),
 ('20261108184000'),
 ('20261108182000'),
 ('20261108180000'),

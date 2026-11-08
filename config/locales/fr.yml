@@ -1,5 +1,6 @@
 fr:
   settings:
+    connection_completed: "Configuration complétée pour la même identité. Les livres existants conservent leur connexion."
     connection_created: "Connexion enregistrée. Lancez un test pour vérifier son accès."
     secret_rotated: "Secret remplacé pour la même identité. Le test précédent est invalidé."
     options_updated: "Options enregistrées. Relancez le test de connexion."

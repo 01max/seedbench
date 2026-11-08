@@ -1,6 +1,23 @@
 require "rails_helper"
 
 RSpec.describe "Provider settings", type: :system do
+  it "completes a legacy AI connection with its secret and model together" do
+    sign_in_browser
+    connection = ProviderConnection.create!(role: "ai", provider: "openai", identity_key: "legacy-project", label: "Legacy AI")
+    visit settings_path
+    within("article[aria-label='Legacy AI']") do
+      find("summary", text: "Compléter la configuration").click
+      fill_in "Clé API", with: "completed-browser-secret"
+      fill_in "Identifiant exact du modèle", with: "synthetic-model"
+      check "Je confirme la même identité de compte ou de démon."
+      click_button "Compléter la connexion"
+    end
+
+    expect(page).to have_content("Configuration complétée")
+    expect(connection.reload.options).to eq("model" => "synthetic-model")
+    expect(page.html).not_to include("completed-browser-secret")
+  end
+
   it "saves future defaults while keeping an existing release unchanged" do
     sign_in_browser
     release = Releases::Create.call

@@ -6,6 +6,8 @@ module Settings
       raise ConnectionConfig::Invalid, "Confirmez que le secret appartient à la même identité." unless confirm_identity == true
 
       connection = ProviderConnection.find(connection_id)
+      raise ConnectionConfig::Invalid, "Complétez d’abord la configuration de cette connexion." if connection.configuration_incomplete?
+
       attributes = ConnectionConfig.call(role: connection.role, label: connection.label, identity_key: connection.identity_key,
         endpoint: connection.endpoint, credentials: credentials, options: connection.options)
       connection.with_lock do
