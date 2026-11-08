@@ -87,25 +87,15 @@ submission-state reads, post-publication draft behavior, publication-time
 validation, and tracker acceptance remain unverified. The guide's profile
 endpoint is account information, not submission-state evidence.
 
-## Ebook content policy remains incomplete
+## Current ebook policy review
 
-The authenticated naming page rendered the standalone pattern
-`Titre.Auteur.Langue.[Extension]-Team` and a series/volume variant, with dotted
-words, preserved source-team attribution, and `-NOTAG` for an unknown team. It
-also distinguishes listing titles from original filenames for reposts.
+The wiki failed during the 2026-11-07 checks, but authenticated access recovered
+on 2026-11-08. The [ebook policy record](c411-ebook-policy.md) now documents live
+eligibility, names, description/NFO requirements, the standard editor's limits,
+manual torrent settings, and the distinction between published site rules and
+operator choices.
 
-The description/NFO page rendered required ebook facts: title, author, format,
-language, meaningful page/file counts, and size. Its general description rules
-require a representative image and content description. The operator's exact
-presentation template remains a separate requirement; the page does not prove
-that a particular template skeleton or label order is site-mandated.
-
-The [ebook rules](https://c411.org/wiki/cat-ebook) repeatedly returned a server
-error in the authenticated browser. Other wiki pages intermittently rendered
-content and subsequently failed. Direct requests with the API key redirected;
-the key did not grant wiki access equivalent to the browser session.
-
-Current ebook eligibility, a measurable site cover-resolution rule, image-host
-allowlist, and complete creation/publication policy could not be established.
-Do not encode remembered rules or represent the local 600 × 900 portrait-cover
-preference as a verified C411 minimum. These policy checks remain pending.
+No numerical cover minimum was found in the reviewed pages; 600 × 900 remains
+the operator's measurable portrait rule. The complete image-host allowlist,
+Postimages acceptance in standard preview, and the API's seeding timing remain
+unverified. Do not infer publication behavior from successful draft storage.

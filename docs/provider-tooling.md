@@ -18,8 +18,10 @@ properties cannot satisfy a hosted-image check. No larger re-upload was made,
 and no selected ebook cover was hosted. The synthetic URL and image hashes
 remain in the private evidence inventory.
 
-C411's current image-host allowlist and any site-specific measurable cover
-minimum remain unverified because the authenticated wiki is failing.
+The [2026-11-08 policy review](c411-ebook-policy.md) found no numerical site cover
+minimum in the reviewed pages. The complete image-host allowlist and C411
+acceptance of a Postimages URL remain unverified; the HTML policy's examples
+are non-exhaustive.
 
 ## OpenAI
 
