@@ -1,0 +1,10 @@
+position: before
+classified_sort: true
+show_indexes: true
+show_foreign_keys: true
+ignore_database_name: true
+ignore_multi_database_name: true
+exclude_tests: true
+exclude_fixtures: true
+exclude_factories: true
+exclude_serializers: true

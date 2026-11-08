@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+
+compose() {
+  docker compose --env-file config/compose.defaults.env -f compose.quality.yaml "$@"
+}
+
+archive=$(mktemp "${TMPDIR:-/tmp}/seedbench-annotations.XXXXXX")
+trap 'rm -f "$archive"' 0 HUP INT TERM
+
+compose build quality >&2
+compose run --rm -T quality sh -c '
+  set -eu
+  cp -R /app /tmp/annotation-source
+  cd /tmp/annotation-source
+  bundle exec rails db:prepare >&2
+  bundle exec annotaterb models "$@" >&2
+  tar -cf - app/models
+' sh "$@" > "$archive"
+tar -xf "$archive" --no-same-owner

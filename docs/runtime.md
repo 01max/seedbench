@@ -20,6 +20,7 @@ Ruby and Rails use the supported patched releases selected from their official
 | Puma / Solid Queue | 8.0.2 / 1.7.2 |
 | RSpec Rails / SimpleCov | 8.1.0 / 0.22.0 |
 | RuboCop / Rails Omakase | 1.92.2 / 1.1.0 |
+| AnnotateRb (development only) | 4.26.0 |
 | RuboCop Rails / Performance / RSpec | 2.38.0 / 1.27.0 / 3.10.2 |
 | Capybara / Selenium / WebMock | 3.40.0 / 4.52.0 / 3.34.0 |
 | Tailwind Rails / standalone compiler | 4.7.0 / 4.3.4 |
@@ -58,7 +59,7 @@ A fresh clone without `.env`, operator ebooks, or private evidence passed
 host Ruby and Node absent from its executable search path. The initial foundation
 passed six examples, including a real Turbo/Stimulus browser interaction and a
 blocked unexpected HTTP request. The expanded domain/workflow suite passes
-66 examples with 99.55% application line coverage; the enforced minimum is 90%.
+99 examples with 99.58% application line coverage; the enforced minimum is 90%.
 
 Both unloaded-source probes failed coverage despite passing examples. Lint
 probes failed for every configured department, formatting, and all four method

@@ -58,6 +58,20 @@ wrap Docker Compose. `bin/test` forwards RSpec arguments, including `--seed`.
 then verifies the production application image with disposable Compose projects.
 No Docker socket is mounted into application or quality containers.
 
+Model schema comments are maintained with [AnnotateRb](https://github.com/drwl/annotaterb).
+Run `bin/annotate` after changing migrations or models. It builds the quality
+image, prepares disposable databases, and annotates a temporary source copy,
+then returns only model files to the checkout. No host Ruby, writable source
+mount, operator data, or persistent application database is required.
+
+Annotations include columns, indexes, and foreign keys, with database names
+omitted so they are stable across environments. Specs, fixtures, factories,
+and serializers are excluded. Development database tasks also refresh them
+automatically in a writable source checkout; set `ANNOTATERB_SKIP_ON_DB_TASKS=1`
+to skip that hook. CI runs `annotaterb models --frozen` against its disposable
+database and fails when comments are stale. AnnotateRb is excluded from the
+production bundle.
+
 An isolated production-mode request check enables forced SSL without assumed
 SSL. It requires plain HTTP `/up` to return 200, application pages to redirect
 to HTTPS, and requests forwarded as HTTPS to render normally.

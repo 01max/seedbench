@@ -1,3 +1,38 @@
+# == Schema Information
+#
+# Table name: workflow_operations
+#
+#  id                 :integer          not null, primary key
+#  attempt_token      :string
+#  attempts           :integer          default(0), not null
+#  effect             :string           not null
+#  error_code         :string
+#  external_reference :json             not null
+#  finished_at        :datetime
+#  input_revision     :integer          not null
+#  kind               :string           not null
+#  lease_expires_at   :datetime
+#  parameters         :json             not null
+#  phase              :string           default("requested"), not null
+#  request_key        :string           not null
+#  result             :json             not null
+#  started_at         :datetime
+#  state              :string           default("pending"), not null
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  release_id         :integer          not null
+#
+# Indexes
+#
+#  index_workflow_operations_on_release_id                  (release_id)
+#  index_workflow_operations_on_release_id_and_id           (release_id,id) UNIQUE
+#  index_workflow_operations_on_release_id_and_request_key  (release_id,request_key) UNIQUE
+#  index_workflow_operations_on_state_and_lease_expires_at  (state,lease_expires_at)
+#
+# Foreign Keys
+#
+#  release_id  (release_id => releases.id)
+#
 class WorkflowOperation < ApplicationRecord
   belongs_to :release
   has_one :dispatch_intent, foreign_key: [ :release_id, :workflow_operation_id ], primary_key: [ :release_id, :id ], inverse_of: :workflow_operation, dependent: :restrict_with_exception

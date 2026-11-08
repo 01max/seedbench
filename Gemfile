@@ -13,6 +13,10 @@ gem "tailwindcss-rails", "~> 4.6"
 gem "bootsnap", require: false
 gem "solid_queue", "~> 1.7"
 
+group :development do
+  gem "annotaterb", "~> 4.25", require: false
+end
+
 group :development, :test do
   gem "rspec-rails", "~> 8.1"
   gem "rubocop-rails-omakase", "~> 1.1", require: false
