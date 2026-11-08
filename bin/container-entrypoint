@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+require "securerandom"
+require "fileutils"
+
+File.umask(0o077)
+FileUtils.mkdir_p(%w[/tmp/rails-home /tmp/rails-tmp /tmp/rails-log])
+%w[SEEDBENCH_STATE_ROOT SEEDBENCH_SCRATCH_ROOT SEEDBENCH_PAYLOAD_ROOT].each do |name|
+  path = ENV.fetch(name)
+  abort "#{name} must be an existing writable absolute directory" unless
+    path.start_with?("/") && File.directory?(path) && File.writable?(path)
+end
+
+unless ENV["SECRET_KEY_BASE"] || ENV["SECRET_KEY_BASE_DUMMY"]
+  key_path = File.join(ENV.fetch("SEEDBENCH_STATE_ROOT"), "secret_key_base")
+  begin
+    File.open(key_path, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
+      file.write(SecureRandom.hex(64))
+    end
+  rescue Errno::EEXIST
+    # Another service can initialize the shared key first.
+  end
+  ENV["SECRET_KEY_BASE"] = File.read(key_path).strip
+  abort "The persisted application key is empty" if ENV["SECRET_KEY_BASE"].empty?
+end
+
+exec(*ARGV)

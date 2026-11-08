@@ -21,3 +21,4 @@
 *.db-*
 *.pdf
 .DS_Store
+/compose.env

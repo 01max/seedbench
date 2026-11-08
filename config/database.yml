@@ -1,0 +1,19 @@
+default: &default
+  adapter: sqlite3
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  timeout: 5000
+
+development: &databases
+  primary:
+    <<: *default
+    database: <%= ENV.fetch("SEEDBENCH_STATE_ROOT") %>/<%= ENV.fetch("RAILS_ENV", "development") %>.sqlite3
+  queue:
+    <<: *default
+    database: <%= ENV.fetch("SEEDBENCH_STATE_ROOT") %>/<%= ENV.fetch("RAILS_ENV", "development") %>_queue.sqlite3
+    migrations_paths: db/queue_migrate
+
+test:
+  <<: *databases
+
+production:
+  <<: *databases
