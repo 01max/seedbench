@@ -1,11 +1,10 @@
 require "digest"
+ARGV.replace([ "verify" ])
+require_relative "runtime_workflows"
 
-connection = ApplicationRecord.connection
-expected = connection.select_value("SELECT payload_hash FROM synthetic_markers")
-payload = Rails.application.config.x.storage.fetch(:payload).join("synthetic-payload.bin")
-abort "Payload or primary state changed across recreation" unless Digest::SHA256.file(payload).hexdigest == expected
-job = SolidQueue::Job.find_by!(class_name: "SyntheticPersistenceJob")
-abort "Queued work was not completed" unless job.finished_at
-marker = Rails.application.config.x.storage.fetch(:scratch).join("queue-proof")
-abort "Worker result missing" unless marker.read == "completed"
-puts "Application state, payload bytes, and queued work survived container recreation."
+record = RuntimeWorkflows.release
+payload = record.payload_revisions.sole
+path = Rails.application.config.x.storage.fetch(:payload).join(payload.locator)
+abort "Payload changed across recreation" unless Digest::SHA256.file(path).hexdigest == payload.sha256 && path.size == payload.size_bytes
+abort "Provider assignment state changed" unless record.provider_assignments.count == 4 && record.provider_assignments.pluck(:provider_connection_id).all?(&:nil?)
+puts "Release revisions, human content, history, provider assignments, payload and workflow state survived recreation."

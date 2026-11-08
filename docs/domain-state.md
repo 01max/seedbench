@@ -91,3 +91,18 @@ an existing external identity cannot be replaced. Stale local results preserve
 that journal and phase for explicit reconciliation, without overwriting newer
 human content. Stored failure metadata uses sanitized codes; unexpected
 exceptions still propagate to error reporting.
+
+The container recreation checks exercise these services through real Solid Queue
+workers, including a producer stopped after application commit, duplicate queue
+deliveries, an edit during paused computation, and a killed worker. The checks
+retain real domain records, protect the original human text and payload hash,
+and repeat with configurable roots and service identities. Synthetic definitions
+and controlled interruption hooks are confined to the verification scripts.
+
+SQL schema loading uses a registered SQLite task subclass. Rails 8.1.4.1's
+loader interpolates the database path through a shell and ignores the command's
+exit status, which can silently fall back to migrations for roots containing
+spaces. The replacement uses argument-vector execution, an input file, and
+SQLite's `-bail` flag with a checked exit status. Other database tasks are
+inherited. Regression examples cover literal paths with spaces/quotes and a
+failing SQL input; runtime mount checks exercise the registered loader.
