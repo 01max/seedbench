@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Operator sessions" do
+  include ActiveSupport::Testing::TimeHelpers
+
   it "protects private pages and leaves health checks available" do
     get root_path
     expect(response).to redirect_to(new_operator_session_path)
@@ -24,17 +26,33 @@ RSpec.describe "Operator sessions" do
     expect(response).to redirect_to(new_operator_session_path)
   end
 
-  it "renders a generic rejection and rate-limit response" do
+  it "locks the account across clients until Devise's unlock interval expires" do
     create_operator
-    post operator_session_path, params: { operator: { password: "incorrect" } }
+    10.times { post operator_session_path, params: { operator: { password: "incorrect" } } }
+    expect(Operator.sole.access_locked?).to be(true)
+    cookies.delete("_seedbench_session")
+    post operator_session_path, params: { operator: { password: OperatorHelpers::PASSWORD } }, headers: { "REMOTE_ADDR" => "192.0.2.2" }
     expect(response).to have_http_status(:unprocessable_content)
-    9.times { Authentication::Throttle.check!(ip: "127.0.0.1") }
+    travel 16.minutes do
+      post operator_session_path, params: { operator: { password: OperatorHelpers::PASSWORD } }
+    end
+
+    expect(response).to redirect_to(root_path)
+    expect(Operator.sole.failed_attempts).to eq(0)
+    expect(Operator.sole.locked_at).to be_nil
+  end
+
+  it "clears failed attempts after a successful login" do
+    create_operator
+    2.times { post operator_session_path, params: { operator: { password: "incorrect" } } }
     post operator_session_path, params: { operator: { password: OperatorHelpers::PASSWORD } }
-    expect(response).to have_http_status(:too_many_requests)
+
+    expect(response).to redirect_to(root_path)
+    expect(Operator.sole.failed_attempts).to eq(0)
   end
 
   %w[X-Forwarded-For Client-Ip Forwarded].each do |header|
-    it "keeps forged #{header} values in the same login throttle bucket" do
+    it "keeps the account locked when #{header} values change" do
       create_operator
       statuses = Array.new(11) do |index|
         address = "198.51.100.#{index + 1}"
@@ -43,8 +61,8 @@ RSpec.describe "Operator sessions" do
         response.status
       end
 
-      expect(statuses).to eq([ *Array.new(10, 422), 429 ])
-      expect(LoginThrottle.sole.attempts).to eq(10)
+      expect(statuses).to eq(Array.new(11, 422))
+      expect(Operator.sole.access_locked?).to be(true)
     end
   end
 

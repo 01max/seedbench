@@ -12,15 +12,14 @@ RSpec.describe Authentication::ResetPassword do
   end
 
   it "revokes existing sessions and rejects the previous password" do
-    create_operator
+    create_operator.lock_access!
     BrowserSession.create!(session_id: "synthetic-session", data: { "key" => "value" })
-    Authentication::Throttle.check!(ip: "192.0.2.1")
     described_class.call(password: replacement, password_confirmation: replacement)
 
     expect(BrowserSession.count).to eq(0)
     expect(Operator.sole.valid_password?(OperatorHelpers::PASSWORD)).to be(false)
     expect(Operator.sole.valid_password?(replacement)).to be(true)
-    expect(LoginThrottle.count).to eq(0)
+    expect(Operator.sole.access_locked?).to be(false)
   end
 
   it "preserves the password and sessions on invalid input" do

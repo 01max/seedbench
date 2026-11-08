@@ -2,9 +2,9 @@
 
 Seedbench uses Devise for its single operator, with no public registration,
 email login, remember-me cookie, or browser password recovery. Devise owns
-bcrypt password verification, login/logout, session rotation, and inactivity
-timeouts. The password-only form always selects the one database-constrained
-operator account; it cannot select or create another account.
+bcrypt password verification, login/logout, session rotation, account locking,
+and inactivity timeouts. The password-only form always selects the one
+database-constrained operator account; it cannot select or create another account.
 
 Rails' Active Record session store retains JSON session data in the application
 database. The HttpOnly, SameSite=Lax cookie contains an opaque session ID; the
@@ -17,15 +17,16 @@ HTTP remains the accepted transport limitation.
 Application controllers require authentication by default. The login form and
 the `/up` container health endpoint are public. Private responses prohibit
 caching. Rails CSRF verification protects login, logout, and authenticated
-state changes. A SQLite-backed limit permits ten login attempts per connection
-peer address in a fifteen-minute window and survives process/container
-replacement. Client-supplied forwarding headers do not change the bucket. Behind
-a reverse proxy, clients with the same peer address share the limit. Stored
-throttle identifiers are hashes, and old windows are pruned.
+state changes. Devise's `lockable` module locks the operator account after ten
+failed attempts and unlocks it after fifteen minutes. Failed attempts and the
+lock timestamp persist in SQLite across process/container replacement. The lock
+applies to every client, regardless of address or forwarding headers. Successful
+login clears the failed-attempt count; locked accounts receive the same generic
+rejection as an incorrect password. The terminal reset command also unlocks the
+account.
 
-The Devise session controller adds only persistent peer-address throttling and
-explicit CSRF verification. The application uses Devise's authentication guard
-and current-operator helpers. Passwords and session identifiers are filtered from
+The Devise session controller adds explicit CSRF verification. The application
+uses Devise's authentication guard and current-operator helpers. Passwords and session identifiers are filtered from
 request parameters. Expired session rows can be removed with the session store's
 `db:sessions:trim` task; schedule it periodically for long-lived deployments.
 
@@ -51,7 +52,7 @@ input echo is disabled. Use at least 12 characters and at most 72 bytes.
 Never put a password in command arguments, shell history, or environment
 variables. The command accepts no arguments and prints only prompts and the
 result. A successful reset atomically replaces the password hash, revokes all
-existing login sessions, and clears login throttles. Invalid input preserves
+existing login sessions, and clears the account lock. Invalid input preserves
 the current password and sessions. Restarting containers alone does not reset
 the account or its sessions.
 

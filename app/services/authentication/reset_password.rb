@@ -11,7 +11,7 @@ module Authentication
         operator.encrypted_password = candidate.encrypted_password
         operator.save!
         BrowserSession.delete_all
-        LoginThrottle.delete_all
+        operator.unlock_access!
         operator
       end
     end

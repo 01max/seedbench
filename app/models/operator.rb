@@ -4,11 +4,13 @@
 #
 #  id                 :integer          not null, primary key
 #  encrypted_password :string           not null
+#  failed_attempts    :integer          default(0), not null
+#  locked_at          :datetime
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
 #
 class Operator < ApplicationRecord
-  devise :database_authenticatable, :validatable, :timeoutable
+  devise :database_authenticatable, :validatable, :timeoutable, :lockable
   validate :password_fits_bcrypt
 
   def self.find_for_database_authentication(_conditions)
