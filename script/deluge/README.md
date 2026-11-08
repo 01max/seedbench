@@ -11,6 +11,20 @@ docker run --rm --network none --read-only \
   seedbench-deluge:verification
 ```
 
+Run the startup regression with the same isolation:
+
+```sh
+docker run --rm --network none --read-only \
+  --tmpfs /tmp:rw,nosuid,nodev,size=128m --cap-drop ALL \
+  --security-opt no-new-privileges --pids-limit 128 --memory 512m --cpus 2 \
+  --entrypoint /usr/bin/python3 seedbench-deluge:verification \
+  /opt/deluge/test_startup.py
+```
+
+The regression delays only `deluged` by three seconds, starts the web UI
+normally, and requires the full protocol check to succeed. The probe retries
+the daemon connection within its existing 20-second deadline.
+
 Only this directory enters the build context. The container runs as UID/GID
 `65534:65534`, with no host mounts, published ports, credentials, or external
 network. It creates a fresh daemon, web UI, random local RPC credentials, three

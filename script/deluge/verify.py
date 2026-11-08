@@ -251,8 +251,12 @@ def main():
             assert wait_for("web login", lambda: rpc.call("auth.login", "deluge")) is True
             hosts = rpc.call("web.get_hosts")
             assert any(host[0] == host_id for host in hosts)
-            rpc.call("web.connect", host_id)
-            assert wait_for("daemon connection", lambda: rpc.call("web.connected")) is True
+
+            def connect_daemon():
+                rpc.call("web.connect", host_id)
+                return rpc.call("web.connected")
+
+            assert wait_for("daemon connection", connect_daemon) is True
             result = verify(rpc, fixtures, payloads, moved)
             for fixture in fixtures:
                 assert rpc.call("core.remove_torrent", fixture["id"], False) is True

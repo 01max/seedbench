@@ -4,6 +4,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends deluged=2.2.0-1 deluge-web=2.2.0-1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY verify.py /opt/deluge/verify.py
+COPY verify.py test_startup.py /opt/deluge/
 USER 65534:65534
 ENTRYPOINT ["/usr/bin/python3", "/opt/deluge/verify.py"]
