@@ -46,3 +46,25 @@ invalid transitions retain dimension/from/to details. Event metadata is bounded
 JSON containing identifiers and sanitized outcomes, with secret fields and URLs
 rejected. Human content and private provider payloads belong in their dedicated
 revision records rather than being copied into audit metadata.
+
+## Durable background dispatch
+
+`Workflows::Start` binds an opaque request key to one operation, input revision,
+and parameter snapshot. It writes the operation, its dispatch intent, and history
+in the same application transaction. Identical retries reuse that identity;
+reusing the key for different inputs raises an idempotency conflict.
+
+Enqueueing is registered with `ActiveRecord.after_all_transactions_commit` by the
+service, with no model callback. The dispatcher claims an intent in a short
+application transaction, calls Active Job outside that transaction, then records
+the queue receipt. Queue rejection leaves the intent pending. A periodic bounded
+recovery job handles committed pending intents and expired dispatch claims.
+Queueing twice around a lost receipt is safe because execution claims the
+operation identity and commits local effects with completion history atomically.
+
+Computation and I/O run outside the application write transaction; a handler's
+apply step performs only local persistence inside it. Definitions are explicit,
+code-owned compute/apply/effect entries. No provider or feature handler is assumed
+implemented: unknown kinds fail closed. Verification supplies a synthetic handler
+that creates evidence, with no provider calls. This is internal work delivery,
+not a seeding monitor or a runtime plugin interface.

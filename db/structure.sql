@@ -222,6 +222,25 @@ CREATE TRIGGER release_events_no_update BEFORE UPDATE ON release_events
 BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
 CREATE TRIGGER release_events_no_delete BEFORE DELETE ON release_events
 BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TABLE IF NOT EXISTS "workflow_operations" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "kind" varchar NOT NULL, "request_key" varchar NOT NULL, "effect" varchar NOT NULL, "state" varchar DEFAULT 'pending' NOT NULL, "phase" varchar DEFAULT 'requested' NOT NULL, "input_revision" integer NOT NULL, "attempts" integer DEFAULT 0 NOT NULL, "parameters" json DEFAULT '{}' NOT NULL, "result" json DEFAULT '{}' NOT NULL, "external_reference" json DEFAULT '{}' NOT NULL, "attempt_token" varchar, "lease_expires_at" datetime(6), "started_at" datetime(6), "finished_at" datetime(6), "error_code" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_072857f718"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT operation_revisions_valid CHECK (input_revision >= 0 AND attempts >= 0), CONSTRAINT operation_request_key_valid CHECK (length(request_key) BETWEEN 1 AND 80), CONSTRAINT operation_effect_valid CHECK (effect IN ('local', 'remote', 'filesystem')), CONSTRAINT operation_state_valid CHECK (state IN ('pending', 'running', 'succeeded', 'failed', 'stale', 'outcome_unknown')), CONSTRAINT running_operation_has_attempt CHECK (state != 'running' OR (attempt_token IS NOT NULL AND lease_expires_at IS NOT NULL)), CONSTRAINT operation_parameters_object CHECK (json_valid(parameters) AND json_type(parameters) = 'object'), CONSTRAINT operation_result_object CHECK (json_valid(result) AND json_type(result) = 'object'), CONSTRAINT operation_external_reference_object CHECK (json_valid(external_reference) AND json_type(external_reference) = 'object'));
+CREATE INDEX "index_workflow_operations_on_release_id" ON "workflow_operations" ("release_id");
+CREATE UNIQUE INDEX "index_workflow_operations_on_release_id_and_request_key" ON "workflow_operations" ("release_id", "request_key");
+CREATE UNIQUE INDEX "index_workflow_operations_on_release_id_and_id" ON "workflow_operations" ("release_id", "id");
+CREATE INDEX "index_workflow_operations_on_state_and_lease_expires_at" ON "workflow_operations" ("state", "lease_expires_at");
+CREATE TABLE IF NOT EXISTS "dispatch_intents" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "workflow_operation_id" bigint NOT NULL, "state" varchar DEFAULT 'pending' NOT NULL, "attempts" integer DEFAULT 0 NOT NULL, "dispatch_token" varchar, "claimed_until" datetime(6), "dispatched_at" datetime(6), "job_id" varchar, "error_code" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_8bde797c9d"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_fe6b47e832"
+FOREIGN KEY ("release_id", "workflow_operation_id")
+  REFERENCES "workflow_operations" ("release_id", "id")
+, CONSTRAINT dispatch_state_valid CHECK (state IN ('pending', 'dispatching', 'dispatched') AND attempts >= 0), CONSTRAINT dispatch_claim_valid CHECK (state != 'dispatching' OR (dispatch_token IS NOT NULL AND claimed_until IS NOT NULL)));
+CREATE INDEX "index_dispatch_intents_on_release_id" ON "dispatch_intents" ("release_id");
+CREATE UNIQUE INDEX "index_dispatch_intents_on_workflow_operation_id" ON "dispatch_intents" ("workflow_operation_id");
+CREATE INDEX "index_dispatch_intents_on_state_and_claimed_until" ON "dispatch_intents" ("state", "claimed_until");
 INSERT INTO "schema_migrations" (version) VALUES
+('20261108143000'),
 ('20261108140000');
 

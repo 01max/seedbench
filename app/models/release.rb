@@ -1,4 +1,6 @@
 class Release < ApplicationRecord
+  has_many :workflow_operations, dependent: :restrict_with_exception
+  has_many :dispatch_intents, dependent: :restrict_with_exception
   has_many :payload_revisions, dependent: :restrict_with_exception
   has_many :preparation_revisions, dependent: :restrict_with_exception
   has_many :evidence_items, dependent: :restrict_with_exception
