@@ -61,4 +61,15 @@ RSpec.describe "Provider settings" do
 
     expect(result.values).to all(eq("[FILTERED]"))
   end
+
+  it "saves defaults and preserves them when an older form arrives" do
+    ids = Providers::Catalog::ROLES.keys.index_with { "" }
+    patch settings_path, params: { defaults: { automatic_ai: "0", expected_revision: 0, connection_ids: ids } }
+    expect(Settings::DefaultsSnapshot.call.automatic_ai).to be(false)
+    patch settings_path, params: { defaults: { automatic_ai: "1", expected_revision: 0, connection_ids: ids } }
+    follow_redirect!
+
+    expect(response.body).to include("Les réglages ont changé")
+    expect(Settings::DefaultsSnapshot.call.automatic_ai).to be(false)
+  end
 end

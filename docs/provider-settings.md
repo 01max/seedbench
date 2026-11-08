@@ -33,6 +33,19 @@ a fresh session cookie for each check and does not save that cookie.
 The OpenAI model identifier can be changed on the same connection without
 changing account identity; saving it invalidates the previous access check.
 
+The **Choix pour les prochains livres** form controls default connection IDs and
+the Automatic AI first pass flag, which starts enabled. Each new release
+captures all four role assignments, including explicitly unconfigured roles,
+and its own AI choice in the same transaction. Changing defaults does not
+retarget an existing release or launch/cancel its work.
+
+Use a release's connections page (`/releases/ID/connections`) to assign a
+previously unconfigured role deliberately. Assignment records history and
+advances the input revision. An existing assigned identity is retained;
+credential rotation is performed on that same connection. Stale forms cannot
+overwrite newer defaults or release assignments. Local/manual work remains
+available with unconfigured roles.
+
 Credentials are encrypted with Active Record Encryption and rendered as a
 constant mask. Request parameters filter passwords, keys, tokens, and credential
 objects. A secret rotation requires confirming that it belongs to the same

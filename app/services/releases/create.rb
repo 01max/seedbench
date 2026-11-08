@@ -2,10 +2,14 @@ module Releases
   class Create
     ROLES = %w[publishing torrent_client ai image_host].freeze
 
-    def self.call(title: nil, author: nil, automatic_ai: true)
+    def self.call(title: nil, author: nil)
       Release.transaction do
-        release = Release.create!(title: title, author: author, automatic_ai: automatic_ai)
-        ROLES.each { |role| release.provider_assignments.create!(role: role) }
+        defaults = Settings::DefaultsSnapshot.call
+        release = Release.create!(title: title, author: author, automatic_ai: defaults.automatic_ai)
+        ROLES.each do |role|
+          id = defaults.connection_ids[role]
+          release.provider_assignments.create!(role: role, provider_connection_id: id, assigned_at: id ? Time.current : nil)
+        end
         RecordEvent.call(release_id: release.id, name: "release.created", actor: "operator")
         release
       end

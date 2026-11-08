@@ -1,6 +1,19 @@
 <main class="mx-auto max-w-5xl px-6 py-8">
   <h1 class="text-2xl font-bold">Réglages</h1>
   <p class="mt-2">Les tests indiquent leur portée réelle. Aucun test ne publie, ne démarre un torrent ou n’envoie une image.</p>
+  <section class="mt-6 rounded border p-5" aria-labelledby="defaults-title">
+    <h2 id="defaults-title" class="text-lg font-semibold">Choix pour les prochains livres</h2>
+    <p class="mt-2 text-sm">Ces choix ne modifient pas les livres existants et ne lancent ni n’annulent aucune opération.</p>
+    <%= form_with url: settings_path, method: :patch, scope: :defaults, class: "mt-4 grid gap-3" do |form| %>
+      <%= form.hidden_field :expected_revision, value: @defaults.revision %>
+      <label><%= form.check_box :automatic_ai, checked: @defaults.automatic_ai %> Premier passage IA automatique</label>
+      <% Providers::Catalog::ROLES.each do |role, definition| %>
+        <%= label_tag "default_#{role}", "#{definition.title} · #{definition.name}" %>
+        <%= select_tag "defaults[connection_ids][#{role}]", options_for_select(@connections.fetch(role, []).map { |connection| [ connection.label, connection.id ] }, @defaults.connection_ids[role]), include_blank: "Non configuré", id: "default_#{role}", class: "rounded border p-2" %>
+      <% end %>
+      <%= form.submit "Enregistrer les choix par défaut", class: "justify-self-start rounded border px-3 py-2" %>
+    <% end %>
+  </section>
   <% Providers::Catalog::ROLES.each do |role, definition| %>
     <section class="mt-6 rounded border p-5" aria-labelledby="role-<%= role %>">
       <h2 id="role-<%= role %>" class="text-lg font-semibold"><%= definition.title %> · <%= definition.name %></h2>

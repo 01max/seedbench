@@ -250,7 +250,14 @@ CREATE UNIQUE INDEX "index_provider_connections_on_role_and_id" ON "provider_con
 CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key, endpoint ON provider_connections BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
 CREATE TRIGGER "provider_connections_no_replace_0" BEFORE INSERT ON "provider_connections" WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.id'); END;
 CREATE TRIGGER "provider_connections_no_replace_1" BEFORE INSERT ON "provider_connections" WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "role" = NEW."role" AND "identity_key" = NEW."identity_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.role, provider_connections.identity_key'); END;
+CREATE TABLE IF NOT EXISTS "operator_preferences" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "automatic_ai" boolean DEFAULT TRUE NOT NULL, "revision" integer DEFAULT 0 NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT operator_preferences_valid CHECK (id = 1 AND revision >= 0 AND automatic_ai IN (0, 1)));
+CREATE TABLE IF NOT EXISTS "provider_defaults" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "role" varchar NOT NULL, "provider_connection_id" bigint, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_aa50db8b51"
+FOREIGN KEY ("role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT default_role_valid CHECK (role IN ('publishing', 'torrent_client', 'ai', 'image_host')));
+CREATE UNIQUE INDEX "index_provider_defaults_on_role" ON "provider_defaults" ("role");
 INSERT INTO "schema_migrations" (version) VALUES
+('20261108184000'),
 ('20261108182000'),
 ('20261108180000'),
 ('20261108160000'),
