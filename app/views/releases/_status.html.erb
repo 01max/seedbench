@@ -1,7 +1,24 @@
-<%= turbo_frame_tag dom_id(@release, :status) do %>
-  <% { "Inspection" => @release.inspection_state, "Préparation" => @release.preparation_state, "Brouillon C411" => @release.draft_state, "Publication" => @release.publication_state, "Premier seeding" => @release.seeding_state }.each do |label, state| %>
-    <div class="check-row"><div><span><%= label %></span><small>Auto</small></div><p><%= workflow_label(state) %></p></div>
+<%= turbo_frame_tag dom_id(@release, :status), data: { controller: "checklist" } do %>
+  <% if @check_error %><p role="alert" class="work-alert"><%= @check_error %></p><% end %>
+  <% @checklist.each do |item| %>
+    <div class="check-row" data-check-key="<%= item.key %>" data-check-state="<%= item.state %>">
+      <div><span><span class="check-symbol" aria-hidden="true"><%= {"done" => "✓", "blocked" => "!", "pending" => "○", "optional" => "—"}.fetch(item.state) %></span> <%= item.label %></span><small><%= item.owner %></small></div>
+      <p><%= item.required ? "Requis" : "Facultatif" %> · <%= item.note %></p>
+      <% if item.owner == "Vous" %>
+        <%= form_with url: release_checks_path(@release), scope: :mark, data: { turbo_frame: dom_id(@release, :status) }, class: "manual-check-form" do |form| %>
+          <%= form.hidden_field :key, value: item.key %>
+          <%= form.hidden_field :expected_revision, value: @release.input_revision %>
+          <% if item.finding %><%= form.hidden_field :finding_id, value: item.finding.id %><%= form.hidden_field :number, value: item.finding.number %><% end %>
+          <label><%= form.check_box :checked, checked: item.checked, id: "mark-#{item.key}", data: { action: "change->checklist#submit" } %> <%= item.finding ? "Accepter cette incertitude" : item.label %></label>
+          <%= form.submit "Appliquer", class: "work-button quiet" %>
+        <% end %>
+      <% end %>
+    </div>
   <% end %>
+  <% @snapshot.findings.select { |finding| finding.severity == "failure" }.each do |finding| %><p class="work-warning"><%= finding.message %></p><% end %>
+  <details class="status-dimensions"><summary>États des opérations</summary>
+    <% { "Inspection" => @release.inspection_state, "Préparation" => @release.preparation_state, "Brouillon C411" => @release.draft_state, "Publication" => @release.publication_state, "Premier seeding" => @release.seeding_state }.each do |label, state| %><p><%= label %> : <%= workflow_label(state) %></p><% end %>
+  </details>
   <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= kind == "draft" ? "Brouillon" : "Soumission" %> #<%= snapshot.remote_id %><%= " · absent" if snapshot.remote_deleted %></p><% end %>
   <% @snapshot.operations.each do |operation| %><p class="operation-state"><%= operation.kind.humanize %> : <%= workflow_label(operation.state) %></p><% end %>
 <% end %>

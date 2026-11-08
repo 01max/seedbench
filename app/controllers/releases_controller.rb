@@ -14,5 +14,6 @@ class ReleasesController < ApplicationController
     @queue = Releases::Queue.call(**params.permit(:q, :state, :page).to_h.symbolize_keys, release_id: params[:id])
     @release = @queue.selected
     @snapshot = Releases::Snapshot.call(release: @release) if @release
+    @checklist = Releases::Checklist.call(release: @release, snapshot: @snapshot) if @release
   end
 end

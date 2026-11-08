@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resource :settings, only: %i[show update]
   resources :uploads, only: :create
   resources :releases, only: %i[index show] do
+    resources :checks, controller: "release_checks", only: :create
     resource :connections, controller: "release_connections", only: %i[show update]
   end
   resources :provider_connections, path: "settings/connections", only: :create do

@@ -86,6 +86,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .check-row > div { display: flex; justify-content: space-between; gap: 4px; }
 .check-row small, .check-row p { font-size: 11px; color: var(--muted); }
 .check-row p { margin-top: 3px !important; }
+.check-symbol { color: var(--muted); }
+.check-row[data-check-state="done"] .check-symbol { color: var(--good); }
+.check-row[data-check-state="blocked"] .check-symbol { color: var(--warning); }
+.manual-check-form { margin-top: 4px; color: var(--muted); font-size: 11px; }
+.manual-check-form label { display: flex; align-items: flex-start; gap: 5px; }
+.manual-check-form input[type="checkbox"] { accent-color: var(--accent); margin-top: 2px; }
+.manual-check-form input[type="submit"] { margin-top: 4px; padding: 2px 5px; }
+[data-auto-submit="true"] .manual-check-form input[type="submit"] { display: none; }
 .release-activity { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 9px; }
 .release-activity p { margin-top: 6px !important; font-size: 11px; color: var(--muted); }
 .remote-identity, .operation-state { font-size: 11px; overflow-wrap: anywhere; margin-top: 7px !important; }

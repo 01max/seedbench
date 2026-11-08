@@ -253,7 +253,17 @@ CREATE TABLE IF NOT EXISTS "sessions" ("id" integer PRIMARY KEY AUTOINCREMENT NO
 CREATE UNIQUE INDEX "index_sessions_on_session_id" ON "sessions" ("session_id");
 CREATE INDEX "index_sessions_on_created_at" ON "sessions" ("created_at");
 CREATE INDEX "index_sessions_on_updated_at" ON "sessions" ("updated_at");
+CREATE TABLE IF NOT EXISTS "manual_checks" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "key" varchar NOT NULL, "number" integer NOT NULL, "checked" boolean DEFAULT FALSE NOT NULL, "input_revision" integer NOT NULL, "actor" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_69d42c483c"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT manual_check_revisions_valid CHECK (number > 0 AND input_revision >= 0), CONSTRAINT manual_check_owner_valid CHECK (key IN ('edition_review', 'text_review') AND actor = 'operator'), CONSTRAINT manual_check_boolean_valid CHECK (checked IN (0, 1)));
+CREATE INDEX "index_manual_checks_on_release_id" ON "manual_checks" ("release_id");
+CREATE UNIQUE INDEX "index_manual_checks_on_release_id_and_key_and_number" ON "manual_checks" ("release_id", "key", "number");
+CREATE TRIGGER manual_checks_no_update BEFORE UPDATE ON manual_checks BEGIN SELECT RAISE(ABORT, 'Checklist history is append-only'); END;
+CREATE TRIGGER manual_checks_no_delete BEFORE DELETE ON manual_checks BEGIN SELECT RAISE(ABORT, 'Checklist history is append-only'); END;
+CREATE TRIGGER manual_checks_no_replace BEFORE INSERT ON manual_checks WHEN EXISTS (SELECT 1 FROM manual_checks WHERE id = NEW.id OR (release_id = NEW.release_id AND key = NEW.key AND number = NEW.number)) BEGIN SELECT RAISE(ABORT, 'Checklist history is append-only'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261109090000'),
 ('20261108220000'),
 ('20261108210000'),
 ('20261108200000'),

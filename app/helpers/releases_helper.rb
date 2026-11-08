@@ -34,6 +34,7 @@ module ReleasesHelper
   def event_label(name)
     { "release.created" => "Release créée", "payload.staged" => "Fichier déposé", "release.revised" => "Texte enregistré",
       "operation.requested" => "Opération demandée", "operation.completed" => "Opération terminée",
+      "checklist.changed" => "Relecture modifiée", "finding.acknowledgement_changed" => "Incertitude revue",
       "operation.stale" => "Ancien résultat écarté" }.fetch(name, name.tr("._", " "))
   end
 end

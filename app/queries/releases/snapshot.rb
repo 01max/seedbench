@@ -16,13 +16,19 @@ module Releases
     private_class_method :revisions
 
     def self.observations(release)
-      { findings: latest(release.findings, :code).includes(:finding_acknowledgements).to_a,
+      { findings: current_findings(release).includes(:finding_acknowledgements).to_a,
         events: release.release_events.order(sequence: :desc).limit(50).to_a,
         snapshots: latest(release.remote_snapshots, :kind).index_by(&:kind),
         operations: release.workflow_operations.order(id: :desc).limit(20).to_a,
         evidence: release.evidence_items.order(id: :desc).limit(20).to_a }
     end
     private_class_method :observations
+
+    def self.current_findings(release)
+      payload = release.payload_revisions.order(number: :desc).limit(1).select(:id)
+      latest(release.findings.where(payload_revision_id: payload), :code)
+    end
+    private_class_method :current_findings
 
     def self.latest(relation, group)
       relation.where(id: relation.select("MAX(id)").group(group))
