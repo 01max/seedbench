@@ -1,0 +1,11 @@
+<main class="mx-auto max-w-md px-6 py-20">
+  <p class="text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">Seedbench</p>
+  <h1 class="mt-4 text-2xl font-bold">Connexion à l’atelier</h1>
+  <p class="mt-3">Votre espace privé de préparation d’ebooks.</p>
+  <% if @error %><p role="alert" class="mt-4"><%= @error %></p><% end %>
+  <%= form_with url: session_path, class: "mt-6 grid gap-4" do |form| %>
+    <%= form.label :password, "Mot de passe" %>
+    <%= form.password_field :password, required: true, autocomplete: "current-password", autofocus: true, class: "rounded border p-2" %>
+    <%= form.submit "Se connecter", class: "rounded bg-[var(--accent)] px-4 py-2 text-white" %>
+  <% end %>
+</main>

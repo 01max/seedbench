@@ -13,7 +13,7 @@ FOREIGN KEY ("release_id", "evidence_item_id")
 CREATE INDEX "index_fact_evidence_links_on_release_id" ON "fact_evidence_links" ("release_id");
 CREATE UNIQUE INDEX "index_fact_evidence_links_on_release_id_and_id" ON "fact_evidence_links" ("release_id", "id");
 CREATE UNIQUE INDEX "idx_on_reviewed_fact_id_evidence_item_id_4b9b4ea960" ON "fact_evidence_links" ("reviewed_fact_id", "evidence_item_id");
-CREATE TABLE IF NOT EXISTS "finding_acknowledgements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "finding_id" bigint NOT NULL, "acknowledged" boolean NOT NULL, "actor" varchar NOT NULL, "note" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_e13fc9786b"
+CREATE TABLE IF NOT EXISTS "finding_acknowledgements" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "finding_id" bigint NOT NULL, "acknowledged" boolean DEFAULT FALSE NOT NULL, "actor" varchar NOT NULL, "note" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_e13fc9786b"
 FOREIGN KEY ("release_id")
   REFERENCES "releases" ("id")
 , CONSTRAINT "fk_rails_dffc13ec6a"
@@ -166,62 +166,34 @@ FOREIGN KEY ("release_id")
 CREATE INDEX "index_release_events_on_release_id" ON "release_events" ("release_id");
 CREATE UNIQUE INDEX "index_release_events_on_release_id_and_id" ON "release_events" ("release_id", "id");
 CREATE UNIQUE INDEX "index_release_events_on_release_id_and_sequence" ON "release_events" ("release_id", "sequence");
-CREATE TRIGGER payload_identity_no_update BEFORE UPDATE OF release_id, number, original_filename, format, sha256, size_bytes ON payload_revisions
-BEGIN SELECT RAISE(ABORT, 'Payload identity is immutable'); END;
-CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key, endpoint ON provider_connections
-BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
-CREATE TRIGGER preparation_revisions_no_update BEFORE UPDATE ON preparation_revisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER preparation_revisions_no_delete BEFORE DELETE ON preparation_revisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER evidence_items_no_update BEFORE UPDATE ON evidence_items
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER evidence_items_no_delete BEFORE DELETE ON evidence_items
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER reviewed_facts_no_update BEFORE UPDATE ON reviewed_facts
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER reviewed_facts_no_delete BEFORE DELETE ON reviewed_facts
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER fact_evidence_links_no_update BEFORE UPDATE ON fact_evidence_links
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER fact_evidence_links_no_delete BEFORE DELETE ON fact_evidence_links
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER findings_no_update BEFORE UPDATE ON findings
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER findings_no_delete BEFORE DELETE ON findings
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER finding_acknowledgements_no_update BEFORE UPDATE ON finding_acknowledgements
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER finding_acknowledgements_no_delete BEFORE DELETE ON finding_acknowledgements
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER cover_revisions_no_update BEFORE UPDATE ON cover_revisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER cover_revisions_no_delete BEFORE DELETE ON cover_revisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER cover_hostings_no_update BEFORE UPDATE ON cover_hostings
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER cover_hostings_no_delete BEFORE DELETE ON cover_hostings
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER content_revisions_no_update BEFORE UPDATE ON content_revisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER content_revisions_no_delete BEFORE DELETE ON content_revisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER duplicate_checks_no_update BEFORE UPDATE ON duplicate_checks
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER duplicate_checks_no_delete BEFORE DELETE ON duplicate_checks
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER duplicate_decisions_no_update BEFORE UPDATE ON duplicate_decisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER duplicate_decisions_no_delete BEFORE DELETE ON duplicate_decisions
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER remote_snapshots_no_update BEFORE UPDATE ON remote_snapshots
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER remote_snapshots_no_delete BEFORE DELETE ON remote_snapshots
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER release_events_no_update BEFORE UPDATE ON release_events
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
-CREATE TRIGGER release_events_no_delete BEFORE DELETE ON release_events
-BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER payload_identity_no_update BEFORE UPDATE OF release_id, number, original_filename, format, sha256, size_bytes ON payload_revisions BEGIN SELECT RAISE(ABORT, 'Payload identity is immutable'); END;
+CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key, endpoint ON provider_connections BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
+CREATE TRIGGER preparation_revisions_no_update BEFORE UPDATE ON preparation_revisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER preparation_revisions_no_delete BEFORE DELETE ON preparation_revisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER evidence_items_no_update BEFORE UPDATE ON evidence_items BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER evidence_items_no_delete BEFORE DELETE ON evidence_items BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER reviewed_facts_no_update BEFORE UPDATE ON reviewed_facts BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER reviewed_facts_no_delete BEFORE DELETE ON reviewed_facts BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER fact_evidence_links_no_update BEFORE UPDATE ON fact_evidence_links BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER fact_evidence_links_no_delete BEFORE DELETE ON fact_evidence_links BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER findings_no_update BEFORE UPDATE ON findings BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER findings_no_delete BEFORE DELETE ON findings BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER finding_acknowledgements_no_update BEFORE UPDATE ON finding_acknowledgements BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER finding_acknowledgements_no_delete BEFORE DELETE ON finding_acknowledgements BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER cover_revisions_no_update BEFORE UPDATE ON cover_revisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER cover_revisions_no_delete BEFORE DELETE ON cover_revisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER cover_hostings_no_update BEFORE UPDATE ON cover_hostings BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER cover_hostings_no_delete BEFORE DELETE ON cover_hostings BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER content_revisions_no_update BEFORE UPDATE ON content_revisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER content_revisions_no_delete BEFORE DELETE ON content_revisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER duplicate_checks_no_update BEFORE UPDATE ON duplicate_checks BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER duplicate_checks_no_delete BEFORE DELETE ON duplicate_checks BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER duplicate_decisions_no_update BEFORE UPDATE ON duplicate_decisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER duplicate_decisions_no_delete BEFORE DELETE ON duplicate_decisions BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER remote_snapshots_no_update BEFORE UPDATE ON remote_snapshots BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER remote_snapshots_no_delete BEFORE DELETE ON remote_snapshots BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER release_events_no_update BEFORE UPDATE ON release_events BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
+CREATE TRIGGER release_events_no_delete BEFORE DELETE ON release_events BEGIN SELECT RAISE(ABORT, 'Revision history is append-only'); END;
 CREATE TABLE IF NOT EXISTS "workflow_operations" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "kind" varchar NOT NULL, "request_key" varchar NOT NULL, "effect" varchar NOT NULL, "state" varchar DEFAULT 'pending' NOT NULL, "phase" varchar DEFAULT 'requested' NOT NULL, "input_revision" integer NOT NULL, "attempts" integer DEFAULT 0 NOT NULL, "parameters" json DEFAULT '{}' NOT NULL, "result" json DEFAULT '{}' NOT NULL, "external_reference" json DEFAULT '{}' NOT NULL, "attempt_token" varchar, "lease_expires_at" datetime(6), "started_at" datetime(6), "finished_at" datetime(6), "error_code" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_072857f718"
 FOREIGN KEY ("release_id")
   REFERENCES "releases" ("id")
@@ -240,119 +212,46 @@ FOREIGN KEY ("release_id", "workflow_operation_id")
 CREATE INDEX "index_dispatch_intents_on_release_id" ON "dispatch_intents" ("release_id");
 CREATE UNIQUE INDEX "index_dispatch_intents_on_workflow_operation_id" ON "dispatch_intents" ("workflow_operation_id");
 CREATE INDEX "index_dispatch_intents_on_state_and_claimed_until" ON "dispatch_intents" ("state", "claimed_until");
-CREATE TRIGGER "payload_revisions_no_replace_0"
-BEFORE INSERT ON "payload_revisions"
-WHEN EXISTS (SELECT 1 FROM "payload_revisions" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: payload_revisions.id'); END;
-CREATE TRIGGER "payload_revisions_no_replace_1"
-BEFORE INSERT ON "payload_revisions"
-WHEN EXISTS (SELECT 1 FROM "payload_revisions" WHERE "release_id" = NEW."release_id" AND "number" = NEW."number")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: payload_revisions.release_id, payload_revisions.number'); END;
-CREATE TRIGGER "provider_connections_no_replace_0"
-BEFORE INSERT ON "provider_connections"
-WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.id'); END;
-CREATE TRIGGER "provider_connections_no_replace_1"
-BEFORE INSERT ON "provider_connections"
-WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "role" = NEW."role" AND "identity_key" = NEW."identity_key")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.role, provider_connections.identity_key'); END;
-CREATE TRIGGER "preparation_revisions_no_replace_0"
-BEFORE INSERT ON "preparation_revisions"
-WHEN EXISTS (SELECT 1 FROM "preparation_revisions" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: preparation_revisions.id'); END;
-CREATE TRIGGER "preparation_revisions_no_replace_1"
-BEFORE INSERT ON "preparation_revisions"
-WHEN EXISTS (SELECT 1 FROM "preparation_revisions" WHERE "release_id" = NEW."release_id" AND "number" = NEW."number")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: preparation_revisions.release_id, preparation_revisions.number'); END;
-CREATE TRIGGER "evidence_items_no_replace_0"
-BEFORE INSERT ON "evidence_items"
-WHEN EXISTS (SELECT 1 FROM "evidence_items" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: evidence_items.id'); END;
-CREATE TRIGGER "evidence_items_no_replace_1"
-BEFORE INSERT ON "evidence_items"
-WHEN EXISTS (SELECT 1 FROM "evidence_items" WHERE "release_id" = NEW."release_id" AND "evidence_key" = NEW."evidence_key")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: evidence_items.release_id, evidence_items.evidence_key'); END;
-CREATE TRIGGER "reviewed_facts_no_replace_0"
-BEFORE INSERT ON "reviewed_facts"
-WHEN EXISTS (SELECT 1 FROM "reviewed_facts" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: reviewed_facts.id'); END;
-CREATE TRIGGER "reviewed_facts_no_replace_1"
-BEFORE INSERT ON "reviewed_facts"
-WHEN EXISTS (SELECT 1 FROM "reviewed_facts" WHERE "release_id" = NEW."release_id" AND "field" = NEW."field" AND "number" = NEW."number")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: reviewed_facts.release_id, reviewed_facts.field, reviewed_facts.number'); END;
-CREATE TRIGGER "fact_evidence_links_no_replace_0"
-BEFORE INSERT ON "fact_evidence_links"
-WHEN EXISTS (SELECT 1 FROM "fact_evidence_links" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: fact_evidence_links.id'); END;
-CREATE TRIGGER "fact_evidence_links_no_replace_1"
-BEFORE INSERT ON "fact_evidence_links"
-WHEN EXISTS (SELECT 1 FROM "fact_evidence_links" WHERE "reviewed_fact_id" = NEW."reviewed_fact_id" AND "evidence_item_id" = NEW."evidence_item_id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: fact_evidence_links.reviewed_fact_id, fact_evidence_links.evidence_item_id'); END;
-CREATE TRIGGER "findings_no_replace_0"
-BEFORE INSERT ON "findings"
-WHEN EXISTS (SELECT 1 FROM "findings" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: findings.id'); END;
-CREATE TRIGGER "findings_no_replace_1"
-BEFORE INSERT ON "findings"
-WHEN EXISTS (SELECT 1 FROM "findings" WHERE "release_id" = NEW."release_id" AND "code" = NEW."code" AND "number" = NEW."number")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: findings.release_id, findings.code, findings.number'); END;
-CREATE TRIGGER "finding_acknowledgements_no_replace_0"
-BEFORE INSERT ON "finding_acknowledgements"
-WHEN EXISTS (SELECT 1 FROM "finding_acknowledgements" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: finding_acknowledgements.id'); END;
-CREATE TRIGGER "cover_revisions_no_replace_0"
-BEFORE INSERT ON "cover_revisions"
-WHEN EXISTS (SELECT 1 FROM "cover_revisions" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_revisions.id'); END;
-CREATE TRIGGER "cover_revisions_no_replace_1"
-BEFORE INSERT ON "cover_revisions"
-WHEN EXISTS (SELECT 1 FROM "cover_revisions" WHERE "release_id" = NEW."release_id" AND "number" = NEW."number")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_revisions.release_id, cover_revisions.number'); END;
-CREATE TRIGGER "cover_hostings_no_replace_0"
-BEFORE INSERT ON "cover_hostings"
-WHEN EXISTS (SELECT 1 FROM "cover_hostings" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_hostings.id'); END;
-CREATE TRIGGER "content_revisions_no_replace_0"
-BEFORE INSERT ON "content_revisions"
-WHEN EXISTS (SELECT 1 FROM "content_revisions" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: content_revisions.id'); END;
-CREATE TRIGGER "content_revisions_no_replace_1"
-BEFORE INSERT ON "content_revisions"
-WHEN EXISTS (SELECT 1 FROM "content_revisions" WHERE "release_id" = NEW."release_id" AND "kind" = NEW."kind" AND "number" = NEW."number")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: content_revisions.release_id, content_revisions.kind, content_revisions.number'); END;
-CREATE TRIGGER "duplicate_checks_no_replace_0"
-BEFORE INSERT ON "duplicate_checks"
-WHEN EXISTS (SELECT 1 FROM "duplicate_checks" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: duplicate_checks.id'); END;
-CREATE TRIGGER "duplicate_decisions_no_replace_0"
-BEFORE INSERT ON "duplicate_decisions"
-WHEN EXISTS (SELECT 1 FROM "duplicate_decisions" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: duplicate_decisions.id'); END;
-CREATE TRIGGER "duplicate_decisions_no_replace_1"
-BEFORE INSERT ON "duplicate_decisions"
-WHEN EXISTS (SELECT 1 FROM "duplicate_decisions" WHERE "duplicate_check_id" = NEW."duplicate_check_id" AND "candidate_key" = NEW."candidate_key")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: duplicate_decisions.duplicate_check_id, duplicate_decisions.candidate_key'); END;
-CREATE TRIGGER "remote_snapshots_no_replace_0"
-BEFORE INSERT ON "remote_snapshots"
-WHEN EXISTS (SELECT 1 FROM "remote_snapshots" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: remote_snapshots.id'); END;
-CREATE TRIGGER "release_events_no_replace_0"
-BEFORE INSERT ON "release_events"
-WHEN EXISTS (SELECT 1 FROM "release_events" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: release_events.id'); END;
-CREATE TRIGGER "release_events_no_replace_1"
-BEFORE INSERT ON "release_events"
-WHEN EXISTS (SELECT 1 FROM "release_events" WHERE "release_id" = NEW."release_id" AND "sequence" = NEW."sequence")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: release_events.release_id, release_events.sequence'); END;
-CREATE TRIGGER "workflow_operations_no_replace_0"
-BEFORE INSERT ON "workflow_operations"
-WHEN EXISTS (SELECT 1 FROM "workflow_operations" WHERE "id" = NEW."id")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: workflow_operations.id'); END;
-CREATE TRIGGER "workflow_operations_no_replace_1"
-BEFORE INSERT ON "workflow_operations"
-WHEN EXISTS (SELECT 1 FROM "workflow_operations" WHERE "release_id" = NEW."release_id" AND "request_key" = NEW."request_key")
-BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: workflow_operations.release_id, workflow_operations.request_key'); END;
+CREATE TRIGGER operation_input_no_update BEFORE UPDATE OF release_id, kind, request_key, effect, input_revision, parameters ON workflow_operations BEGIN SELECT RAISE(ABORT, 'Operation inputs are immutable'); END;
+CREATE TRIGGER "payload_revisions_no_replace_0" BEFORE INSERT ON "payload_revisions" WHEN EXISTS (SELECT 1 FROM "payload_revisions" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: payload_revisions.id'); END;
+CREATE TRIGGER "payload_revisions_no_replace_1" BEFORE INSERT ON "payload_revisions" WHEN EXISTS (SELECT 1 FROM "payload_revisions" WHERE "release_id" = NEW."release_id" AND "number" = NEW."number") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: payload_revisions.release_id, payload_revisions.number'); END;
+CREATE TRIGGER "provider_connections_no_replace_0" BEFORE INSERT ON "provider_connections" WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.id'); END;
+CREATE TRIGGER "provider_connections_no_replace_1" BEFORE INSERT ON "provider_connections" WHEN EXISTS (SELECT 1 FROM "provider_connections" WHERE "role" = NEW."role" AND "identity_key" = NEW."identity_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: provider_connections.role, provider_connections.identity_key'); END;
+CREATE TRIGGER "preparation_revisions_no_replace_0" BEFORE INSERT ON "preparation_revisions" WHEN EXISTS (SELECT 1 FROM "preparation_revisions" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: preparation_revisions.id'); END;
+CREATE TRIGGER "preparation_revisions_no_replace_1" BEFORE INSERT ON "preparation_revisions" WHEN EXISTS (SELECT 1 FROM "preparation_revisions" WHERE "release_id" = NEW."release_id" AND "number" = NEW."number") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: preparation_revisions.release_id, preparation_revisions.number'); END;
+CREATE TRIGGER "evidence_items_no_replace_0" BEFORE INSERT ON "evidence_items" WHEN EXISTS (SELECT 1 FROM "evidence_items" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: evidence_items.id'); END;
+CREATE TRIGGER "evidence_items_no_replace_1" BEFORE INSERT ON "evidence_items" WHEN EXISTS (SELECT 1 FROM "evidence_items" WHERE "release_id" = NEW."release_id" AND "evidence_key" = NEW."evidence_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: evidence_items.release_id, evidence_items.evidence_key'); END;
+CREATE TRIGGER "reviewed_facts_no_replace_0" BEFORE INSERT ON "reviewed_facts" WHEN EXISTS (SELECT 1 FROM "reviewed_facts" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: reviewed_facts.id'); END;
+CREATE TRIGGER "reviewed_facts_no_replace_1" BEFORE INSERT ON "reviewed_facts" WHEN EXISTS (SELECT 1 FROM "reviewed_facts" WHERE "release_id" = NEW."release_id" AND "field" = NEW."field" AND "number" = NEW."number") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: reviewed_facts.release_id, reviewed_facts.field, reviewed_facts.number'); END;
+CREATE TRIGGER "fact_evidence_links_no_replace_0" BEFORE INSERT ON "fact_evidence_links" WHEN EXISTS (SELECT 1 FROM "fact_evidence_links" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: fact_evidence_links.id'); END;
+CREATE TRIGGER "fact_evidence_links_no_replace_1" BEFORE INSERT ON "fact_evidence_links" WHEN EXISTS (SELECT 1 FROM "fact_evidence_links" WHERE "reviewed_fact_id" = NEW."reviewed_fact_id" AND "evidence_item_id" = NEW."evidence_item_id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: fact_evidence_links.reviewed_fact_id, fact_evidence_links.evidence_item_id'); END;
+CREATE TRIGGER "findings_no_replace_0" BEFORE INSERT ON "findings" WHEN EXISTS (SELECT 1 FROM "findings" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: findings.id'); END;
+CREATE TRIGGER "findings_no_replace_1" BEFORE INSERT ON "findings" WHEN EXISTS (SELECT 1 FROM "findings" WHERE "release_id" = NEW."release_id" AND "code" = NEW."code" AND "number" = NEW."number") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: findings.release_id, findings.code, findings.number'); END;
+CREATE TRIGGER "finding_acknowledgements_no_replace_0" BEFORE INSERT ON "finding_acknowledgements" WHEN EXISTS (SELECT 1 FROM "finding_acknowledgements" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: finding_acknowledgements.id'); END;
+CREATE TRIGGER "cover_revisions_no_replace_0" BEFORE INSERT ON "cover_revisions" WHEN EXISTS (SELECT 1 FROM "cover_revisions" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_revisions.id'); END;
+CREATE TRIGGER "cover_revisions_no_replace_1" BEFORE INSERT ON "cover_revisions" WHEN EXISTS (SELECT 1 FROM "cover_revisions" WHERE "release_id" = NEW."release_id" AND "number" = NEW."number") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_revisions.release_id, cover_revisions.number'); END;
+CREATE TRIGGER "cover_hostings_no_replace_0" BEFORE INSERT ON "cover_hostings" WHEN EXISTS (SELECT 1 FROM "cover_hostings" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_hostings.id'); END;
+CREATE TRIGGER "content_revisions_no_replace_0" BEFORE INSERT ON "content_revisions" WHEN EXISTS (SELECT 1 FROM "content_revisions" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: content_revisions.id'); END;
+CREATE TRIGGER "content_revisions_no_replace_1" BEFORE INSERT ON "content_revisions" WHEN EXISTS (SELECT 1 FROM "content_revisions" WHERE "release_id" = NEW."release_id" AND "kind" = NEW."kind" AND "number" = NEW."number") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: content_revisions.release_id, content_revisions.kind, content_revisions.number'); END;
+CREATE TRIGGER "duplicate_checks_no_replace_0" BEFORE INSERT ON "duplicate_checks" WHEN EXISTS (SELECT 1 FROM "duplicate_checks" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: duplicate_checks.id'); END;
+CREATE TRIGGER "duplicate_decisions_no_replace_0" BEFORE INSERT ON "duplicate_decisions" WHEN EXISTS (SELECT 1 FROM "duplicate_decisions" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: duplicate_decisions.id'); END;
+CREATE TRIGGER "duplicate_decisions_no_replace_1" BEFORE INSERT ON "duplicate_decisions" WHEN EXISTS (SELECT 1 FROM "duplicate_decisions" WHERE "duplicate_check_id" = NEW."duplicate_check_id" AND "candidate_key" = NEW."candidate_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: duplicate_decisions.duplicate_check_id, duplicate_decisions.candidate_key'); END;
+CREATE TRIGGER "remote_snapshots_no_replace_0" BEFORE INSERT ON "remote_snapshots" WHEN EXISTS (SELECT 1 FROM "remote_snapshots" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: remote_snapshots.id'); END;
+CREATE TRIGGER "release_events_no_replace_0" BEFORE INSERT ON "release_events" WHEN EXISTS (SELECT 1 FROM "release_events" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: release_events.id'); END;
+CREATE TRIGGER "release_events_no_replace_1" BEFORE INSERT ON "release_events" WHEN EXISTS (SELECT 1 FROM "release_events" WHERE "release_id" = NEW."release_id" AND "sequence" = NEW."sequence") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: release_events.release_id, release_events.sequence'); END;
+CREATE TRIGGER "workflow_operations_no_replace_0" BEFORE INSERT ON "workflow_operations" WHEN EXISTS (SELECT 1 FROM "workflow_operations" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: workflow_operations.id'); END;
+CREATE TRIGGER "workflow_operations_no_replace_1" BEFORE INSERT ON "workflow_operations" WHEN EXISTS (SELECT 1 FROM "workflow_operations" WHERE "release_id" = NEW."release_id" AND "request_key" = NEW."request_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: workflow_operations.release_id, workflow_operations.request_key'); END;
+CREATE TABLE IF NOT EXISTS "operators" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "password_digest" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT single_operator CHECK (id = 1));
+CREATE TABLE IF NOT EXISTS "login_sessions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "operator_id" integer NOT NULL, "token_digest" varchar NOT NULL, "expires_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_23b3242840"
+FOREIGN KEY ("operator_id")
+  REFERENCES "operators" ("id")
+);
+CREATE INDEX "index_login_sessions_on_operator_id" ON "login_sessions" ("operator_id");
+CREATE UNIQUE INDEX "index_login_sessions_on_token_digest" ON "login_sessions" ("token_digest");
+CREATE TABLE IF NOT EXISTS "login_throttles" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_hash" varchar NOT NULL, "attempts" integer DEFAULT 0 NOT NULL, "window_started_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT login_attempts_valid CHECK (attempts >= 0));
+CREATE UNIQUE INDEX "index_login_throttles_on_client_hash" ON "login_throttles" ("client_hash");
 INSERT INTO "schema_migrations" (version) VALUES
+('20261108180000'),
 ('20261108160000'),
 ('20261108143000'),
 ('20261108140000');

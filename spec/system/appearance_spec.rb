@@ -2,6 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Appearance", type: :system do
   it "loads controls through Turbo and applies a Stimulus preference", :aggregate_failures do
+    sign_in_browser
     visit root_path
     page.execute_script("window.navigationMarker = 'retained'")
     click_link "Apparence"
