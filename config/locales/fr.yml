@@ -1,3 +1,7 @@
 fr:
+  settings:
+    connection_created: "Connexion enregistrée. Lancez un test pour vérifier son accès."
+    secret_rotated: "Secret remplacé pour la même identité. Le test précédent est invalidé."
+    options_updated: "Options enregistrées. Relancez le test de connexion."
   application:
     name: Seedbench

@@ -10,6 +10,14 @@
     <%= javascript_importmap_tags %>
   </head>
   <body data-controller="appearance">
+    <% if current_operator %>
+      <nav aria-label="Navigation principale" class="flex items-center gap-6 border-b px-6 py-3">
+        <%= link_to "Seedbench", root_path, class: "font-bold" %>
+        <%= link_to "Réglages", settings_path, class: "underline" %>
+        <%= button_to "Se déconnecter", session_path, method: :delete, class: "underline" %>
+      </nav>
+    <% end %>
+    <% flash.each do |_name, message| %><p role="status" class="mx-auto max-w-5xl px-6 py-3"><%= message %></p><% end %>
     <%= yield %>
   </body>
 </html>

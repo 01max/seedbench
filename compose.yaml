@@ -26,6 +26,7 @@ x-application: &application
     DELUGE_PAYLOAD_ROOT: ${DELUGE_PAYLOAD_ROOT:-}
     FORCE_SSL: ${FORCE_SSL:-0}
     ASSUME_SSL: ${ASSUME_SSL:-0}
+    SEEDBENCH_ENCRYPTION_KEY: ${SEEDBENCH_ENCRYPTION_KEY:-}
   volumes:
     - state:${SEEDBENCH_STATE_ROOT:-/state}
     - scratch:${SEEDBENCH_SCRATCH_ROOT:-/scratch}

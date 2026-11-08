@@ -1,8 +1,9 @@
 # Seedbench
 
 A private, single-operator ebook preparation application built with Rails and
-Hotwire. Versioned release state and recoverable background execution are available;
-ebook workflows and operator login are still pending. Keep this development build bound to loopback.
+Hotwire. Versioned release state, recoverable background execution, operator
+login, and provider Settings are available. Ebook workflows are still pending.
+Keep this development build bound to loopback.
 
 Install Docker Engine and Docker Compose 2.24.4 or newer, and run the commands
 from a POSIX shell (use WSL or a compatible shell on Windows). Ruby, Node,
@@ -67,6 +68,8 @@ Service ownership and error conventions are documented in
 background completion guarantees are described in [durable state](docs/domain-state.md).
 Initialize or reset the operator password with `bin/operator-password` after
 setup; see [operator access](docs/operator-access.md).
+Configure provider credentials and connection checks in Réglages; see
+[provider settings](docs/provider-settings.md).
 Refresh model schema comments with `bin/annotate`; CI checks they stay current.
 
 Verified versions and fresh-checkout evidence are recorded in

@@ -23,4 +23,20 @@ unless ENV["SECRET_KEY_BASE"] || ENV["SECRET_KEY_BASE_DUMMY"]
   abort "The persisted application key is empty" if ENV["SECRET_KEY_BASE"].empty?
 end
 
+if ENV["SEEDBENCH_ENCRYPTION_KEY"].to_s.empty?
+  key_path = File.join(ENV.fetch("SEEDBENCH_STATE_ROOT"), "provider_encryption_key")
+  File.open(key_path, File::RDWR | File::CREAT, 0o600) do |file|
+    file.flock(File::LOCK_EX)
+    key = file.read.strip
+    if key.empty?
+      key = SecureRandom.hex(32)
+      file.rewind
+      file.write(key)
+      file.flush
+    end
+    ENV["SEEDBENCH_ENCRYPTION_KEY"] = key
+  end
+end
+abort "Provider encryption key must be 64 hexadecimal characters" unless ENV["SEEDBENCH_ENCRYPTION_KEY"].match?(/\A[0-9a-fA-F]{64}\z/)
+
 exec(*ARGV)
