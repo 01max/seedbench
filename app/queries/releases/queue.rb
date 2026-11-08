@@ -38,8 +38,8 @@ module Releases
     def search(scope)
       return scope if @criteria[:q].empty?
 
-      term = "%#{Release.sanitize_sql_like(@criteria[:q])}%"
-      scope.where("title LIKE :term ESCAPE '\\' OR author LIKE :term ESCAPE '\\'", term: term)
+      term = "%#{Release.sanitize_sql_like(SearchText.call(title: @criteria[:q]))}%"
+      scope.where("search_text LIKE :term ESCAPE '\\'", term: term)
     end
 
     def filter(scope)

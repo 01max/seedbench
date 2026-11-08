@@ -21,7 +21,7 @@ RSpec.describe "Release workbench" do
   end
 
   it "searches the actual queue beyond the sample size" do
-    65.times { |index| Release.create!(title: "Synthetic #{index}", author: "Author #{index}") }
+    65.times { |index| Releases::Create.call(title: "Synthetic #{index}", author: "Author #{index}") }
     sign_in_operator
     get root_path, params: { q: "Author 64" }
 

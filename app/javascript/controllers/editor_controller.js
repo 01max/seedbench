@@ -8,6 +8,7 @@ export default class extends Controller {
     this.connected = true
     this.baseline = JSON.stringify(this.valuesFromForm())
     this.dirty = false
+    this.unloadGuard = event => this.beforeUnload(event)
     this.bypassedForms = new WeakSet()
     this.restoreDraft()
     this.element.dataset.editorReady = "true"
@@ -16,6 +17,7 @@ export default class extends Controller {
   disconnect() {
     this.connected = false
     clearTimeout(this.timer)
+    window.removeEventListener("beforeunload", this.unloadGuard)
   }
 
   valuesFromForm() {
@@ -48,13 +50,22 @@ export default class extends Controller {
   setStatus(message) {
     this.statusTarget.textContent = message
     this.statusTarget.dataset.dirty = String(this.dirty)
+    this.syncUnloadGuard()
+  }
+
+  syncUnloadGuard() {
+    if (this.connected && (this.dirty || this.saving)) window.addEventListener("beforeunload", this.unloadGuard)
+    else window.removeEventListener("beforeunload", this.unloadGuard)
   }
 
   save() {
     if (this.saving) return this.saving
     if (this.conflicted) return Promise.resolve(false)
     if (!this.dirty) return Promise.resolve(true)
-    this.saving = this.performSave().finally(() => { this.saving = null })
+    this.saving = this.performSave().finally(() => {
+      this.saving = null
+      this.syncUnloadGuard()
+    })
     return this.saving
   }
 
@@ -144,7 +155,7 @@ export default class extends Controller {
 
   async flush() {
     clearTimeout(this.timer)
-    if (this.conflicted) return false
+    if (this.conflicted || !this.connected) return false
     while (this.dirty || this.saving) {
       if (!(await this.save())) return false
       clearTimeout(this.timer)
@@ -184,7 +195,7 @@ export default class extends Controller {
     if (!url || this.navigating) return
     this.navigating = true
     try {
-      if (await this.flush()) window.Turbo.visit(url)
+      if (await this.flush() && this.connected) window.Turbo.visit(url)
     } finally {
       this.navigating = false
     }
@@ -195,7 +206,7 @@ export default class extends Controller {
   }
 
   async performAction(url) {
-    if (!(await this.flush())) return
+    if (!(await this.flush()) || !this.connected) return
     try {
       const response = await fetch(url, {
         method: "PATCH", body: new FormData(this.formTarget), credentials: "same-origin",

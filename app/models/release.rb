@@ -12,6 +12,7 @@
 #  preparation_state :string           default("unprepared"), not null
 #  proposed_name     :string
 #  publication_state :string           default("unpublished"), not null
+#  search_text       :text             default(""), not null
 #  seeding_state     :string           default("not_started"), not null
 #  title             :string
 #  created_at        :datetime         not null

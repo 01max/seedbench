@@ -2,9 +2,9 @@
   <div class="status-content" data-status-sequence="<%= @snapshot.events.first&.sequence || 0 %>" data-active-operations="<%= @workflow_active || false %>">
   <% if @check_error %><p role="alert" class="work-alert"><%= @check_error %></p><% end %>
   <% @checklist.each do |item| %>
-    <div class="check-row" data-check-key="<%= item.key %>" data-check-state="<%= item.state %>">
-      <div><span><span class="check-symbol" aria-hidden="true"><%= {"done" => "✓", "blocked" => "!", "pending" => "○", "optional" => "—"}.fetch(item.state) %></span> <%= item.label %></span><small><%= item.owner %></small></div>
-      <p><%= item.required ? "Requis" : "Facultatif" %> · <%= item.note %></p>
+    <div class="check-row" data-check-key="<%= item.key %>" data-check-state="<%= item.state %>" data-uncertain="<%= item.finding.present? %>">
+      <div><span class="check-name"><span class="check-symbol" aria-hidden="true"><%= (item.finding && !item.checked) ? "!" : {"done" => "✓", "blocked" => "!", "pending" => "○", "optional" => "—"}.fetch(item.state) %></span><span><%= item.label %></span></span><small><%= item.owner %></small></div>
+      <p><span class="<%= "sr-only" if item.required %>"><%= item.required ? "Requis. " : "Facultatif · " %></span><%= item.note %></p>
       <% if item.owner == "Vous" %>
         <%= form_with url: release_checks_path(@release), scope: :mark, data: { turbo_frame: dom_id(@release, :status) }, class: "manual-check-form" do |form| %>
           <%= form.hidden_field :key, value: item.key %>
@@ -17,10 +17,17 @@
     </div>
   <% end %>
   <% @snapshot.findings.select { |finding| finding.severity == "failure" }.each do |finding| %><p class="work-warning"><%= finding.message %></p><% end %>
-  <details class="status-dimensions"><summary>États des opérations</summary>
+  <details class="status-dimensions" data-detail-key="dimensions"><summary>États des opérations</summary>
     <% { "Inspection" => @release.inspection_state, "Préparation" => @release.preparation_state, "Brouillon C411" => @release.draft_state, "Publication" => @release.publication_state, "Premier seeding" => @release.seeding_state }.each do |label, state| %><p><%= label %> : <%= workflow_label(state) %></p><% end %>
   </details>
   <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= kind == "draft" ? "Brouillon" : "Soumission" %> #<%= snapshot.remote_id %><%= " · absent" if snapshot.remote_deleted %></p><% end %>
-  <% @snapshot.operations.each do |operation| %><p class="operation-state"><%= operation.kind.humanize %> : <%= workflow_label(operation.state) %></p><% end %>
+  <% @snapshot.operations.each do |operation| %>
+    <details class="operation-state" data-detail-key="operation_<%= operation.id %>">
+      <summary>Opération #<%= operation.id %> : <%= workflow_label(operation.state) %></summary>
+      <p>Étape : <%= operation_phase_label(operation.phase) %></p>
+      <% if operation.error_code %><p>Diagnostic : <%= operation.error_code %></p><% end %>
+      <% if operation.external_reference.present? %><p>Identités externes conservées</p><pre><%= JSON.pretty_generate(operation.external_reference) %></pre><% end %>
+    </details>
+  <% end %>
   </div>
 <% end %>

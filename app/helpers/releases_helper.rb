@@ -1,4 +1,6 @@
 module ReleasesHelper
+  PHASE_LABELS = { "requested" => "Demandée", "computing" => "Traitement en cours", "completed" => "Terminée",
+    "discarded" => "Ancien résultat écarté", "retry_pending" => "Reprise en attente", "accepted" => "Acceptation observée" }.freeze
   STATE_LABELS = { "pending" => "En attente", "running" => "En cours", "succeeded" => "Terminé", "failed" => "Échec",
     "unprepared" => "Non préparé", "prepared" => "Préparé", "stale" => "À revoir", "unlinked" => "Sans brouillon",
     "synced" => "Synchronisé", "conflicted" => "Conflit", "missing" => "Absent", "unpublished" => "Non publié",
@@ -21,6 +23,10 @@ module ReleasesHelper
 
   def workflow_label(state)
     STATE_LABELS.fetch(state, state)
+  end
+
+  def operation_phase_label(phase)
+    PHASE_LABELS.fetch(phase, "Étape enregistrée")
   end
 
   def content_body(snapshot, kind)

@@ -5,6 +5,6 @@
   <%= form_with url: operator_session_path, scope: :operator, class: "mt-6 grid gap-4" do |form| %>
     <%= form.label :password, "Mot de passe" %>
     <%= form.password_field :password, required: true, autocomplete: "current-password", autofocus: true, class: "rounded border p-2" %>
-    <%= form.submit "Se connecter", class: "rounded bg-[var(--accent)] px-4 py-2 text-white" %>
+    <%= form.submit "Se connecter", class: "rounded bg-[var(--accent)] px-4 py-2 text-[var(--on-accent)]" %>
   <% end %>
 </main>

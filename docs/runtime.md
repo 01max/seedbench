@@ -1,6 +1,6 @@
 # Supported runtime and verification
 
-Verified on 2026-11-08 with Docker Engine 28.2.2 and Compose 2.36.2 on Linux
+Verified on 2026-11-09 with Docker Engine 28.2.2 and Compose 2.36.2 on Linux
 ARM64 containers. Docker Compose 2.24.4 or newer is required for volume overrides.
 Windows hosts use Docker's Linux-container backend and a compatible POSIX shell.
 Host and container paths remain independent deployment configuration.
@@ -63,7 +63,7 @@ A fresh clone without `.env`, operator ebooks, or private evidence passed
 host Ruby and Node absent from its executable search path. The initial foundation
 passed six examples, including a real Turbo/Stimulus browser interaction and a
 blocked unexpected HTTP request. The expanded domain/workflow suite passes
-201 examples with 99.76% application line coverage; the enforced minimum is 90%.
+290 examples with 99.61% application line coverage; the enforced minimum is 90%.
 
 Both unloaded-source probes failed coverage despite passing examples. Lint
 probes failed for every configured department, formatting, and all four method
@@ -78,13 +78,21 @@ duplicate-delivery suppression, obsolete-result rejection after human edits,
 recovery after killing a worker, and domain state/payload hashes surviving
 container replacement. Cleanup removed only generated verification state.
 
-The production-mode runtime probes also verify real password login and CSRF,
+The production-mode runtime probes also retain complete presentation, BBCode,
+multiline NFO, manual review history, and revision-bound uncertainty
+acknowledgements. They reopen the authenticated editor after worker/web
+replacement and verify the actual HTML5 textarea values.
+
+The probes also verify real password login and CSRF,
 session/key retention, encrypted provider credentials, future-only defaults,
 and password-reset session invalidation across recreation. Their state and
 identities are synthetic, with external network access disabled.
 
-These checks establish the application, authentication, and Settings foundation.
-Ebook workflows, live provider acceptance, and acceptance on an actual deployment host
+These checks establish the application, authentication, Settings, upload, and
+persistent local-review workflow. Dark/light desktop density, narrow layouts,
+keyboard navigation, larger queues, save races, and reload recovery are covered
+by real browser checks. Inspection, preparation, cover hosting, publication,
+seeding, live provider acceptance, and acceptance on an actual deployment host
 remain separate work. No live C411 publication or production Deluge operation
 was performed. See [durable state](domain-state.md), [quality checks](testing.md), [storage configuration](storage-configuration.md),
 and the earlier [provider/tool observations](provider-tooling.md).

@@ -37,10 +37,21 @@ must fail. A clean source sample must pass. The probes do not edit source files.
 
 Capybara uses Debian Chromium and its matching packaged ChromeDriver via an
 explicit executable path, so Selenium does not download a driver during tests.
-The system example loads appearance controls into a Turbo Frame, checks that
+The appearance example loads controls into a Turbo Frame, checks that
 the document was retained, changes the theme through Stimulus, and verifies the
 local preference after a reload. Browser screenshots and reports remain in
-disposable `/tmp/browser-artifacts` storage.
+disposable `/tmp/browser-artifacts` storage. Each scenario closes its browser
+process, isolating browser state and avoiding Chromium refusing the driver’s
+`about:blank` reset after earlier scenarios. Application navigation and reload
+assertions still run in the real browser within each scenario.
+
+Workbench browser checks cover the dark/light desktop palette and density,
+320/390/736-pixel layouts, long metadata, keyboard focus and shortcuts, and an
+85-release queue. Editing checks hold real save/status responses to exercise
+typing during a save, Save and next, and older status arrival. Failed filtering,
+navigation, concurrent edits, and reload recovery must preserve entered text.
+Request checks reject forged automatic checks and verify that local work makes
+no provider calls. All book names and content in these checks are synthetic.
 
 Chromium's `--no-sandbox` flag applies only to this unprivileged, synthetic,
 network-isolated quality container. It avoids a privileged browser sandbox setup;
@@ -108,6 +119,11 @@ be discarded. Another worker is killed during computation, recreated against the
 same databases, and recovered with a new attempt token after the synthetic lease
 is expired. Its old token cannot replace the accepted result. Finally web is
 recreated and all retained domain state and payload hashes are checked.
+
+Each runtime layout also saves full presentation, BBCode, and multiline NFO,
+records a reversible review mark and uncertainty acknowledgement, and verifies
+them after worker and web replacement. The authenticated editor is reopened and
+parsed as HTML5 to check its actual textarea values and checked state.
 
 This runs with default named volumes, alternate named-volume roots and UID/GID
 65534, and existing synthetic bind folders/container roots containing spaces.

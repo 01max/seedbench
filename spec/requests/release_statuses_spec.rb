@@ -27,4 +27,14 @@ RSpec.describe "Local operation status" do
 
     expect(response).to redirect_to(new_operator_session_path)
   end
+
+  it "retains the observed phase and known external identity for uncertain outcomes" do
+    release = Releases::Create.call
+    release.workflow_operations.create!(kind: "synthetic", request_key: "accepted", effect: "remote", input_revision: 0,
+      state: "outcome_unknown", phase: "accepted", external_reference: { submission_id: "known-submission" })
+    sign_in_operator
+    get release_status_path(release)
+
+    expect(response.body).to include("Acceptation observée", "known-submission", "Résultat incertain")
+  end
 end

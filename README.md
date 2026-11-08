@@ -2,7 +2,8 @@
 
 A private, single-operator ebook preparation application built with Rails and
 Hotwire. Versioned release state, recoverable background execution, operator
-login, and provider Settings are available. Ebook workflows are still pending.
+login, provider Settings, batch upload, and persistent local review are available.
+Inspection, preparation, cover hosting, publication, and seeding remain pending.
 Keep this development build bound to loopback.
 
 Install Docker Engine and Docker Compose 2.24.4 or newer, and run the commands
@@ -74,6 +75,8 @@ setup; see [operator access](docs/operator-access.md).
 Configure provider credentials and connection checks in Réglages; see
 [provider settings](docs/provider-settings.md).
 Refresh model schema comments with `bin/annotate`; CI checks they stay current.
+See [the ebook workbench](docs/workbench.md) for upload limits, saving, keyboard
+navigation, review checks, and draft recovery.
 
 Verified versions and fresh-checkout evidence are recorded in
 [supported runtime](docs/runtime.md).

@@ -1,4 +1,21 @@
 fr:
+  number:
+    format:
+      separator: ","
+      delimiter: " "
+    human:
+      storage_units:
+        format: "%n %u"
+        units:
+          byte:
+            one: "octet"
+            other: "octets"
+          kb: "Kio"
+          mb: "Mio"
+          gb: "Gio"
+          tb: "Tio"
+          pb: "Pio"
+          eb: "Eio"
   releases:
     saved: "Texte enregistré."
   time:

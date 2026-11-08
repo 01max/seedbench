@@ -2,6 +2,7 @@
        data-status-poll-url-value="<%= release_status_path(@release) %>"
        data-action="turbo:frame-load->status-poll#loaded turbo:before-frame-render->status-poll#preserveNewer turbo:submit-start->status-poll#pause turbo:submit-end->status-poll#resume turbo:frame-missing->status-poll#failed turbo:fetch-request-error->status-poll#failed visibilitychange@document->status-poll#visibility">
   <div class="checklist-heading"><h2>Contrôles</h2><button type="button" class="work-button quiet" aria-label="Actualiser les contrôles" data-action="status-poll#refresh">↻</button></div>
+  <p class="checklist-legend">Requis, sauf mention facultative</p>
   <p class="refresh-state" role="status" data-status-poll-target="message">État local à jour</p>
   <%= render "status" %>
   <section class="release-activity"><h2>Activité</h2><% @snapshot.events.first(3).each do |event| %><p><%= l(event.occurred_at, format: :short) %><br><%= event_label(event.name) %></p><% end %></section>

@@ -66,7 +66,9 @@ module Releases
     end
 
     def finish_save
-      @release.update!(@changes.slice(*EditorValues::METADATA).merge("input_revision" => @revision))
+      metadata = @changes.slice(*EditorValues::METADATA)
+      search = SearchText.call(title: metadata.fetch("title", @release.title), author: metadata.fetch("author", @release.author))
+      @release.update!(metadata.merge("input_revision" => @revision, "search_text" => search))
       RecordEvent.call(release_id: @release.id, name: "release.revised", actor: "operator", data: { fields: @changes.keys.sort })
     end
 

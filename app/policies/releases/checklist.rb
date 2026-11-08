@@ -12,7 +12,7 @@ module Releases
     end
 
     def call
-      core_steps + content_steps + optional_steps + outcomes + warnings
+      core_steps + warnings + content_steps + optional_steps + outcomes
     end
 
     private
@@ -40,7 +40,7 @@ module Releases
     def cover
       selected = @snapshot.covers.first
       hosted = selected && selected.cover_hostings.exists?
-      item("cover", "Couverture", state: hosted ? "done" : "pending", owner: "Revue + auto",
+      item("cover", "Couverture", state: hosted ? "done" : "pending", owner: "Vous + auto",
         note: selected ? "Choisie · hébergement à vérifier à l’envoi" : "Choisir une couverture correspondant à l’édition")
     end
 

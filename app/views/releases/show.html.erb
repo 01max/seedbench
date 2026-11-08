@@ -13,7 +13,7 @@
       <% if @release %>data-controller="editor" data-editor-release-id-value="<%= @release.id %>"
       data-editor-previous-url-value="<%= @queue.previous_id ? queue_path(@queue.previous_id, criteria: @queue.criteria) : "" %>"
       data-editor-next-url-value="<%= @queue.next_id ? queue_path(@queue.next_id, criteria: @queue.criteria) : "" %>"
-      data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember beforeunload@window->editor#beforeUnload keydown@window->editor#shortcut workspace-tabs:shown->editor#preview"<% end %>>
+      data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember keydown@window->editor#shortcut workspace-tabs:shown->editor#preview"<% end %>>
   <% Array(flash[:upload_errors]).each do |error| %><p role="alert" class="work-alert"><%= error %></p><% end %>
   <div class="work-layout">
     <%= render "queue" %>

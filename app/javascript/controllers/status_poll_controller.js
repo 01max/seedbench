@@ -79,7 +79,12 @@ export default class extends Controller {
   preserveNewer(event) {
     const current = Number(this.frameTarget.querySelector("[data-status-sequence]")?.dataset.statusSequence || 0)
     const incoming = Number(event.detail.newFrame.querySelector("[data-status-sequence]")?.dataset.statusSequence || 0)
-    if (incoming < current) event.detail.render = () => {}
+    if (incoming < current) {
+      event.detail.render = () => {}
+      return
+    }
+    const opened = new Set(Array.from(this.frameTarget.querySelectorAll("details[open][data-detail-key]"), node => node.dataset.detailKey))
+    event.detail.newFrame.querySelectorAll("details[data-detail-key]").forEach(node => { node.open = opened.has(node.dataset.detailKey) })
   }
 
   failed(event) {
