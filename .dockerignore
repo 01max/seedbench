@@ -37,3 +37,8 @@
 **/*.mobi
 app/assets/builds/*
 !app/assets/builds/.keep
+**/.env*
+**/*.env
+**/*.torrent
+**/*.nfo
+**/*.log

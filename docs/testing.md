@@ -50,3 +50,25 @@ not install Chromium.
 WebMock denies unstubbed external HTTP while allowing the local browser server.
 An integration example proves that an unexpected request raises before network
 access; the Docker network boundary also prevents external browser requests.
+
+
+The host entry points `bin/setup`, `bin/dev`, `bin/test`, `bin/lint`, and `bin/ci`
+wrap Docker Compose. `bin/test` forwards RSpec arguments, including `--seed`.
+`bin/ci` runs the same locked quality image and checks as local verification,
+then verifies the production application image with disposable Compose projects.
+No Docker socket is mounted into application or quality containers.
+
+The runtime check uses no network or published ports. It verifies served assets,
+non-root file access and same-inode rename, writes a synthetic primary-database
+marker, removes a worker container, enqueues work while that worker is absent,
+and recreates the worker against the same queue database. It then recreates web
+and checks the saved primary state, job result, and unchanged payload hash. A
+second run repeats this using temporary host folders and container roots with
+spaces. Cleanup removes only each generated project's volumes and temporary
+folders. The synthetic job is loaded only through the smoke worker's explicit
+command; it is not part of the application job namespace.
+
+Production/test migrations do not dump schema into the read-only application
+image. Schema updates belong in source changes; runtime migrations only update
+the configured persistent databases. The quality source/build context is an
+allowlist that excludes credentials, books, databases, extracts, and reports.

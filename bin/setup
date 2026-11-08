@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+bin/compose build web
+bin/compose run --rm --no-deps web bin/rails db:prepare

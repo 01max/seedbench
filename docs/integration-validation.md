@@ -95,5 +95,6 @@ publication or personalized torrent retrieval.
   application image, with separate real-file, parser-bound, and hostile-input
   checks.
 
-The checkout has an `origin` remote. There is no Rails application, spec runner,
-or linter yet; application verification cannot run at this stage.
+The checkout has an `origin` remote and a containerized Rails foundation.
+`bin/test`, `bin/lint`, and `bin/ci` run isolated checks; no live provider
+credentials or operator ebooks are used by those commands.

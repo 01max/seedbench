@@ -17,6 +17,7 @@ module Seedbench
     config.time_zone = "UTC"
     config.logger = ActiveSupport::TaggedLogging.logger(STDOUT)
     config.active_job.queue_adapter = :solid_queue
+    config.active_record.dump_schema_after_migration = false
     config.solid_queue.connects_to = { database: { writing: :queue } }
     config.generators.system_tests = nil
   end

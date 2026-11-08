@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+bundle exec rails db:prepare db:migrate zeitwerk:check
+bundle exec rspec
+script/quality/verify_coverage
+bin/rubocop --cache false
+script/quality/verify_lint
+python3 script/tooling/verify.py

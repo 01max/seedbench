@@ -14,6 +14,5 @@ Rails.application.configure do
   config.silence_healthcheck_path = "/up"
   config.active_support.report_deprecations = false
   config.i18n.fallbacks = true
-  config.active_record.dump_schema_after_migration = false
   config.active_record.attributes_for_inspect = [ :id ]
 end
