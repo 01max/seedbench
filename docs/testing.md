@@ -60,7 +60,10 @@ No Docker socket is mounted into application or quality containers.
 
 Access checks cover unauthenticated pages and actions, inherited artifact
 responses, forged and expired cookies, password-reset revocation, HTTPS cookie
-flags, and invalid CSRF tokens on authenticated writes. Browser checks exercise
+flags, copied-cookie rejection after logout, Devise session rotation, and invalid
+CSRF tokens on authenticated writes. Migration checks retain the original bcrypt
+hash through the Devise upgrade and rollback, revoke legacy cookies, and preserve
+the single-operator constraint. Browser checks exercise
 login, provider-specific credential forms, masked results, future-only defaults,
 and deliberate release assignment. Adapter checks use WebMock and synthetic
 credentials, including rejected redirects, oversized/invalid responses, network
@@ -86,7 +89,8 @@ database and fails when comments are stale. AnnotateRb is excluded from the
 production bundle.
 
 An isolated production-mode request check enables forced SSL without assumed
-SSL. It requires plain HTTP `/up` to return 200, application pages to redirect
+SSL and prepares its own disposable production databases. It requires plain HTTP
+`/up` to return 200, application pages to redirect
 to HTTPS, and requests forwarded as HTTPS to render normally.
 
 The runtime check uses no network or published ports. It creates actual release,

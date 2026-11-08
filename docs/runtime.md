@@ -16,6 +16,7 @@ Ruby and Rails use the supported patched releases selected from their official
 | --- | --- |
 | Ruby / Rails | 4.0.9 / 8.1.4.1 |
 | bcrypt | 3.1.22 |
+| Devise / Active Record session store | 5.0.4 / 2.3.0 |
 | sqlite3 gem / embedded SQLite | 2.10.2 / 3.54.1 |
 | SQLite schema/verification CLI | 3.46.1 |
 | Puma / Solid Queue | 8.0.2 / 1.7.2 |
@@ -62,7 +63,7 @@ A fresh clone without `.env`, operator ebooks, or private evidence passed
 host Ruby and Node absent from its executable search path. The initial foundation
 passed six examples, including a real Turbo/Stimulus browser interaction and a
 blocked unexpected HTTP request. The expanded domain/workflow suite passes
-161 examples with 99.77% application line coverage; the enforced minimum is 90%.
+193 examples with 99.77% application line coverage; the enforced minimum is 90%.
 
 Both unloaded-source probes failed coverage despite passing examples. Lint
 probes failed for every configured department, formatting, and all four method

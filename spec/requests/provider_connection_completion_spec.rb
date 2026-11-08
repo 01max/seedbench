@@ -30,7 +30,7 @@ RSpec.describe "Completing provider connections" do
   it "requires authentication for completion" do
     patch complete_provider_connection_path(123), params: { completion: completion }
 
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
   end
 
   it "requires valid CSRF before completing a connection" do

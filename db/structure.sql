@@ -235,13 +235,6 @@ CREATE TRIGGER "release_events_no_replace_0" BEFORE INSERT ON "release_events" W
 CREATE TRIGGER "release_events_no_replace_1" BEFORE INSERT ON "release_events" WHEN EXISTS (SELECT 1 FROM "release_events" WHERE "release_id" = NEW."release_id" AND "sequence" = NEW."sequence") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: release_events.release_id, release_events.sequence'); END;
 CREATE TRIGGER "workflow_operations_no_replace_0" BEFORE INSERT ON "workflow_operations" WHEN EXISTS (SELECT 1 FROM "workflow_operations" WHERE "id" = NEW."id") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: workflow_operations.id'); END;
 CREATE TRIGGER "workflow_operations_no_replace_1" BEFORE INSERT ON "workflow_operations" WHEN EXISTS (SELECT 1 FROM "workflow_operations" WHERE "release_id" = NEW."release_id" AND "request_key" = NEW."request_key") BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: workflow_operations.release_id, workflow_operations.request_key'); END;
-CREATE TABLE IF NOT EXISTS "operators" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "password_digest" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT single_operator CHECK (id = 1));
-CREATE TABLE IF NOT EXISTS "login_sessions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "operator_id" integer NOT NULL, "token_digest" varchar NOT NULL, "expires_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_23b3242840"
-FOREIGN KEY ("operator_id")
-  REFERENCES "operators" ("id")
-);
-CREATE INDEX "index_login_sessions_on_operator_id" ON "login_sessions" ("operator_id");
-CREATE UNIQUE INDEX "index_login_sessions_on_token_digest" ON "login_sessions" ("token_digest");
 CREATE TABLE IF NOT EXISTS "login_throttles" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "client_hash" varchar NOT NULL, "attempts" integer DEFAULT 0 NOT NULL, "window_started_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT login_attempts_valid CHECK (attempts >= 0));
 CREATE UNIQUE INDEX "index_login_throttles_on_client_hash" ON "login_throttles" ("client_hash");
 CREATE TABLE IF NOT EXISTS "provider_connections" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "role" varchar NOT NULL, "provider" varchar NOT NULL, "identity_key" varchar NOT NULL, "label" varchar NOT NULL, "endpoint" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "credentials" text, "options" json DEFAULT '{}' NOT NULL, "credentials_version" integer DEFAULT 0 NOT NULL, "check_status" varchar DEFAULT 'untested' NOT NULL, "check_code" varchar, "check_message" varchar, "checked_at" datetime(6), CONSTRAINT provider_role_matches CHECK ((role = 'publishing' AND provider = 'c411') OR (role = 'torrent_client' AND provider = 'deluge') OR (role = 'ai' AND provider = 'openai') OR (role = 'image_host' AND provider = 'postimages')), CONSTRAINT connection_options_object CHECK (json_valid(options) AND json_type(options) = 'object'), CONSTRAINT connection_version_valid CHECK (credentials_version >= 0), CONSTRAINT connection_check_valid CHECK (check_status IN ('untested', 'passed', 'limited', 'failed')));
@@ -257,7 +250,13 @@ FOREIGN KEY ("role", "provider_connection_id")
 CREATE UNIQUE INDEX "index_provider_defaults_on_role" ON "provider_defaults" ("role");
 CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key ON provider_connections BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
 CREATE TRIGGER provider_endpoint_no_update BEFORE UPDATE OF endpoint ON provider_connections WHEN OLD.endpoint IS NOT NULL OR NEW.endpoint IS NULL BEGIN SELECT RAISE(ABORT, 'Provider endpoint is immutable once configured'); END;
+CREATE TABLE IF NOT EXISTS "operators" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "encrypted_password" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT single_operator CHECK (id = 1));
+CREATE TABLE IF NOT EXISTS "sessions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "session_id" varchar NOT NULL, "data" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL);
+CREATE UNIQUE INDEX "index_sessions_on_session_id" ON "sessions" ("session_id");
+CREATE INDEX "index_sessions_on_created_at" ON "sessions" ("created_at");
+CREATE INDEX "index_sessions_on_updated_at" ON "sessions" ("updated_at");
 INSERT INTO "schema_migrations" (version) VALUES
+('20261108210000'),
 ('20261108200000'),
 ('20261108184000'),
 ('20261108182000'),

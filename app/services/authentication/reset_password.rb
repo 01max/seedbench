@@ -7,10 +7,10 @@ module Authentication
       raise InvalidPassword, "Utilisez au moins 12 caractères, au plus 72 octets, avec une confirmation identique." unless candidate.valid?
 
       Operator.transaction do
-        operator = Operator.find_or_initialize_by(id: 1)
-        operator.password_digest = candidate.password_digest
+        operator = Operator.find_by(id: 1) || candidate
+        operator.encrypted_password = candidate.encrypted_password
         operator.save!
-        operator.login_sessions.delete_all
+        BrowserSession.delete_all
         LoginThrottle.delete_all
         operator
       end

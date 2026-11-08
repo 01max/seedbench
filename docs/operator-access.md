@@ -1,11 +1,18 @@
 # Operator access
 
-Seedbench has one operator account and no public registration. Passwords use
-bcrypt hashing. Successful login rotates the Rails session and issues an
-encrypted, HttpOnly, SameSite=Lax cookie with an opaque random token. Only its
-SHA-256 digest is stored in the application database. The server expires each
-login after 12 hours; logout revokes it immediately. HTTPS requests receive a
-Secure cookie. Plain private-LAN HTTP remains the accepted transport limitation.
+Seedbench uses Devise for its single operator, with no public registration,
+email login, remember-me cookie, or browser password recovery. Devise owns
+bcrypt password verification, login/logout, session rotation, and inactivity
+timeouts. The password-only form always selects the one database-constrained
+operator account; it cannot select or create another account.
+
+Rails' Active Record session store retains JSON session data in the application
+database. The HttpOnly, SameSite=Lax cookie contains an opaque session ID; the
+database stores its private digest. Server-side lookups reject sessions older
+than 12 hours even if they were recently active, and logout deletes the original
+session so a copied cookie cannot restore it. Devise also enforces a twelve-hour
+inactivity timeout. HTTPS requests receive a Secure cookie. Plain private-LAN
+HTTP remains the accepted transport limitation.
 
 Application controllers require authentication by default. The login form and
 the `/up` container health endpoint are public. Private responses prohibit
@@ -16,9 +23,16 @@ replacement. Client-supplied forwarding headers do not change the bucket. Behind
 a reverse proxy, clients with the same peer address share the limit. Stored
 throttle identifiers are hashes, and old windows are pruned.
 
-Authentication services handle password verification, session creation,
-resumption, revocation, and throttling. Controllers handle HTTP cookies and
-redirects. Passwords and session tokens are filtered from request parameters.
+The Devise session controller adds only persistent peer-address throttling and
+explicit CSRF verification. The application uses Devise's authentication guard
+and current-operator helpers. Passwords and session identifiers are filtered from
+request parameters. Expired session rows can be removed with the session store's
+`db:sessions:trim` task; schedule it periodically for long-lived deployments.
+
+Upgrading preserves the existing bcrypt password hash under Devise's
+`encrypted_password` column. Old custom login cookies are invalidated, so sign
+in again after migration. Provider credentials, encryption keys, releases, and
+their assignments are preserved.
 
 After `bin/setup`, initialize the operator password from the checkout on the
 Docker host:
@@ -41,4 +55,6 @@ existing login sessions, and clears login throttles. Invalid input preserves
 the current password and sessions. Restarting containers alone does not reset
 the account or its sessions.
 
-These boundaries follow the [Rails security guide](https://guides.rubyonrails.org/security.html).
+Implementation references: [Devise](https://github.com/heartcombo/devise),
+[Rails Active Record session store](https://github.com/rails/activerecord-session_store),
+and the [Rails security guide](https://guides.rubyonrails.org/security.html).

@@ -7,12 +7,12 @@ module OperatorHelpers
 
   def sign_in_operator
     create_operator unless Operator.exists?
-    post session_path, params: { password: PASSWORD }
+    post operator_session_path, params: { operator: { password: PASSWORD } }
   end
 
   def sign_in_browser
     create_operator
-    visit new_session_path
+    visit new_operator_session_path
     fill_in "Mot de passe", with: PASSWORD
     click_button "Se connecter"
     expect(page).to have_button("Se déconnecter")

@@ -27,7 +27,7 @@ module RuntimeAccess
     cookies = {}
     login = request(Net::HTTP::Get, "/session/new", cookies)
     token = Nokogiri::HTML(login.body).at_css('meta[name="csrf-token"]')["content"]
-    accepted = request(Net::HTTP::Post, "/session", cookies, { password: PASSWORD, authenticity_token: token })
+    accepted = request(Net::HTTP::Post, "/session", cookies, { "operator[password]" => PASSWORD, authenticity_token: token })
     abort "Production login failed" unless accepted.code == "303"
     abort "Authenticated Settings failed" unless request(Net::HTTP::Get, "/settings", cookies).code == "200"
     prepare_defaults
@@ -58,7 +58,7 @@ module RuntimeAccess
     abort "Encryption key permissions too broad" unless (key_path.stat.mode & 0o077).zero?
     Authentication::ResetPassword.call(password: "Replacement synthetic runtime password", password_confirmation: "Replacement synthetic runtime password")
     abort "Reset did not revoke browser session" unless request(Net::HTTP::Get, "/", cookies).code == "302"
-    abort "Old password remained usable" if Operator.sole.authenticate(PASSWORD)
+    abort "Old password remained usable" if Operator.sole.valid_password?(PASSWORD)
     puts "Login, CSRF, encrypted credentials, key/session persistence, future defaults and password-reset revocation verified."
   end
 

@@ -6,13 +6,13 @@ RSpec.describe "Private access boundary" do
     connection = create_connection
     [ root_path, settings_path, release_connections_path(release) ].each do |path|
       get path
-      expect(response).to redirect_to(new_session_path)
+      expect(response).to redirect_to(new_operator_session_path)
       expect(response.body).not_to include("Private book title", "synthetic-private-credential")
     end
     post provider_connections_path, params: { connection: connection_attributes(identity: "forged") }
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
     post check_provider_connection_path(connection)
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
     expect(ProviderConnection.count).to eq(1)
   end
 
@@ -20,23 +20,24 @@ RSpec.describe "Private access boundary" do
     release = Releases::Create.call
     connection = create_connection
     patch settings_path, params: { defaults: { automatic_ai: "0" } }
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
     patch release_connections_path(release), params: { assignment: { role: "publishing", connection_id: connection.id, expected_revision: 0 } }
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
     patch rotate_provider_connection_path(connection), params: { rotation: { credentials: { api_key: "forged" } } }
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
     expect(release.provider_assignments.pluck(:provider_connection_id)).to all(be_nil)
     expect(Settings::DefaultsSnapshot.call.automatic_ai).to be(true)
   end
 
   it "rejects a tampered or expired authentication cookie" do
     sign_in_operator
-    LoginSession.sole.update!(expires_at: 1.second.ago)
+    record = BrowserSession.order(:id).last
+    record.update!(data: record.data, created_at: 13.hours.ago)
     get settings_path
-    expect(response).to redirect_to(new_session_path)
-    cookies[:operator_session] = "forged-cookie"
+    expect(response).to redirect_to(new_operator_session_path)
+    cookies["_seedbench_session"] = "forged-cookie"
     get settings_path
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
   end
 
   it "requires fresh authentication after password recovery" do
@@ -44,14 +45,23 @@ RSpec.describe "Private access boundary" do
     Authentication::ResetPassword.call(password: "New protected password", password_confirmation: "New protected password")
     get settings_path
 
-    expect(response).to redirect_to(new_session_path)
+    expect(response).to redirect_to(new_operator_session_path)
   end
 
   it "uses Secure cookies for HTTPS login" do
     create_operator
     https!
-    post session_path, params: { password: OperatorHelpers::PASSWORD }
+    post operator_session_path, params: { operator: { password: OperatorHelpers::PASSWORD } }
 
+    expect(Array(response.headers["Set-Cookie"]).join).to include("secure", "httponly", "samesite=lax")
+  end
+
+  it "keeps Secure cookies on Devise's early redirect for an authenticated HTTPS session" do
+    sign_in_operator
+    https!
+    get new_operator_session_path
+
+    expect(response).to redirect_to(root_path)
     expect(Array(response.headers["Set-Cookie"]).join).to include("secure", "httponly", "samesite=lax")
   end
 
