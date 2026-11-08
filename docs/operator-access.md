@@ -10,8 +10,10 @@ Secure cookie. Plain private-LAN HTTP remains the accepted transport limitation.
 Application controllers require authentication by default. The login form and
 the `/up` container health endpoint are public. Private responses prohibit
 caching. Rails CSRF verification protects login, logout, and authenticated
-state changes. A SQLite-backed limit permits ten login attempts per client IP
-in a fifteen-minute window and survives process/container replacement. Stored
+state changes. A SQLite-backed limit permits ten login attempts per connection
+peer address in a fifteen-minute window and survives process/container
+replacement. Client-supplied forwarding headers do not change the bucket. Behind
+a reverse proxy, clients with the same peer address share the limit. Stored
 throttle identifiers are hashes, and old windows are pruned.
 
 Authentication services handle password verification, session creation,

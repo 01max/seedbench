@@ -5,7 +5,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    result = Authentication::SignIn.call(password: params[:password], ip: request.remote_ip)
+    result = Authentication::SignIn.call(password: params[:password], ip: request.get_header("REMOTE_ADDR"))
     reset_session
     cookies.encrypted[:operator_session] = { value: result.token, expires: result.expires_at,
       httponly: true, same_site: :lax, secure: request.ssl? }

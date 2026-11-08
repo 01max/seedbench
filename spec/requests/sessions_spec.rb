@@ -32,6 +32,21 @@ RSpec.describe "Operator sessions" do
     expect(response).to have_http_status(:too_many_requests)
   end
 
+  %w[X-Forwarded-For Client-Ip Forwarded].each do |header|
+    it "keeps forged #{header} values in the same login throttle bucket" do
+      create_operator
+      statuses = Array.new(11) do |index|
+        address = "198.51.100.#{index + 1}"
+        value = header == "Forwarded" ? "for=#{address}" : address
+        post session_path, params: { password: "incorrect" }, headers: { "REMOTE_ADDR" => "192.168.1.77", header => value }
+        response.status
+      end
+
+      expect(statuses).to eq([ *Array.new(10, 422), 429 ])
+      expect(LoginThrottle.sole.attempts).to eq(10)
+    end
+  end
+
   it "rejects invalid CSRF on login and authenticated logout" do
     sign_in_operator
     begin
