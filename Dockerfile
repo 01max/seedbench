@@ -10,7 +10,7 @@ ENV BUNDLE_DEPLOYMENT=1 BUNDLE_PATH=/usr/local/bundle \
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       ca-certificates libyaml-0-2 libsqlite3-0 calibre fonts-dejavu-core \
+       ca-certificates libyaml-0-2 libsqlite3-0 sqlite3 calibre fonts-dejavu-core \
        mktorrent poppler-utils tesseract-ocr tesseract-ocr-fra \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 1000 rails \

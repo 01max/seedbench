@@ -6,6 +6,7 @@ default: &default
 development: &databases
   primary:
     <<: *default
+    schema_format: sql
     database: <%= ENV.fetch("SEEDBENCH_STATE_ROOT") %>/<%= ENV.fetch("RAILS_ENV", "development") %>.sqlite3
   queue:
     <<: *default
