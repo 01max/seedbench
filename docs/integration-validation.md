@@ -21,12 +21,13 @@ local `.env` permissions were tightened to `0600`; private responses use `0600`
 files under a `0700` directory. The entire `tmp/` directory is ignored.
 
 The authenticated C411 documentation is available at
-[the integration guide](https://c411.org/user/integrations/guide). Its API
-contracts and current ebook rules have not yet been fully reviewed or exercised.
+[the integration guide](https://c411.org/user/integrations/guide). The
+[2026-11-08 ebook policy review](c411-ebook-policy.md) records current rules and
+the remaining undocumented contracts. Publication has not been exercised.
 The draft listing reported six existing drafts and a maximum of 15. Those drafts
 are outside the mutation test scope.
 
-## Existing automation and candidate paths
+## Existing deployment observations
 
 Read-only inspection of the deployed Windmill torrent-inbox script found:
 
@@ -39,10 +40,15 @@ Read-only inspection of the deployed Windmill torrent-inbox script found:
   inspect connection state before relying on it as a strictly read-only probe.
 
 The worker's inbox mount was observed with a read-only probe, but its
-`/data/completed/uploads` path is absent. No app mount, same-filesystem staging
-directory, daemon UID/GID, LAN/Tailscale binding, or shared payload hash has been
-verified. Keep disposable probe artifacts outside the watched inbox until their
-import is intended.
+`/data/completed/uploads` path is absent. This is a property of that worker's
+mounts, not a required application layout. Keep disposable artifacts outside
+the watched inbox until their import is intended.
+
+The [storage contract](storage-configuration.md) declares host binds in Compose
+and lets the app and client use independently configured container roots.
+Portable mount validation does not need George access. Actual deployment
+permissions, client access, and LAN/Tailscale bindings still require acceptance
+on the selected deployment host.
 
 ## Test-data boundary
 
@@ -71,13 +77,14 @@ publication or personalized torrent retrieval.
 - Verify attachment round trips and handle actual production slot-limit errors
   without filling the account's slots merely for a test.
 - Make a deliberate OpenAI application connection assignment.
-- Read current authenticated API, ebook, naming, description/NFO, image, and
-  publication rules before encoding provider behavior.
+- Apply the dated ebook policy and resolve its remaining host, renderer, and
+  publication-timing uncertainties before claiming those contracts work.
 - Exercise draft lifecycle, concurrency and failures only against the identified
   test draft; record actual requests and responses with secrets redacted.
 - Publication, personalized torrent retrieval, and post-publication behavior
   cannot be tested under the current authorization. Keep them unverified.
-- Verify George's host/app/Deluge path identity and access with synthetic bytes.
+- The portable synthetic mount check passed. Validate the selected production
+  host's actual app/Deluge mount identities and access during deployment.
 - Verify paused import, per-torrent options, full recheck, resume, and bounded
   tracker acceptance against the identified test torrent.
 - Carry the measured provider limitations and selected Linux tools into the
