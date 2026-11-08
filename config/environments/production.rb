@@ -8,6 +8,7 @@ Rails.application.configure do
   config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
   config.force_ssl = ENV["FORCE_SSL"] == "1"
   config.assume_ssl = ENV["ASSUME_SSL"] == "1"
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
   config.log_tags = [ :request_id ]
   config.logger = ActiveSupport::TaggedLogging.logger(STDOUT)
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")

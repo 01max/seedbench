@@ -58,6 +58,10 @@ wrap Docker Compose. `bin/test` forwards RSpec arguments, including `--seed`.
 then verifies the production application image with disposable Compose projects.
 No Docker socket is mounted into application or quality containers.
 
+An isolated production-mode request check enables forced SSL without assumed
+SSL. It requires plain HTTP `/up` to return 200, application pages to redirect
+to HTTPS, and requests forwarded as HTTPS to render normally.
+
 The runtime check uses no network or published ports. It verifies served assets,
 non-root file access and same-inode rename, writes a synthetic primary-database
 marker, removes a worker container, enqueues work while that worker is absent,
