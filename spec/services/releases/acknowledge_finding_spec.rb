@@ -4,6 +4,13 @@ RSpec.describe Releases::AcknowledgeFinding do
   let(:release) { build_release_graph }
   let(:finding) { release.findings.find_by!(code: "edition_uncertain", number: 1) }
 
+  it "rejects warning acknowledgements tied to an older payload" do
+    release.payload_revisions.create!(number: 2, original_filename: "new.epub", format: "epub", size_bytes: 20, sha256: "b" * 64, locator: "staging/new.epub")
+
+    expect { acknowledge(true) }.to raise_error(described_class::StaleFinding)
+    expect(Releases::Snapshot.call(release: release).findings).to be_empty
+  end
+
   def acknowledge(checked, **options)
     described_class.call(release_id: release.id, finding_id: finding.id, number: finding.number,
       expected_revision: 0, acknowledged: checked, **options)

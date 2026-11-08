@@ -3,6 +3,18 @@ require "rails_helper"
 RSpec.describe Releases::Save do
   let(:release) { build_release_graph }
 
+  it "discards a background result after full human content was saved" do
+    install_workflow_definition
+    operation = start_synthetic_operation(release)
+    token = Workflows::Claim.call(operation_id: operation.id)
+    described_class.call(release_id: release.id, expected_revision: 0, changes: { bbcode: "Human BBCode", nfo: "Human NFO\nComplete" })
+    Workflows::Complete.call(operation_id: operation.id, attempt_token: token, result: {}, apply: SyntheticWorkflow::Apply)
+
+    expect(operation.reload.state).to eq("stale")
+    expect(Releases::EditorValues.call(release: release.reload)).to include("bbcode" => "Human BBCode", "nfo" => "Human NFO\nComplete")
+    expect(release.evidence_items.where(evidence_key: "workflow-#{operation.id}")).to be_empty
+  end
+
   def save(changes)
     described_class.call(release_id: release.id, expected_revision: 0, changes: changes)
   end
