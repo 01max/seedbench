@@ -58,6 +58,19 @@ wrap Docker Compose. `bin/test` forwards RSpec arguments, including `--seed`.
 then verifies the production application image with disposable Compose projects.
 No Docker socket is mounted into application or quality containers.
 
+Access checks cover unauthenticated pages and actions, inherited artifact
+responses, forged and expired cookies, password-reset revocation, HTTPS cookie
+flags, and invalid CSRF tokens on authenticated writes. Browser checks exercise
+login, provider-specific credential forms, masked results, future-only defaults,
+and deliberate release assignment. Adapter checks use WebMock and synthetic
+credentials, including rejected redirects, oversized/invalid responses, network
+failures, and a check completed after credential rotation.
+
+The password console is tested through a pseudo-terminal with echo disabled.
+The actual runner command has also been exercised in disposable state, with the
+synthetic password absent from its transcript and process arguments. No test
+uses the deployment password command against operator volumes.
+
 Model schema comments are maintained with [AnnotateRb](https://github.com/drwl/annotaterb).
 Run `bin/annotate` after changing migrations or models. It builds the quality
 image, prepares disposable databases, and annotates a temporary source copy,
@@ -96,6 +109,15 @@ Cleanup removes only generated project volumes and temporary folders. Synthetic
 handler definitions are installed only by the verification worker's explicit
 fixture command. The production code-owned definition map does not pretend to
 implement inspection, publication or other later feature handlers.
+
+Each layout also initializes a synthetic operator, signs in through the real
+production-mode HTTP endpoint with valid CSRF, and retains its browser cookies
+across web recreation. It then verifies authenticated Settings, rejection of a
+forged CSRF request, unchanged encryption-key hash and private key permissions,
+decryptable credentials with ciphertext-only database storage, retained release
+assignments and future-only AI/default choices, and browser-session revocation
+after password reset. These hooks require the disposable runtime flag, use no
+live provider checks, and keep the image-host test from uploading anything.
 
 Production/test migrations do not dump schema into the read-only application
 image. Schema updates belong in source changes; runtime migrations only update

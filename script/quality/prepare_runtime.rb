@@ -1,11 +1,14 @@
 require "digest"
 require "net/http"
+require_relative "runtime_access"
 
 abort "Runtime must be unprivileged" if Process.uid.zero?
 abort "Image contains operator material" if %w[/app/.env /app/.git /app/private /app/tmp/ebooks].any? { |path| File.exist?(path) }
 abort "Provider key leaked into runtime" if ENV.key?("C411_API_KEY") || ENV.key?("OPENAI_API_KEY")
 
-response = Net::HTTP.get_response(URI("http://127.0.0.1:3000/"))
+private_page = Net::HTTP.get_response(URI("http://127.0.0.1:3000/"))
+abort "Private application shell is unauthenticated" unless private_page.code == "302" && private_page["location"].end_with?("/session/new")
+response = Net::HTTP.get_response(URI("http://127.0.0.1:3000/session/new"))
 abort "Application shell failed" unless response.code == "200" && response.body.include?("Seedbench")
 assets = response.body.scan(%r{/assets/[^"<>\s]+}).uniq
 abort "Assets missing" if assets.empty?
@@ -31,4 +34,5 @@ begin
 rescue ActiveRecord::StatementInvalid => error
   raise unless error.message.include?("append-only")
 end
+RuntimeAccess.prepare
 puts "Application image, assets, SQL history guards, domain state and same-file rename verified."

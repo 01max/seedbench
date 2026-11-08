@@ -10,7 +10,7 @@
         <p><%= assignment.provider_connection.label %> · <%= assignment.provider_connection.identity_key %></p>
       <% else %>
         <p>Non configuré pour ce livre.</p>
-        <%= form_with url: release_connections_path(@release), method: :patch, scope: :assignment, namespace: assignment.role, class: "mt-3 flex flex-wrap items-center gap-3" do |form| %>
+        <%= form_with url: release_connections_path(@release), method: :patch, scope: :assignment, namespace: assignment.role, id: "#{assignment.role}_assignment", class: "mt-3 flex flex-wrap items-center gap-3" do |form| %>
           <%= form.hidden_field :role, value: assignment.role %>
           <%= form.hidden_field :expected_revision, value: @release.input_revision %>
           <%= form.label :connection_id, "Connexion à affecter" %>

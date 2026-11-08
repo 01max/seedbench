@@ -15,6 +15,7 @@ Ruby and Rails use the supported patched releases selected from their official
 | Component | Verified version |
 | --- | --- |
 | Ruby / Rails | 4.0.9 / 8.1.4.1 |
+| bcrypt | 3.1.22 |
 | sqlite3 gem / embedded SQLite | 2.10.2 / 3.54.1 |
 | SQLite schema/verification CLI | 3.46.1 |
 | Puma / Solid Queue | 8.0.2 / 1.7.2 |
@@ -41,11 +42,13 @@ synthetic fixture-generation dependencies are installed only in the quality stag
 | Command | Behavior |
 | --- | --- |
 | `bin/setup` | Build the application image and prepare persistent app/queue databases. |
+| `bin/operator-password` | Initialize/reset the single operator through protected terminal input and revoke sessions. |
 | `bin/dev` | Build and start web/worker; add `-d --wait` for background startup. |
 | `bin/compose` | Run application Compose commands with the selected explicit env file. |
 | `bin/test [RSpec arguments]` | Build and run isolated specs, with a printed reproducible seed. |
 | `bin/lint` | Build and run all configured RuboCop checks, failing at refactor severity. |
 | `bin/ci` | Run tests, coverage/lint gate probes, migrations, Zeitwerk, tools, and runtime recreation checks. |
+| `bin/annotate` | Refresh model schema comments from disposable databases using AnnotateRb. |
 
 The application image is immutable; runtime migrations update the mounted
 SQLite databases without dumping schema into the image. Source changes require
@@ -59,7 +62,7 @@ A fresh clone without `.env`, operator ebooks, or private evidence passed
 host Ruby and Node absent from its executable search path. The initial foundation
 passed six examples, including a real Turbo/Stimulus browser interaction and a
 blocked unexpected HTTP request. The expanded domain/workflow suite passes
-99 examples with 99.58% application line coverage; the enforced minimum is 90%.
+161 examples with 99.77% application line coverage; the enforced minimum is 90%.
 
 Both unloaded-source probes failed coverage despite passing examples. Lint
 probes failed for every configured department, formatting, and all four method
@@ -74,8 +77,13 @@ duplicate-delivery suppression, obsolete-result rejection after human edits,
 recovery after killing a worker, and domain state/payload hashes surviving
 container replacement. Cleanup removed only generated verification state.
 
-These checks establish the application foundation. Operator authentication,
-ebook workflows, provider actions, and acceptance on an actual deployment host
+The production-mode runtime probes also verify real password login and CSRF,
+session/key retention, encrypted provider credentials, future-only defaults,
+and password-reset session invalidation across recreation. Their state and
+identities are synthetic, with external network access disabled.
+
+These checks establish the application, authentication, and Settings foundation.
+Ebook workflows, live provider acceptance, and acceptance on an actual deployment host
 remain separate work. No live C411 publication or production Deluge operation
 was performed. See [durable state](domain-state.md), [quality checks](testing.md), [storage configuration](storage-configuration.md),
 and the earlier [provider/tool observations](provider-tooling.md).

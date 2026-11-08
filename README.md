@@ -11,10 +11,12 @@ SQLite, browser drivers, and ebook tools run inside containers.
 
 ```sh
 bin/setup
+bin/operator-password
 bin/dev
 ```
 
 Open <http://127.0.0.1:3000>. Setup builds the image and prepares both databases.
+The password command prompts without echo; sign in with the password you set.
 Development startup runs web and worker from the same image. Rebuild after source
 changes; no host Ruby, Node, or ebook-tool installation is needed.
 
@@ -50,6 +52,7 @@ To mount existing host folders, copy `compose.env.example` to the ignored
 export SEEDBENCH_COMPOSE_ENV=compose.env
 export COMPOSE_FILE=compose.yaml:compose.binds.yaml
 bin/setup
+bin/operator-password
 bin/dev
 ```
 
