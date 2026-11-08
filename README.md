@@ -65,6 +65,8 @@ passed into containers by these configurations. Setup makes no provider calls.
 Service ownership and error conventions are documented in
 [application boundaries](docs/architecture.md). Records, revisions, history, and
 background completion guarantees are described in [durable state](docs/domain-state.md).
+Initialize or reset the operator password with `bin/operator-password` after
+setup; see [operator access](docs/operator-access.md).
 Refresh model schema comments with `bin/annotate`; CI checks they stay current.
 
 Verified versions and fresh-checkout evidence are recorded in

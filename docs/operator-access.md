@@ -18,4 +18,25 @@ Authentication services handle password verification, session creation,
 resumption, revocation, and throttling. Controllers handle HTTP cookies and
 redirects. Passwords and session tokens are filtered from request parameters.
 
+After `bin/setup`, initialize the operator password from the checkout on the
+Docker host:
+
+```sh
+bin/operator-password
+```
+
+The same command resets a forgotten password. It uses the selected deployment's
+Compose configuration and state volume, works with `SEEDBENCH_COMPOSE_ENV` and
+Compose overrides, and starts a temporary web-image container without starting
+the worker. No SSH alias, host Ruby, fixed mount point, or running web container
+is required. An interactive terminal is required. Enter the new password twice;
+input echo is disabled. Use at least 12 characters and at most 72 bytes.
+
+Never put a password in command arguments, shell history, or environment
+variables. The command accepts no arguments and prints only prompts and the
+result. A successful reset atomically replaces the password hash, revokes all
+existing login sessions, and clears login throttles. Invalid input preserves
+the current password and sessions. Restarting containers alone does not reset
+the account or its sessions.
+
 These boundaries follow the [Rails security guide](https://guides.rubyonrails.org/security.html).
