@@ -21,8 +21,10 @@ resolves to `/payloads/example.epub` for the app and
 under each configured root; do not replace string prefixes or send host paths
 to Deluge. Persist relative payload locators, not deployment-host paths.
 
-The following is a configuration fragment for the future application services,
-not a runnable application stack:
+The application stack uses `compose.yaml` with named volumes by default.
+Combine it with `compose.binds.yaml` to use existing host folders, configured
+through `compose.env` as described in the root README. This is a representative
+bind declaration:
 
 ```yaml
 services:
@@ -48,8 +50,9 @@ directory nor unrelated files in the shared root belong in the torrent.
 
 State and scratch use the same declaration pattern and can instead use named
 volumes or tmpfs where appropriate. Those stores are not part of the payload
-mapping. Actual production Compose services and root validation still need to
-be implemented; the executable example below is a filesystem probe only.
+mapping. The application web/worker services validate writable roots on startup.
+Production mount permissions and client identity still require deployment
+acceptance; the executable example below is a separate filesystem probe.
 
 ## Filesystem requirements
 

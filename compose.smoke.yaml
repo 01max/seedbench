@@ -1,0 +1,22 @@
+x-smoke: &smoke
+  image: seedbench:verification
+  user: "${SEEDBENCH_UID:-1000}:${SEEDBENCH_GID:-1000}"
+  network_mode: none
+  environment:
+    RAILS_ENV: production
+    SEEDBENCH_STATE_ROOT: ${SEEDBENCH_STATE_ROOT:-/state}
+    SEEDBENCH_SCRATCH_ROOT: ${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+    SEEDBENCH_PAYLOAD_ROOT: ${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
+    DELUGE_PAYLOAD_ROOT: /independent-client/books
+  volumes: !override
+    - state:${SEEDBENCH_STATE_ROOT:-/state}
+    - scratch:${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+    - payloads:${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
+
+services:
+  web:
+    <<: *smoke
+    ports: !override []
+  worker:
+    <<: *smoke
+    command: [ruby, -r/app/script/quality/fixture_job.rb, bin/jobs]

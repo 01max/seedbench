@@ -92,3 +92,7 @@ are [deployment configuration](storage-configuration.md). The selected host's
 actual mounts, service permissions, RPC behavior, and intended network
 interfaces remain deployment acceptance checks. The existing torrent inbox is
 not proof of canonical payload access.
+
+The application now uses the verified Trixie runtime recorded in
+[supported runtime](runtime.md). Its CI repeats the synthetic tooling checks;
+the dated standalone Bookworm observations above remain historical evidence.

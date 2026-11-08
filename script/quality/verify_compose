@@ -1,0 +1,50 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/../.."
+project="seedbench-check-$(date +%s)-$$"
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/seedbench-check.XXXXXX")
+export SEEDBENCH_STATE_ROOT=/state SEEDBENCH_SCRATCH_ROOT=/scratch SEEDBENCH_PAYLOAD_ROOT=/payloads
+export SEEDBENCH_UID=1000 SEEDBENCH_GID=1000
+binds=false
+if [ "${1:-}" = --binds ]; then
+  binds=true
+  export SEEDBENCH_STATE_ROOT='/unusual state' SEEDBENCH_SCRATCH_ROOT='/analysis scratch' SEEDBENCH_PAYLOAD_ROOT='/library books'
+  export SEEDBENCH_STATE_SOURCE="$temporary/state folder" SEEDBENCH_SCRATCH_SOURCE="$temporary/scratch folder" SEEDBENCH_PAYLOAD_SOURCE="$temporary/payload folder"
+  mkdir "$SEEDBENCH_STATE_SOURCE" "$SEEDBENCH_SCRATCH_SOURCE" "$SEEDBENCH_PAYLOAD_SOURCE"
+  chmod 777 "$SEEDBENCH_STATE_SOURCE" "$SEEDBENCH_SCRATCH_SOURCE" "$SEEDBENCH_PAYLOAD_SOURCE"
+elif [ "${1:-}" = --named-overrides ]; then
+  export SEEDBENCH_STATE_ROOT='/alternate state' SEEDBENCH_SCRATCH_ROOT='/alternate scratch' SEEDBENCH_PAYLOAD_ROOT='/alternate payloads'
+  export SEEDBENCH_UID=65534 SEEDBENCH_GID=65534
+fi
+compose() {
+  if [ "$binds" = true ]; then
+    docker compose --env-file config/compose.defaults.env -p "$project" -f compose.yaml -f compose.smoke.yaml -f compose.binds.yaml "$@"
+  else
+    docker compose --env-file config/compose.defaults.env -p "$project" -f compose.yaml -f compose.smoke.yaml "$@"
+  fi
+}
+cleanup() {
+  status=$?
+  trap - EXIT INT TERM
+  if [ "$status" -ne 0 ]; then compose logs --no-color --tail 40; fi
+  compose down --volumes --remove-orphans
+  rm -rf "$temporary"
+  exit "$status"
+}
+trap cleanup EXIT INT TERM
+compose build web
+compose run --rm --no-deps web bin/rails db:prepare db:migrate
+compose up -d --no-build --wait
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/prepare_runtime.rb
+compose stop worker
+compose rm -f worker
+compose exec -T web bin/container-entrypoint bin/rails runner 'require Rails.root.join("script/quality/fixture_job"); SyntheticPersistenceJob.perform_later; abort "Worker unexpectedly ran" if Rails.application.config.x.storage.fetch(:scratch).join("queue-proof").exist?'
+compose up -d --no-build --no-deps worker
+remaining=30
+until compose exec -T web bin/container-entrypoint ruby -e 'exit(File.exist?(File.join(ENV.fetch("SEEDBENCH_SCRATCH_ROOT"), "queue-proof")) ? 0 : 1)' >/dev/null 2>&1; do
+  remaining=$((remaining - 1))
+  [ "$remaining" -gt 0 ] || exit 1
+  sleep 1
+done
+compose up -d --no-build --no-deps --force-recreate --wait web
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/check_runtime.rb

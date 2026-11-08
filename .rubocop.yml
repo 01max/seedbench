@@ -1,0 +1,46 @@
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+plugins:
+  - rubocop-rails
+  - rubocop-performance
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 4.0
+  NewCops: enable
+  SuggestExtensions: false
+
+Lint:
+  Enabled: true
+Security:
+  Enabled: true
+Rails:
+  Enabled: true
+Performance:
+  Enabled: true
+RSpec:
+  Enabled: true
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 15
+  Include: [app/**/*.rb, lib/**/*.rb]
+Metrics/AbcSize:
+  Enabled: true
+  Max: 20
+  Include: [app/**/*.rb, lib/**/*.rb]
+Metrics/CyclomaticComplexity:
+  Enabled: true
+  Max: 7
+  Include: [app/**/*.rb, lib/**/*.rb]
+Metrics/PerceivedComplexity:
+  Enabled: true
+  Max: 8
+  Include: [app/**/*.rb, lib/**/*.rb]
+
+# Integration examples keep one action and its related contract assertions together.
+RSpec/MultipleExpectations:
+  Max: 5
+RSpec/ExampleLength:
+  Max: 15

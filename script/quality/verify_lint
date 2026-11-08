@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+require "json"
+require "open3"
+
+abort "Use the disposable quality container" unless ENV["SEEDBENCH_QUALITY"] == "1"
+
+samples = {
+  "Lint/UnreachableCode" => [ "app/services/lint_gate_probe.rb", "def call\n  return 1\n  consume(2)\nend\n" ],
+  "Security/Eval" => [ "app/services/lint_gate_probe.rb", "eval(input)\n" ],
+  "Rails/TimeZone" => [ "app/services/lint_gate_probe.rb", "Time.now\n" ],
+  "Performance/ReverseEach" => [ "app/services/lint_gate_probe.rb", "items.reverse.each { |item| consume(item) }\n" ],
+  "RSpec/Focus" => [ "spec/lint_gate_probe_spec.rb", 'RSpec.describe String, :focus do; it("checks") { expect("a").to eq("a") }; end' ],
+  "Style/StringLiterals" => [ "app/services/lint_gate_probe.rb", "def call\n  'ready'\nend\n" ]
+}
+method_body = Array.new(20) { "  value += 1" } + Array.new(8) { |number| "  if value > #{number}\n    value += 1\n  end" }
+complexity = "def call(value)\n#{method_body.join("\n")}\n  value\nend\n"
+%w[MethodLength AbcSize CyclomaticComplexity PerceivedComplexity].each do |name|
+  samples["Metrics/#{name}"] = [ "app/services/lint_gate_probe.rb", complexity ]
+end
+
+samples.each do |cop, (path, input)|
+  output, errors, status = Open3.capture3("bin/rubocop", "--stdin", path,
+    "--format", "json", "--cache", "false", stdin_data: input)
+  abort errors if output.empty?
+  offenses = JSON.parse(output).fetch("files").flat_map { |file| file.fetch("offenses") }
+  abort "#{cop} did not fail the lint gate: #{output}" unless
+    !status.success? && offenses.any? { |offense| offense.fetch("cop_name") == cop }
+  puts "#{cop} offense failed the lint gate."
+end
+
+clean = "class LintGateProbe\n  def self.call\n    1\n  end\nend\n"
+output, status = Open3.capture2e("bin/rubocop", "--stdin", "app/services/lint_gate_probe.rb",
+  "--cache", "false", stdin_data: clean)
+abort output unless status.success?
+puts "Clean source passed the lint gate."

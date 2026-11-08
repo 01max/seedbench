@@ -1,0 +1,24 @@
+# Optional existing host directories; combine with compose.yaml.
+x-binds: &binds
+  volumes: !override
+    - type: bind
+      source: ${SEEDBENCH_STATE_SOURCE:?Choose an existing state directory}
+      target: ${SEEDBENCH_STATE_ROOT:-/state}
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ${SEEDBENCH_SCRATCH_SOURCE:?Choose an existing scratch directory}
+      target: ${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+      bind:
+        create_host_path: false
+    - type: bind
+      source: ${SEEDBENCH_PAYLOAD_SOURCE:?Choose an existing payload directory}
+      target: ${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
+      bind:
+        create_host_path: false
+
+services:
+  web:
+    <<: *binds
+  worker:
+    <<: *binds

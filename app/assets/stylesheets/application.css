@@ -1,0 +1,3 @@
+:root { --background: #f5f0f8; --foreground: #302936; --accent: #714879; }
+:root[data-theme="dark"] { --background: #211e26; --foreground: #eee6f4; --accent: #c7a7d8; }
+body { background: var(--background); color: var(--foreground); }

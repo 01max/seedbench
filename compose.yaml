@@ -1,0 +1,55 @@
+name: seedbench
+
+x-application: &application
+  image: seedbench:${SEEDBENCH_IMAGE_TAG:-local}
+  build:
+    context: .
+    target: application
+    args:
+      APP_UID: ${SEEDBENCH_UID:-1000}
+      APP_GID: ${SEEDBENCH_GID:-1000}
+      STATE_ROOT: ${SEEDBENCH_STATE_ROOT:-/state}
+      SCRATCH_ROOT: ${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+      PAYLOAD_ROOT: ${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
+  user: "${SEEDBENCH_UID:-1000}:${SEEDBENCH_GID:-1000}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  init: true
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,size=256m
+  environment: &environment
+    RAILS_ENV: ${RAILS_ENV:-production}
+    SEEDBENCH_STATE_ROOT: ${SEEDBENCH_STATE_ROOT:-/state}
+    SEEDBENCH_SCRATCH_ROOT: ${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+    SEEDBENCH_PAYLOAD_ROOT: ${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
+    DELUGE_PAYLOAD_ROOT: ${DELUGE_PAYLOAD_ROOT:-}
+    FORCE_SSL: ${FORCE_SSL:-0}
+    ASSUME_SSL: ${ASSUME_SSL:-0}
+  volumes:
+    - state:${SEEDBENCH_STATE_ROOT:-/state}
+    - scratch:${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+    - payloads:${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
+
+services:
+  web:
+    <<: *application
+    ports:
+      - "${SEEDBENCH_BIND_ADDRESS:-127.0.0.1}:${SEEDBENCH_PORT:-3000}:3000"
+    healthcheck:
+      test: [CMD, ruby, -rnet/http, -e, "exit(Net::HTTP.get_response(URI('http://127.0.0.1:3000/up')).code == '200' ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  worker:
+    <<: *application
+    command: [bin/jobs]
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  state:
+  scratch:
+  payloads:
