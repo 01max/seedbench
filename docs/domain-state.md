@@ -32,3 +32,17 @@ constraints survive schema loading and restoration. The separate queue database
 retains its Ruby schema. SQLite's command-line tool is included in the image;
 no host database tooling is required. These records store metadata and relative
 locators, without reading, copying, renaming, or distributing ebook files.
+
+Local commands use explicit services. `Releases::Create` creates four
+unconfigured provider assignments and initial history atomically. `Releases::Revise`
+currently edits title/author against an expected input revision; unchanged edits
+are no-ops. `Releases::Transition` changes one allowed workflow dimension without
+pretending to validate a later provider-specific action. Final publication gates
+remain the publishing service's responsibility.
+
+Each write and its ordered event share an application transaction. Stale input
+revisions raise `Releases::RevisionConflict` with expected and actual revisions;
+invalid transitions retain dimension/from/to details. Event metadata is bounded
+JSON containing identifiers and sanitized outcomes, with secret fields and URLs
+rejected. Human content and private provider payloads belong in their dedicated
+revision records rather than being copied into audit metadata.
