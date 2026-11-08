@@ -1,0 +1,39 @@
+x-probe: &probe
+  image: seedbench-storage:verification
+  build: .
+  network_mode: none
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 64
+  mem_limit: 128m
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,size=16m
+
+services:
+  app_view:
+    <<: *probe
+    user: "${APP_UID:-65534}:${SHARED_GID:-65534}"
+    environment:
+      SEEDBENCH_PAYLOAD_ROOT: ${APP_MOUNT_PATH:-/payloads}
+      PROBE_ID: ${PROBE_ID:?Set a unique probe identifier}
+    volumes:
+      - type: bind
+        source: ${PAYLOAD_HOST_PATH:?Choose an existing disposable folder}
+        target: ${APP_MOUNT_PATH:-/payloads}
+        bind:
+          create_host_path: false
+
+  client_view:
+    <<: *probe
+    user: "${CLIENT_UID:-65533}:${SHARED_GID:-65534}"
+    environment:
+      SEEDBENCH_PAYLOAD_ROOT: ${DELUGE_PAYLOAD_ROOT:-/client-payloads}
+      PROBE_ID: ${PROBE_ID:?Set a unique probe identifier}
+    volumes:
+      - type: bind
+        source: ${CLIENT_HOST_PATH:-${PAYLOAD_HOST_PATH}}
+        target: ${DELUGE_PAYLOAD_ROOT:-/client-payloads}
+        read_only: true
+        bind:
+          create_host_path: false

@@ -78,7 +78,7 @@ archives, and real-file acceptance still require their own verification.
 References: [Calibre metadata CLI](https://manual.calibre-ebook.com/generated/en/ebook-meta.html)
 and [Tesseract CLI](https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html).
 
-## George storage prerequisite
+## Existing deployment storage observation
 
 A read-only probe in the existing `george-basics` Windmill worker found its
 torrent-inbox mount but no `/data/completed` or `/data/completed/uploads`.
@@ -86,9 +86,9 @@ The worker ran as root; its successful access cannot establish permissions for
 an unprivileged application or Deluge daemon. No file was created, modified,
 renamed, or moved by that probe.
 
-No George SSH alias or SSH/Unraid/Docker resource was found in the inspected
-local configuration and connected workspace. This does not establish that no
-other authorized access exists. Host mount configuration, application staging,
-the Deluge daemon UID/GID, same-filesystem rename, shared synthetic bytes, and
-intended LAN/Tailscale interfaces remain unverified. Do not treat the existing
-torrent inbox as proof of canonical payload access.
+That observation does not define application paths or require George access for
+portable development checks. Host binds, application roots, and client roots
+are [deployment configuration](storage-configuration.md). The selected host's
+actual mounts, service permissions, RPC behavior, and intended network
+interfaces remain deployment acceptance checks. The existing torrent inbox is
+not proof of canonical payload access.
