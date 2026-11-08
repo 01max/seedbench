@@ -2,6 +2,12 @@
   <p class="text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">Atelier d’ebooks</p>
   <h1 class="mt-4 text-4xl font-bold tracking-tight">Seedbench</h1>
   <p class="mt-4 text-lg">Préparez et relisez vos ebooks.</p>
+  <%= form_with url: uploads_path, multipart: true, class: "mt-6" do |form| %>
+    <%= form.label :files, "Ajouter des ebooks" %>
+    <%= form.file_field :files, multiple: true, accept: ".epub,.pdf,.mobi", required: true %>
+    <%= form.submit "Importer" %>
+  <% end %>
+  <% Array(flash[:upload_errors]).each do |error| %><p role="alert"><%= error %></p><% end %>
   <%= turbo_frame_tag "appearance", class: "mt-8 block" do %>
     <%= link_to "Apparence", appearance_path, class: "underline underline-offset-4" %>
   <% end %>

@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     delete "session", to: "sessions#destroy", as: :destroy_operator_session
   end
   resource :settings, only: %i[show update]
+  resources :uploads, only: :create
   resources :releases, only: [] do
     resource :connections, controller: "release_connections", only: %i[show update]
   end
