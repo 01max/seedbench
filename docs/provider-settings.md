@@ -39,6 +39,8 @@ classified as an invalid key. Raw provider bodies and exceptions are never
 rendered or stored as diagnostic messages. HTTP redirects are refused, TLS
 verification remains enabled, and responses/timeouts are bounded. Deluge uses
 a fresh session cookie for each check and does not save that cookie.
+Malformed HTTP, chunked, or compressed responses record a sanitized failed check;
+their raw exception text is discarded, including chained causes.
 The OpenAI model identifier can be changed on the same connection without
 changing account identity; saving it invalidates the previous access check.
 

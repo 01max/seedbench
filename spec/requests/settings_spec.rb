@@ -47,6 +47,21 @@ RSpec.describe "Provider settings" do
     expect(response.body).not_to include("private provider payload", "synthetic-private-credential")
   end
 
+  it "replaces a passing check with a sanitized protocol failure" do
+    with_provider_http_response("upstream-private-marker\r\n\r\n") do |endpoint|
+      connection = Settings::CreateConnection.call(**connection_attributes("torrent_client").merge(endpoint: endpoint))
+      connection.update!(check_status: "passed", check_code: "daemon_connected", checked_at: 1.hour.ago)
+      post check_provider_connection_path(connection)
+      follow_redirect!
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Réponse HTTP illisible", "échec")
+      expect(response.body).not_to include("upstream-private-marker", "synthetic-private-credential")
+      expect(connection.reload.check_status).to eq("failed")
+      expect(connection.check_code).to eq("invalid_response")
+    end
+  end
+
   it "updates implemented AI options without changing the connection identity" do
     connection = create_connection("ai")
     patch configure_provider_connection_path(connection), params: { configuration: { expected_version: 1, options: { model: "another-model" } } }

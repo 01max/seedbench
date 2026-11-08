@@ -1,6 +1,7 @@
 require "net/http"
 require "json"
 require "timeout"
+require "zlib"
 
 module Providers
   class Http
@@ -14,14 +15,16 @@ module Providers
       headers.each { |key, value| request[key] = value }
       request.body = JSON.generate(body) if body
       Timeout.timeout(10) { execute(uri, request) }
+    rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Zlib::Error
+      raise Failure.new("invalid_response", "Réponse HTTP illisible du fournisseur."), cause: nil
     rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError
-      raise Failure.new("network_error", "Connexion impossible ou délai dépassé; vérifiez l’adresse, le réseau et TLS.")
+      raise Failure.new("network_error", "Connexion impossible ou délai dépassé; vérifiez l’adresse, le réseau et TLS."), cause: nil
     end
 
     def self.json(response)
       JSON.parse(response.body)
     rescue JSON::ParserError
-      raise Failure.new("invalid_response", "Réponse JSON illisible du fournisseur.")
+      raise Failure.new("invalid_response", "Réponse JSON illisible du fournisseur."), cause: nil
     end
 
     def self.execute(uri, request)
