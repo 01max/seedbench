@@ -21,7 +21,9 @@ keys also enforce connection-role matching and bind a preparation to its exact
 payload hash and size. Positive revision numbers, supported formats/states,
 JSON object/array shapes, and required override reasons have database constraints.
 
-Revision history rejects SQL updates and deletes. Payload bytes/original identity
+Revision history rejects SQL updates, deletes, and replacement inserts. Insert
+guards protect primary and natural unique identities, including when recursive
+triggers are disabled on a connection. Payload bytes/original identity
 and connection identity are immutable, while the payload's current relative
 locator can change through preparation and a connection label can change without
 retargeting its account. Provider credentials and connection management remain
