@@ -16,12 +16,12 @@ RSpec.describe "Operator sessions" do
     sign_in_operator
     expect(response).to redirect_to(root_path)
     expect(Array(response.headers["Set-Cookie"]).join).to include("httponly", "samesite=lax")
-    record = BrowserSession.order(:id).last
+    record = ActiveRecord::SessionStore::Session.order(:id).last
     get root_path
     expect(response).to have_http_status(:ok)
     expect(response.headers["Cache-Control"]).to include("no-store")
     delete destroy_operator_session_path
-    expect(BrowserSession.exists?(record.id)).to be(false)
+    expect(ActiveRecord::SessionStore::Session.exists?(record.id)).to be(false)
     get root_path
     expect(response).to redirect_to(new_operator_session_path)
   end
@@ -68,12 +68,12 @@ RSpec.describe "Operator sessions" do
 
   it "rejects invalid CSRF on login and authenticated logout" do
     sign_in_operator
-    ids = BrowserSession.ids
+    ids = ActiveRecord::SessionStore::Session.ids
     begin
       ActionController::Base.allow_forgery_protection = true
       delete destroy_operator_session_path, params: { authenticity_token: "forged" }
       expect(response).to have_http_status(:unprocessable_content)
-      expect(BrowserSession.ids).to eq(ids)
+      expect(ActiveRecord::SessionStore::Session.ids).to eq(ids)
       post operator_session_path, params: { operator: { password: OperatorHelpers::PASSWORD }, authenticity_token: "forged" }
       expect(response).to have_http_status(:unprocessable_content)
     ensure

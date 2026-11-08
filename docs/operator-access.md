@@ -6,13 +6,13 @@ bcrypt password verification, login/logout, session rotation, account locking,
 and inactivity timeouts. The password-only form always selects the one
 database-constrained operator account; it cannot select or create another account.
 
-Rails' Active Record session store retains JSON session data in the application
-database. The HttpOnly, SameSite=Lax cookie contains an opaque session ID; the
-database stores its private digest. Server-side lookups reject sessions older
-than 12 hours even if they were recently active, and logout deletes the original
-session so a copied cookie cannot restore it. Devise also enforces a twelve-hour
-inactivity timeout. HTTPS requests receive a Secure cookie. Plain private-LAN
-HTTP remains the accepted transport limitation.
+Rails' Active Record session store uses its standard model to retain JSON
+session data in the application database. The HttpOnly, SameSite=Lax cookie
+contains an opaque session ID; the database stores its private digest. Logout
+deletes the original session so a copied cookie cannot restore it. Devise's
+`timeoutable` module enforces a twelve-hour inactivity timeout; active sessions
+can continue beyond twelve hours. HTTPS requests receive a Secure cookie.
+Plain private-LAN HTTP remains the accepted transport limitation.
 
 Application controllers require authentication by default. The login form and
 the `/up` container health endpoint are public. Private responses prohibit

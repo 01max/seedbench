@@ -10,7 +10,7 @@ module Authentication
         operator = Operator.find_by(id: 1) || candidate
         operator.encrypted_password = candidate.encrypted_password
         operator.save!
-        BrowserSession.delete_all
+        ActiveRecord::SessionStore::Session.delete_all
         operator.unlock_access!
         operator
       end

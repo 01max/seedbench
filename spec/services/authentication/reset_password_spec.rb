@@ -13,10 +13,10 @@ RSpec.describe Authentication::ResetPassword do
 
   it "revokes existing sessions and rejects the previous password" do
     create_operator.lock_access!
-    BrowserSession.create!(session_id: "synthetic-session", data: { "key" => "value" })
+    ActiveRecord::SessionStore::Session.create!(session_id: "synthetic-session", data: { "key" => "value" })
     described_class.call(password: replacement, password_confirmation: replacement)
 
-    expect(BrowserSession.count).to eq(0)
+    expect(ActiveRecord::SessionStore::Session.count).to eq(0)
     expect(Operator.sole.valid_password?(OperatorHelpers::PASSWORD)).to be(false)
     expect(Operator.sole.valid_password?(replacement)).to be(true)
     expect(Operator.sole.access_locked?).to be(false)
@@ -24,9 +24,9 @@ RSpec.describe Authentication::ResetPassword do
 
   it "preserves the password and sessions on invalid input" do
     create_operator
-    record = BrowserSession.create!(session_id: "synthetic-session", data: { "key" => "value" })
+    record = ActiveRecord::SessionStore::Session.create!(session_id: "synthetic-session", data: { "key" => "value" })
     expect { described_class.call(password: "short", password_confirmation: "different") }.to raise_error(described_class::InvalidPassword)
-    expect(BrowserSession.exists?(record.id)).to be(true)
+    expect(ActiveRecord::SessionStore::Session.exists?(record.id)).to be(true)
     expect(Operator.sole.valid_password?(OperatorHelpers::PASSWORD)).to be(true)
   end
 

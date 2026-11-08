@@ -59,7 +59,8 @@ then verifies the production application image with disposable Compose projects.
 No Docker socket is mounted into application or quality containers.
 
 Access checks cover unauthenticated pages and actions, inherited artifact
-responses, forged and expired cookies, password-reset revocation, HTTPS cookie
+responses, forged cookies, Devise inactivity expiry and active-session renewal,
+password-reset revocation, HTTPS cookie
 flags, copied-cookie rejection after logout, Devise session rotation, and invalid
 CSRF tokens on authenticated writes. Migration checks retain the original bcrypt
 hash through the Devise upgrade and rollback, revoke legacy cookies, and preserve

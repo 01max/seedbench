@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Private access boundary" do
+  include ActiveSupport::Testing::TimeHelpers
+
   it "blocks release/settings reads and all configuration writes without a session" do
     release = Releases::Create.call(title: "Private book title")
     connection = create_connection
@@ -29,12 +31,35 @@ RSpec.describe "Private access boundary" do
     expect(Settings::DefaultsSnapshot.call.automatic_ai).to be(true)
   end
 
-  it "rejects a tampered or expired authentication cookie" do
+  it "rejects a replayed cookie after twelve hours without activity" do
     sign_in_operator
-    record = BrowserSession.order(:id).last
-    record.update!(data: record.data, created_at: 13.hours.ago)
-    get settings_path
-    expect(response).to redirect_to(new_operator_session_path)
+    copied_cookie = cookies["_seedbench_session"]
+
+    travel 13.hours do
+      cookies["_seedbench_session"] = copied_cookie
+      get settings_path
+      expect(response).to redirect_to(settings_path)
+      follow_redirect!
+      expect(response).to redirect_to(new_operator_session_path)
+      follow_redirect!
+      expect(response.body).to include("Votre session a expiré")
+    end
+  end
+
+  it "keeps an active session open beyond twelve hours" do
+    sign_in_operator
+    started_at = Time.current
+
+    [ 11.hours, 22.hours ].each do |elapsed|
+      travel_to(started_at + elapsed) do
+        get settings_path
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
+  it "rejects a tampered authentication cookie" do
+    sign_in_operator
     cookies["_seedbench_session"] = "forged-cookie"
     get settings_path
     expect(response).to redirect_to(new_operator_session_path)
