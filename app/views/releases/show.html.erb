@@ -9,7 +9,11 @@
     <% end %>
   </details>
 <% end %>
-<main id="workbench" aria-label="Atelier de préparation">
+<main id="workbench" aria-label="Atelier de préparation"
+      <% if @release %>data-controller="editor" data-editor-release-id-value="<%= @release.id %>"
+      data-editor-previous-url-value="<%= @queue.previous_id ? queue_path(@queue.previous_id, criteria: @queue.criteria) : "" %>"
+      data-editor-next-url-value="<%= @queue.next_id ? queue_path(@queue.next_id, criteria: @queue.criteria) : "" %>"
+      data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember beforeunload@window->editor#beforeUnload keydown@window->editor#shortcut workspace-tabs:shown->editor#preview"<% end %>>
   <% Array(flash[:upload_errors]).each do |error| %><p role="alert" class="work-alert"><%= error %></p><% end %>
   <div class="work-layout">
     <%= render "queue" %>
@@ -17,7 +21,7 @@
       <section class="work-main" aria-label="Release sélectionnée" data-release-id="<%= @release.id %>">
         <header class="release-heading">
           <div><h1><%= @release.title.presence || "Sans titre" %></h1><p><%= @release.author.presence || "Auteur à confirmer" %> <span><%= @snapshot.payload&.format&.upcase || "Sans fichier" %></span> <span><%= number_to_human_size(@snapshot.payload&.size_bytes || 0) %></span> <span>#<%= @release.id %></span></p></div>
-          <span class="save-status" role="status" id="save-status">Enregistré</span>
+          <span class="save-status" role="status" id="save-status" data-editor-target="status">Enregistré</span>
         </header>
         <div class="release-workspace">
           <%= render "editor" %>
@@ -26,9 +30,11 @@
         <footer class="work-footer">
           <span>Alt ↑↓ : livre · Ctrl/⌘ S : enregistrer</span>
           <div class="work-actions">
-            <% ["Préparer", "Brouillon C411", "Publier", "Enregistrer et suivant"].each do |label| %>
+            <% ["Préparer", "Brouillon C411", "Publier"].each do |label| %>
               <button class="work-button" type="button" disabled><%= label %></button>
             <% end %>
+            <button class="work-button" type="submit" form="release-editor">Enregistrer</button>
+            <button class="work-button primary" type="button" data-action="editor#next" <%= "disabled" unless @queue.next_id %>>Enregistrer et suivant</button>
           </div>
         </footer>
       </section>

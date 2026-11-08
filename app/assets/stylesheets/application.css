@@ -60,6 +60,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .release-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 10px 12px 9px; border-bottom: 1px solid var(--border); }
 .release-heading p { margin-top: 5px !important; display: flex; flex-wrap: wrap; gap: 9px; color: var(--muted); font-size: 11px; }
 .save-status { flex-shrink: 0; color: var(--good); font-size: 11px; padding-top: 2px; }
+.save-status[data-dirty="true"] { color: var(--warning); }
+.save-conflict { border: 1px solid var(--warning); padding: 10px; margin-bottom: 10px; background: var(--warning-bg); }
+.save-conflict pre { max-height: 200px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+.save-conflict > div { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .release-workspace { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 181px; }
 .editor-area { min-width: 0; padding: 0 11px 12px; }
 .editor-tabs { display: flex; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); margin-bottom: 9px; }

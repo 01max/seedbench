@@ -4,25 +4,31 @@
       <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= label %></button>
     <% end %>
   </div>
-  <%= form_with scope: :edit, url: release_path(@release), method: :patch, id: "release-editor" do |form| %>
+  <p role="alert" class="work-alert" hidden data-editor-target="error"></p>
+  <section class="save-conflict" hidden data-editor-target="conflict" aria-label="Conflit de sauvegarde">
+    <h2>Votre saisie est conservée</h2><p>Une autre version a été enregistrée. Choisissez après comparaison.</p>
+    <details><summary>Voir le texte enregistré</summary><pre data-editor-target="serverValues"></pre></details>
+    <div><button type="button" class="work-button" data-action="editor#useServer">Charger le texte enregistré</button><button type="button" class="work-button" data-action="editor#keepMine">Enregistrer ma saisie à la place</button></div>
+  </section>
+  <%= form_with scope: :edit, url: release_path(@release), method: :patch, id: "release-editor", data: { editor_target: "form" } do |form| %>
     <%= form.hidden_field :expected_revision, value: @release.input_revision %>
     <section id="panel-review" role="tabpanel" aria-labelledby="tab-review" data-workspace-tabs-target="panel" data-panel="review">
       <p class="work-warning"><%= workflow_label(@release.inspection_state) %> pour l’inspection. Les faits restent à vérifier.</p>
       <div class="editor-fields">
-        <label>Titre<%= form.text_field :title, value: @release.title, readonly: true %></label>
-        <label>Auteur<%= form.text_field :author, value: @release.author, readonly: true %></label>
-        <label>ISBN<%= form.text_field :isbn, value: fact_value(@snapshot, "isbn"), placeholder: "Absent · ne pas inventer", readonly: true %></label>
-        <label>Éditeur / édition<%= form.text_field :edition, value: fact_value(@snapshot, "edition"), readonly: true %></label>
-        <label>Langue<%= form.text_field :language, value: fact_value(@snapshot, "language"), readonly: true %></label>
+        <label>Titre<%= form.text_field :title, value: @editor_values.fetch("title"), maxlength: 500, data: { edit_field: "title" } %></label>
+        <label>Auteur<%= form.text_field :author, value: @editor_values.fetch("author"), maxlength: 500, data: { edit_field: "author" } %></label>
+        <label>ISBN<%= form.text_field :isbn, value: @editor_values.fetch("isbn"), maxlength: 64, placeholder: "Absent · ne pas inventer", data: { edit_field: "isbn" } %></label>
+        <label>Éditeur / édition<%= form.text_field :edition, value: @editor_values.fetch("edition"), maxlength: 2000, data: { edit_field: "edition" } %></label>
+        <label>Langue<%= form.text_field :language, value: @editor_values.fetch("language"), maxlength: 120, data: { edit_field: "language" } %></label>
         <label>Format<input value="<%= @snapshot.payload&.format&.upcase %>" readonly></label>
       </div>
-      <label class="editor-section">Présentation<%= form.text_area :presentation, value: content_body(@snapshot, "presentation"), rows: 7, readonly: true %></label>
+      <label class="editor-section">Présentation<%= form.text_area :presentation, value: @editor_values.fetch("presentation"), rows: 7, maxlength: 100000, data: { edit_field: "presentation" } %></label>
       <div class="cover-summary"><span class="cover-placeholder" aria-hidden="true"><%= @release.title.to_s.first.presence || "?" %></span><div><h2>Couverture</h2><p><%= @snapshot.covers.any? ? "Sélection locale conservée" : "Aucune couverture retenue" %></p></div><button type="button" class="work-button" data-panel="evidence" data-action="workspace-tabs#show">Examiner</button></div>
-      <details class="editor-notes"><summary>Notes supplémentaires</summary><%= form.text_area :notes, value: content_body(@snapshot, "notes"), aria: { label: "Notes supplémentaires" }, rows: 3, readonly: true %></details>
+      <details class="editor-notes"><summary>Notes supplémentaires</summary><%= form.text_area :notes, value: @editor_values.fetch("notes"), aria: { label: "Notes supplémentaires" }, rows: 3, maxlength: 100000, data: { edit_field: "notes" } %></details>
     </section>
     <% { "bbcode" => "BBCode complet", "nfo" => "NFO complet" }.each do |key, label| %>
       <section id="panel-<%= key %>" role="tabpanel" aria-labelledby="tab-<%= key %>" hidden data-workspace-tabs-target="panel" data-panel="<%= key %>">
-        <label><%= label %><%= form.text_area key, value: content_body(@snapshot, key), class: "code-editor", rows: 20, spellcheck: false, readonly: true %></label>
+        <label><%= label %><%= form.text_area key, value: @editor_values.fetch(key), class: "code-editor", rows: 20, spellcheck: false, maxlength: 250000, data: { edit_field: key } %></label>
         <p class="editor-hint">Texte local conservé intégralement.</p>
       </section>
     <% end %>
@@ -34,6 +40,6 @@
   </section>
   <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence" %></section>
   <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
-    <article class="local-preview"><h2><%= @release.title %></h2><p><%= @release.author %></p><h3>Présentation</h3><div class="preserved-text"><%= content_body(@snapshot, "presentation") %></div><h3>Notes supplémentaires</h3><div class="preserved-text"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint">Aperçu local du texte relu.</p></article>
+    <article class="local-preview"><h2 data-preview-field="title"><%= @release.title %></h2><p data-preview-field="author"><%= @release.author %></p><h3>Présentation</h3><div class="preserved-text" data-preview-field="presentation"><%= content_body(@snapshot, "presentation") %></div><h3>Notes supplémentaires</h3><div class="preserved-text" data-preview-field="notes"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint">Aperçu local du texte relu.</p></article>
   </section>
 </section>

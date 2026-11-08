@@ -14,6 +14,7 @@ export default class extends Controller {
       tab.setAttribute("aria-selected", String(selected))
       tab.tabIndex = selected ? 0 : -1
     })
+    this.dispatch("shown", { detail: { key } })
   }
 
   navigate(event) {

@@ -27,10 +27,6 @@ module ReleasesHelper
     snapshot.contents[kind]&.body.to_s
   end
 
-  def fact_value(snapshot, field)
-    snapshot.facts[field]&.value.to_s
-  end
-
   def event_label(name)
     { "release.created" => "Release créée", "payload.staged" => "Fichier déposé", "release.revised" => "Texte enregistré",
       "operation.requested" => "Opération demandée", "operation.completed" => "Opération terminée",
