@@ -44,7 +44,10 @@ CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
 
 FROM gems AS quality-gems
 ENV BUNDLE_WITHOUT="" RAILS_ENV=test
-RUN bundle config unset without \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends chromium chromium-driver python3-pil python3-reportlab \
+    && rm -rf /var/lib/apt/lists/* \
+    && bundle config unset without \
     && bundle install \
     && rm -rf /usr/local/bundle/cache
 

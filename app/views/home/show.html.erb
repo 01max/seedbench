@@ -1,5 +1,8 @@
 <main class="mx-auto max-w-4xl px-6 py-20">
-  <p class="text-sm font-semibold uppercase tracking-widest text-purple-700">Atelier d’ebooks</p>
+  <p class="text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">Atelier d’ebooks</p>
   <h1 class="mt-4 text-4xl font-bold tracking-tight">Seedbench</h1>
-  <p class="mt-4 text-lg text-gray-700">Préparez et relisez vos ebooks.</p>
+  <p class="mt-4 text-lg">Préparez et relisez vos ebooks.</p>
+  <%= turbo_frame_tag "appearance", class: "mt-8 block" do %>
+    <%= link_to "Apparence", appearance_path, class: "underline underline-offset-4" %>
+  <% end %>
 </main>

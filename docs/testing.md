@@ -34,3 +34,19 @@ there is no generated TODO baseline.
 severities as well. `script/quality/verify_lint` supplies disposable stdin probes
 for each enabled department, all four complexity limits, and formatting; each
 must fail. A clean source sample must pass. The probes do not edit source files.
+
+Capybara uses Debian Chromium and its matching packaged ChromeDriver via an
+explicit executable path, so Selenium does not download a driver during tests.
+The system example loads appearance controls into a Turbo Frame, checks that
+the document was retained, changes the theme through Stimulus, and verifies the
+local preference after a reload. Browser screenshots and reports remain in
+disposable `/tmp/browser-artifacts` storage.
+
+Chromium's `--no-sandbox` flag applies only to this unprivileged, synthetic,
+network-isolated quality container. It avoids a privileged browser sandbox setup;
+the container has no operator files or credentials. The application image does
+not install Chromium.
+
+WebMock denies unstubbed external HTTP while allowing the local browser server.
+An integration example proves that an unexpected request raises before network
+access; the Docker network boundary also prevents external browser requests.

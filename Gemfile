@@ -23,4 +23,7 @@ end
 
 group :test do
   gem "simplecov", "~> 0.22", require: false
+  gem "capybara", "~> 3.40"
+  gem "selenium-webdriver", "~> 4.0"
+  gem "webmock", "~> 3.0"
 end
