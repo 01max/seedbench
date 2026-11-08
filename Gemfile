@@ -15,6 +15,10 @@ gem "solid_queue", "~> 1.7"
 
 group :development, :test do
   gem "rspec-rails", "~> 8.1"
+  gem "rubocop-rails-omakase", "~> 1.1", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-performance", require: false
+  gem "rubocop-rspec", require: false
 end
 
 group :test do

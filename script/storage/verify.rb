@@ -1,6 +1,5 @@
 require "digest"
 require "json"
-require "pathname"
 
 class StorageProbe
   def initialize
@@ -25,7 +24,7 @@ class StorageProbe
     before = File.stat(source)
     File.rename(source, payload)
     after = File.stat(payload)
-    raise "Rename changed file identity" unless [before.dev, before.ino] == [after.dev, after.ino]
+    raise "Rename changed file identity" unless [ before.dev, before.ino ] == [ after.dev, after.ino ]
     raise "Staged source still exists" if occupied?(source)
 
     report.merge(single_inode_rename: true, staged_source_absent: true)

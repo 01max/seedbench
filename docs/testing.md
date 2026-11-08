@@ -21,3 +21,16 @@ and tests unloaded probes in `app/services` and `lib` independently. Each child
 run must pass its examples, confirm that its probe was not loaded, include the
 probe as uncovered in the report, and exit unsuccessfully because of coverage.
 Neither the image source nor the checkout is edited by this self-test.
+
+RuboCop inherits Rails Omakase formatting and explicitly enables Lint, Security,
+Rails, Performance, and RSpec. Application methods are limited to 15 lines,
+ABC size 20, cyclomatic complexity 7, and perceived complexity 8. These method
+limits apply to `app` and `lib`; spec DSL blocks are not application methods.
+Integration examples allow up to 15 lines and five related expectations to keep
+one action and its contract together. No application/spec files are excluded and
+there is no generated TODO baseline.
+
+`bin/rubocop` fails at refactor severity, covering convention and higher
+severities as well. `script/quality/verify_lint` supplies disposable stdin probes
+for each enabled department, all four complexity limits, and formatting; each
+must fail. A clean source sample must pass. The probes do not edit source files.

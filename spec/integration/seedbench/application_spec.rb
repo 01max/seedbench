@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Isolated runtime storage" do
+RSpec.describe Seedbench::Application do
   it "provides distinct writable storage roots for synthetic files" do
     roots = Rails.application.config.x.storage.values_at(:state, :scratch, :payload)
 
