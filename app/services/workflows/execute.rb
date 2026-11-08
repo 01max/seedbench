@@ -6,7 +6,7 @@ module Workflows
 
       definition = Definitions.fetch(operation.kind)
       token = Claim.call(operation_id: operation.id)
-      return operation unless token
+      return operation.reload unless token
 
       result = definition.compute.call(operation: operation.reload)
       Complete.call(operation_id: operation.id, attempt_token: token, result: result, apply: definition.apply)

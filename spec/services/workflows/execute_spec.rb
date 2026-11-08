@@ -32,4 +32,14 @@ RSpec.describe Workflows::Execute do
     expect(SyntheticWorkflow::Compute).to have_received(:call).once
     expect(release.evidence_items.where(evidence_key: "workflow-#{operation.id}").count).to eq(1)
   end
+
+  it "does not compute work whose approved input revision is already obsolete" do
+    id = operation.id
+    Releases::Revise.call(release_id: release.id, expected_revision: 0, changes: { author: "New author" })
+    allow(SyntheticWorkflow::Compute).to receive(:call).and_call_original
+    described_class.call(operation_id: id)
+
+    expect(SyntheticWorkflow::Compute).not_to have_received(:call)
+    expect(operation.reload.state).to eq("stale")
+  end
 end

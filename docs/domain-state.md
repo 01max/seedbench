@@ -68,3 +68,26 @@ code-owned compute/apply/effect entries. No provider or feature handler is assum
 implemented: unknown kinds fail closed. Verification supplies a synthetic handler
 that creates evidence, with no provider calls. This is internal work delivery,
 not a seeding monitor or a runtime plugin interface.
+
+## Completion and interruption
+
+Every execution has an attempt token and a renewable five-minute lease. Results
+can be applied only by the current, unexpired attempt against its original input
+revision. A newer human edit makes the old result stale; a repeated completion
+or superseded token cannot create another accepted effect or history event.
+Local apply work, completion, and history share one transaction, so a failed
+apply rolls back partial database changes.
+
+Recovery requeues expired local computations with a new attempt identity.
+Remote or filesystem effects instead become `outcome_unknown`; they are never
+blindly replayed. Another request key cannot bypass an unresolved non-local
+operation of the same kind. This does not claim exactly-once external behavior:
+provider-specific idempotency and reconciliation remain required.
+
+Non-local handlers must journal known external identities through
+`Workflows::RecordOutcome` before applying derived local state. These observations
+remain bound to the approved operation and survive later input edits or failure;
+an existing external identity cannot be replaced. Stale local results preserve
+that journal and phase for explicit reconciliation, without overwriting newer
+human content. Stored failure metadata uses sanitized codes; unexpected
+exceptions still propagate to error reporting.

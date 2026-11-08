@@ -54,4 +54,16 @@ RSpec.describe Workflows::Start do
     expect { described_class.call(release_id: release.id, kind: "unimplemented", request_key: "unknown", expected_revision: 0) }
       .to raise_error(Workflows::Definitions::UnsupportedKind)
   end
+
+  it "prevents a new request key from replaying an uncertain external effect" do
+    install_workflow_definition(effect: "remote")
+    operation = start_synthetic_operation(release)
+    Workflows::Claim.call(operation_id: operation.id)
+    operation.update!(lease_expires_at: 1.second.ago)
+    Workflows::Lease.expire(operation_id: operation.id)
+
+    expect { start_synthetic_operation(release, request_key: "different-request") }
+      .to raise_error(described_class::UnresolvedEffect)
+    expect(release.workflow_operations.count).to eq(1)
+  end
 end
