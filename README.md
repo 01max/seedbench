@@ -1,8 +1,9 @@
 # Seedbench
 
 A private, single-operator ebook preparation application built with Rails and
-Hotwire. Versioned release state and recoverable background execution are available;
-ebook workflows and operator login are still pending. Keep this development build bound to loopback.
+Hotwire. Versioned release state, recoverable background execution, operator
+login, and provider Settings are available. Ebook workflows are still pending.
+Keep this development build bound to loopback.
 
 Install Docker Engine and Docker Compose 2.24.4 or newer, and run the commands
 from a POSIX shell (use WSL or a compatible shell on Windows). Ruby, Node,
@@ -10,10 +11,12 @@ SQLite, browser drivers, and ebook tools run inside containers.
 
 ```sh
 bin/setup
+bin/operator-password
 bin/dev
 ```
 
 Open <http://127.0.0.1:3000>. Setup builds the image and prepares both databases.
+The password command prompts without echo; sign in with the password you set.
 Development startup runs web and worker from the same image. Rebuild after source
 changes; no host Ruby, Node, or ebook-tool installation is needed.
 
@@ -49,6 +52,7 @@ To mount existing host folders, copy `compose.env.example` to the ignored
 export SEEDBENCH_COMPOSE_ENV=compose.env
 export COMPOSE_FILE=compose.yaml:compose.binds.yaml
 bin/setup
+bin/operator-password
 bin/dev
 ```
 
@@ -65,6 +69,10 @@ passed into containers by these configurations. Setup makes no provider calls.
 Service ownership and error conventions are documented in
 [application boundaries](docs/architecture.md). Records, revisions, history, and
 background completion guarantees are described in [durable state](docs/domain-state.md).
+Initialize or reset the operator password with `bin/operator-password` after
+setup; see [operator access](docs/operator-access.md).
+Configure provider credentials and connection checks in Réglages; see
+[provider settings](docs/provider-settings.md).
 Refresh model schema comments with `bin/annotate`; CI checks they stay current.
 
 Verified versions and fresh-checkout evidence are recorded in

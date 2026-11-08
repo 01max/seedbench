@@ -1,3 +1,21 @@
 fr:
+  devise:
+    failure:
+      already_authenticated: "Vous êtes déjà connecté."
+      invalid: "Mot de passe incorrect ou compte non initialisé."
+      not_found_in_database: "Mot de passe incorrect ou compte non initialisé."
+      unauthenticated: "Connectez-vous pour accéder à l’atelier."
+      timeout: "Votre session a expiré. Connectez-vous à nouveau."
+    sessions:
+      signed_in: "Connexion réussie."
+      signed_out: "Déconnexion réussie."
+      already_signed_out: "Vous êtes déjà déconnecté."
+  settings:
+    connection_completed: "Configuration complétée pour la même identité. Les livres existants conservent leur connexion."
+    connection_created: "Connexion enregistrée. Lancez un test pour vérifier son accès."
+    secret_rotated: "Secret remplacé pour la même identité. Le test précédent est invalidé."
+    options_updated: "Options enregistrées. Relancez le test de connexion."
+    defaults_updated: "Réglages enregistrés pour les prochains livres. Les livres existants restent inchangés."
+    connection_assigned: "Connexion affectée explicitement à ce livre."
   application:
     name: Seedbench

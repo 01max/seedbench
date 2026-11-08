@@ -12,6 +12,8 @@ gem "stimulus-rails", "~> 1.3"
 gem "tailwindcss-rails", "~> 4.6"
 gem "bootsnap", require: false
 gem "solid_queue", "~> 1.7"
+gem "devise", "~> 5.0.4"
+gem "activerecord-session_store", "~> 2.3"
 
 group :development do
   gem "annotaterb", "~> 4.25", require: false

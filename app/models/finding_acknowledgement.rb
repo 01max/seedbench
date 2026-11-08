@@ -3,7 +3,7 @@
 # Table name: finding_acknowledgements
 #
 #  id           :integer          not null, primary key
-#  acknowledged :boolean          not null
+#  acknowledged :boolean          default(FALSE), not null
 #  actor        :string           not null
 #  note         :text
 #  created_at   :datetime         not null

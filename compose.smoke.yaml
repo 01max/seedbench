@@ -8,6 +8,10 @@ x-smoke: &smoke
     SEEDBENCH_SCRATCH_ROOT: ${SEEDBENCH_SCRATCH_ROOT:-/scratch}
     SEEDBENCH_PAYLOAD_ROOT: ${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
     DELUGE_PAYLOAD_ROOT: /independent-client/books
+    SEEDBENCH_RUNTIME_VERIFICATION: "1"
+    SEEDBENCH_ENCRYPTION_KEY: ""
+    FORCE_SSL: "0"
+    ASSUME_SSL: "0"
   volumes: !override
     - state:${SEEDBENCH_STATE_ROOT:-/state}
     - scratch:${SEEDBENCH_SCRATCH_ROOT:-/scratch}

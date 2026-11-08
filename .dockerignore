@@ -25,6 +25,7 @@
 !spec/
 !spec/**
 !script/
+!script/operator_password.rb
 !script/quality/
 !script/quality/**
 !script/tooling/

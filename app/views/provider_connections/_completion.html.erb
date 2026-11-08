@@ -1,0 +1,21 @@
+<details class="mt-3">
+  <summary class="cursor-pointer">Compléter la configuration</summary>
+  <p class="mt-2 text-sm">Renseignez les éléments manquants pour la même identité. Les livres déjà liés conservent cette connexion.</p>
+  <%= form_with url: complete_provider_connection_path(connection), method: :patch, scope: :completion, namespace: "complete_#{connection.id}", class: "mt-3 grid gap-2" do |form| %>
+    <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+    <% if connection.role == "torrent_client" && connection.endpoint.nil? %>
+      <%= form.label :endpoint, "Adresse du WebUI Deluge (sans /json)" %><%= form.url_field :endpoint, required: true, class: "rounded border p-2" %>
+    <% end %>
+    <%= form.fields_for :credentials do |fields| %>
+      <%= fields.label definition.secret, definition.secret == "password" ? "Mot de passe WebUI" : "Clé API" %>
+      <%= fields.password_field definition.secret, required: true, autocomplete: "new-password", class: "rounded border p-2" %>
+    <% end %>
+    <% if connection.role == "ai" %>
+      <%= form.fields_for :options do |fields| %>
+        <%= fields.label :model, "Identifiant exact du modèle" %><%= fields.text_field :model, value: connection.options["model"], required: true, class: "rounded border p-2" %>
+      <% end %>
+    <% end %>
+    <label><%= form.check_box :confirm_identity, required: true %> Je confirme la même identité de compte ou de démon.</label>
+    <%= form.submit "Compléter la connexion", class: "justify-self-start rounded border px-3 py-2" %>
+  <% end %>
+</details>
