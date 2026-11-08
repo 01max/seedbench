@@ -87,7 +87,8 @@ The [storage probe](../script/storage/README.md) verifies independently chosen
 host and container roots using only synthetic data. Its reader represents the
 client's filesystem view, not a running Deluge daemon. Successful mount checks
 do not establish RPC authentication, torrent recheck/seeding, tracker acceptance,
-or deployment network access. Those remain separate integration checks.
+or deployment network access. The separate [Deluge protocol check](deluge-protocol.md)
+exercises a disposable daemon; production deployment acceptance remains required.
 
 ### Verification on 2026-11-08
 

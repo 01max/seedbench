@@ -3,7 +3,8 @@
 Discovery performed on 2026-11-07. C411 category reads and an isolated draft
 lifecycle have been verified. Synthetic Postimages/OpenAI checks and Linux
 tooling checks are recorded in [provider and tooling observations](provider-tooling.md).
-Publication and seeding remain unverified. See [the API observations](c411-api.md)
+The [isolated Deluge protocol check](deluge-protocol.md) passed on 2026-11-08.
+Publication and production seeding remain unverified. See [the API observations](c411-api.md)
 for measured responses, concurrency limitations, and unresolved policy checks.
 
 ## Connection inventory
@@ -11,7 +12,7 @@ for measured responses, concurrency limitations, and unresolved policy checks.
 | Provider | Observed configuration | Verification still needed |
 | --- | --- | --- |
 | C411 | The production API key is configured as `C411_API_KEY` in the ignored `.env`. Category/options reads and isolated draft create/read/update/delete succeeded. | Profile access returned HTTP 403; API account identity could not be independently confirmed through that endpoint. Publication is forbidden by the operator. |
-| Deluge | The `george-basics` Windmill workspace contains a secret variable and an existing torrent-inbox script referencing it. | Verify authentication and daemon identity with a bounded diagnostic before testing torrent operations. |
+| Deluge | An isolated Deluge 2.2.0 daemon passed paused import, per-torrent options, recheck, resume, seeding, and tracker acceptance/rejection checks. The `george-basics` Windmill workspace also contains a production connection reference. | Verify the selected deployment's daemon identity, authentication, permissions, and payload mapping before production client operations. |
 | OpenAI | The same workspace contains an OpenAI resource and a secret-variable reference. A synthetic strict-schema request succeeded, and an invalid schema was rejected. | Make a deliberate application connection assignment; the probe does not select production defaults. |
 | Postimages | The upload helper authenticated and returned a loadable direct PNG for a synthetic image. | Hosting reduced 600 × 900 to 512 × 768; actual cover quality and C411 host policy remain to be verified. |
 
@@ -63,8 +64,10 @@ only a newly created, clearly identified test draft for mutation tests. Existing
 browser uploads, drafts, published submissions, and torrents are outside that
 mutation scope. One isolated test draft was created, updated, and deleted; the
 original six drafts were preserved. One generated checkerboard was uploaded to
-Postimages for verification. No ebook cover upload, C411 publication, torrent
-import, or seeding operation was performed during discovery.
+Postimages for verification. No operator ebook cover was uploaded, and no
+operator ebook was published, imported into Deluge, or seeded. The isolated
+Deluge check imported and removed three synthetic torrents without external
+network access or production connections.
 
 Record the selected draft's identity and any remote identifiers in the private
 inventory before subsequent changes. Use synthetic evidence for the AI check
@@ -85,8 +88,9 @@ publication or personalized torrent retrieval.
   cannot be tested under the current authorization. Keep them unverified.
 - The portable synthetic mount check passed. Validate the selected production
   host's actual app/Deluge mount identities and access during deployment.
-- Verify paused import, per-torrent options, full recheck, resume, and bounded
-  tracker acceptance against the identified test torrent.
+- The isolated Deluge protocol check passed, including incomplete data and
+  tracker rejection. Verify actual daemon access and real tracker acceptance
+  separately during authorized deployment acceptance.
 - Carry the measured provider limitations and selected Linux tools into the
   application image, with separate real-file, parser-bound, and hostile-input
   checks.
