@@ -1,0 +1,5 @@
+<aside class="release-checklist" aria-label="Contrôles de publication">
+  <h2>Contrôles</h2>
+  <%= render "status" %>
+  <section class="release-activity"><h2>Activité</h2><% @snapshot.events.first(3).each do |event| %><p><%= l(event.occurred_at, format: :short) %><br><%= event_label(event.name) %></p><% end %></section>
+</aside>

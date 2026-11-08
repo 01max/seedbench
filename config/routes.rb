@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
-  root "home#show"
+  root "releases#index"
   devise_for :operators, skip: :all
   devise_scope :operator do
     get "session/new", to: "sessions#new", as: :new_operator_session
@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   end
   resource :settings, only: %i[show update]
   resources :uploads, only: :create
-  resources :releases, only: [] do
+  resources :releases, only: %i[index show] do
     resource :connections, controller: "release_connections", only: %i[show update]
   end
   resources :provider_connections, path: "settings/connections", only: :create do

@@ -1,0 +1,7 @@
+<%= turbo_frame_tag dom_id(@release, :status) do %>
+  <% { "Inspection" => @release.inspection_state, "Préparation" => @release.preparation_state, "Brouillon C411" => @release.draft_state, "Publication" => @release.publication_state, "Premier seeding" => @release.seeding_state }.each do |label, state| %>
+    <div class="check-row"><div><span><%= label %></span><small>Auto</small></div><p><%= workflow_label(state) %></p></div>
+  <% end %>
+  <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= kind == "draft" ? "Brouillon" : "Soumission" %> #<%= snapshot.remote_id %><%= " · absent" if snapshot.remote_deleted %></p><% end %>
+  <% @snapshot.operations.each do |operation| %><p class="operation-state"><%= operation.kind.humanize %> : <%= workflow_label(operation.state) %></p><% end %>
+<% end %>

@@ -1,0 +1,29 @@
+<aside class="work-queue" aria-label="File de travail">
+  <header class="queue-heading"><h2>File de travail</h2><span><%= @queue.total %> releases</span></header>
+  <%= form_with url: root_path, method: :get, class: "queue-search" do |form| %>
+    <%= form.search_field :q, value: @queue.criteria[:q], placeholder: "Titre, auteur…", aria: { label: "Rechercher par titre ou auteur" } %>
+    <%= form.select :state, Releases::Queue::STATES.map { |value, label| [label, value] }, { selected: @queue.criteria[:state] }, aria: { label: "Filtrer la file" } %>
+    <%= form.submit "Filtrer", class: "work-button" %>
+  <% end %>
+  <div class="queue-columns" aria-hidden="true"><span>Livre</span><span>Fmt.</span><span>État</span></div>
+  <div class="queue-records" aria-label="Releases à traiter">
+    <% @queue.records.each do |record| %>
+      <%= link_to queue_path(record.id, criteria: @queue.criteria), class: "queue-row", aria: { current: record.id == @release&.id ? "page" : nil }, title: "#{record.title} — #{record.author}" do %>
+        <span class="queue-title"><%= record.title.presence || "Sans titre" %></span><span class="queue-format"><%= record.payload_revisions.max_by(&:number)&.format&.upcase || "—" %></span><span class="queue-state"><%= release_label(record) %></span>
+      <% end %>
+    <% end %>
+    <% if @queue.records.empty? %><p class="queue-empty">Aucun livre ne correspond.</p><% end %>
+  </div>
+  <footer class="queue-footer">
+    <span><%= @queue.position || "Hors filtre" %> / <%= @queue.total %></span>
+    <div><% if @queue.previous_id %><%= link_to "Précédent", queue_path(@queue.previous_id, criteria: @queue.criteria), class: "work-button quiet", rel: "prev" %><% end %>
+      <% if @queue.next_id %><%= link_to "Suivant", queue_path(@queue.next_id, criteria: @queue.criteria), class: "work-button quiet", rel: "next" %><% end %></div>
+  </footer>
+  <% if @queue.pages > 1 %>
+    <nav class="queue-pagination" aria-label="Pages de la file">
+      <% if @queue.page > 1 %><%= link_to "Page précédente", root_path(**@queue.criteria, page: @queue.page - 1) %><% end %>
+      <span><%= @queue.page %> / <%= @queue.pages %></span>
+      <% if @queue.page < @queue.pages %><%= link_to "Page suivante", root_path(**@queue.criteria, page: @queue.page + 1) %><% end %>
+    </nav>
+  <% end %>
+</aside>

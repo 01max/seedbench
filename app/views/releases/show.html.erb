@@ -1,0 +1,39 @@
+<% content_for :toolbar do %>
+  <details class="upload-menu">
+    <summary class="work-button">+ Ajouter des ebooks</summary>
+    <%= form_with url: uploads_path, multipart: true, class: "upload-form" do |form| %>
+      <%= form.label :files, "Fichiers EPUB, PDF ou MOBI" %>
+      <%= form.file_field :files, multiple: true, accept: ".epub,.pdf,.mobi", required: true %>
+      <p>50 fichiers par lot, 100 Mio par fichier.</p>
+      <%= form.submit "Importer", class: "work-button primary" %>
+    <% end %>
+  </details>
+<% end %>
+<main id="workbench" aria-label="Atelier de préparation">
+  <% Array(flash[:upload_errors]).each do |error| %><p role="alert" class="work-alert"><%= error %></p><% end %>
+  <div class="work-layout">
+    <%= render "queue" %>
+    <% if @release %>
+      <section class="work-main" aria-label="Release sélectionnée" data-release-id="<%= @release.id %>">
+        <header class="release-heading">
+          <div><h1><%= @release.title.presence || "Sans titre" %></h1><p><%= @release.author.presence || "Auteur à confirmer" %> <span><%= @snapshot.payload&.format&.upcase || "Sans fichier" %></span> <span><%= number_to_human_size(@snapshot.payload&.size_bytes || 0) %></span> <span>#<%= @release.id %></span></p></div>
+          <span class="save-status" role="status" id="save-status">Enregistré</span>
+        </header>
+        <div class="release-workspace">
+          <%= render "editor" %>
+          <%= render "checklist" %>
+        </div>
+        <footer class="work-footer">
+          <span>Alt ↑↓ : livre · Ctrl/⌘ S : enregistrer</span>
+          <div class="work-actions">
+            <% ["Préparer", "Brouillon C411", "Publier", "Enregistrer et suivant"].each do |label| %>
+              <button class="work-button" type="button" disabled><%= label %></button>
+            <% end %>
+          </div>
+        </footer>
+      </section>
+    <% else %>
+      <section class="work-empty"><h1>Seedbench</h1><p>Préparez et relisez vos ebooks.</p><p>Ajoutez des fichiers EPUB, PDF ou MOBI pour commencer, ou modifiez les filtres.</p></section>
+    <% end %>
+  </div>
+</main>

@@ -1,0 +1,9 @@
+<h2>Sources et observations</h2>
+<% if @snapshot.evidence.empty? %><p class="editor-hint">Aucune observation disponible.</p><% end %>
+<% @snapshot.evidence.each do |item| %>
+  <details class="source-detail"><summary><%= item.source %> · <%= item.kind %></summary><p>Source <%= item.evidence_key %>, relevée le <%= l(item.captured_at, format: :short) %></p><pre><%= JSON.pretty_generate(item.data) %></pre></details>
+<% end %>
+<% @snapshot.findings.each do |finding| %><section class="finding-detail"><h3><%= finding.message %></h3><p><%= finding.severity == "failure" ? "Échec vérifiable" : "Observation à relire" %> · version <%= finding.number %></p><pre><%= JSON.pretty_generate(finding.data) %></pre></section><% end %>
+<h3>Couvertures conservées</h3>
+<% if @snapshot.covers.empty? %><p>Aucune couverture disponible.</p><% end %>
+<div class="cover-candidates"><% @snapshot.covers.each do |cover| %><article><h4>Version <%= cover.number %> · <%= cover.source_kind %></h4><p><%= cover.width %> × <%= cover.height %> px</p><p class="fingerprint"><%= cover.source_locator %></p><pre><%= JSON.pretty_generate(cover.edition_evidence) %></pre></article><% end %></div>

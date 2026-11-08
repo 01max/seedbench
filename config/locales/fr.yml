@@ -1,4 +1,7 @@
 fr:
+  time:
+    formats:
+      short: "%d/%m %H:%M"
   devise:
     failure:
       already_authenticated: "Vous êtes déjà connecté."

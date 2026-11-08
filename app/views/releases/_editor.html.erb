@@ -1,0 +1,39 @@
+<section class="editor-area" aria-label="Revue de la release" data-controller="workspace-tabs">
+  <div class="editor-tabs" role="tablist" aria-label="Sections de la release">
+    <% { "review" => "Revue", "bbcode" => "BBCode", "nfo" => "NFO", "files" => "Fichiers", "history" => "Historique", "evidence" => "Sources", "preview" => "Aperçu" }.each_with_index do |(key, label), index| %>
+      <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= label %></button>
+    <% end %>
+  </div>
+  <%= form_with scope: :edit, url: release_path(@release), method: :patch, id: "release-editor" do |form| %>
+    <%= form.hidden_field :expected_revision, value: @release.input_revision %>
+    <section id="panel-review" role="tabpanel" aria-labelledby="tab-review" data-workspace-tabs-target="panel" data-panel="review">
+      <p class="work-warning"><%= workflow_label(@release.inspection_state) %> pour l’inspection. Les faits restent à vérifier.</p>
+      <div class="editor-fields">
+        <label>Titre<%= form.text_field :title, value: @release.title, readonly: true %></label>
+        <label>Auteur<%= form.text_field :author, value: @release.author, readonly: true %></label>
+        <label>ISBN<%= form.text_field :isbn, value: fact_value(@snapshot, "isbn"), placeholder: "Absent · ne pas inventer", readonly: true %></label>
+        <label>Éditeur / édition<%= form.text_field :edition, value: fact_value(@snapshot, "edition"), readonly: true %></label>
+        <label>Langue<%= form.text_field :language, value: fact_value(@snapshot, "language"), readonly: true %></label>
+        <label>Format<input value="<%= @snapshot.payload&.format&.upcase %>" readonly></label>
+      </div>
+      <label class="editor-section">Présentation<%= form.text_area :presentation, value: content_body(@snapshot, "presentation"), rows: 7, readonly: true %></label>
+      <div class="cover-summary"><span class="cover-placeholder" aria-hidden="true"><%= @release.title.to_s.first.presence || "?" %></span><div><h2>Couverture</h2><p><%= @snapshot.covers.any? ? "Sélection locale conservée" : "Aucune couverture retenue" %></p></div><button type="button" class="work-button" data-panel="evidence" data-action="workspace-tabs#show">Examiner</button></div>
+      <details class="editor-notes"><summary>Notes supplémentaires</summary><%= form.text_area :notes, value: content_body(@snapshot, "notes"), aria: { label: "Notes supplémentaires" }, rows: 3, readonly: true %></details>
+    </section>
+    <% { "bbcode" => "BBCode complet", "nfo" => "NFO complet" }.each do |key, label| %>
+      <section id="panel-<%= key %>" role="tabpanel" aria-labelledby="tab-<%= key %>" hidden data-workspace-tabs-target="panel" data-panel="<%= key %>">
+        <label><%= label %><%= form.text_area key, value: content_body(@snapshot, key), class: "code-editor", rows: 20, spellcheck: false, readonly: true %></label>
+        <p class="editor-hint">Texte local conservé intégralement.</p>
+      </section>
+    <% end %>
+  <% end %>
+  <section id="panel-files" role="tabpanel" aria-labelledby="tab-files" hidden data-workspace-tabs-target="panel" data-panel="files"><%= render "files" %></section>
+  <section id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden data-workspace-tabs-target="panel" data-panel="history">
+    <h2>Historique récent</h2>
+    <ol class="release-history"><% @snapshot.events.each do |event| %><li><time datetime="<%= event.occurred_at.iso8601 %>"><%= l(event.occurred_at, format: :short) %></time><span><%= event_label(event.name) %><small><%= event.actor == "operator" ? "Vous" : "Automatique" %> · révision <%= event.input_revision %></small></span></li><% end %></ol>
+  </section>
+  <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence" %></section>
+  <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
+    <article class="local-preview"><h2><%= @release.title %></h2><p><%= @release.author %></p><h3>Présentation</h3><div class="preserved-text"><%= content_body(@snapshot, "presentation") %></div><h3>Notes supplémentaires</h3><div class="preserved-text"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint">Aperçu local du texte relu.</p></article>
+  </section>
+</section>
