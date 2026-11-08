@@ -1,3 +1,16 @@
+ENV["DISABLE_BOOTSNAP"] = "1"
+require "simplecov"
+
+SimpleCov.start do
+  coverage_dir ENV.fetch("COVERAGE_DIR", "/tmp/coverage")
+  track_files "{app,lib}/**/*.rb"
+  add_filter do |source|
+    !source.filename.start_with?("#{SimpleCov.root}/app/", "#{SimpleCov.root}/lib/")
+  end
+  add_group "Services", "app/services"
+  minimum_coverage line: 90
+end
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true

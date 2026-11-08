@@ -55,4 +55,5 @@ RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile \
     && ln -s /tmp/rails-tmp /app/tmp \
     && ln -s /tmp/rails-log /app/log
 USER rails:rails
+ENTRYPOINT ["/app/bin/container-entrypoint"]
 CMD ["bundle", "exec", "rspec"]

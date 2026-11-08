@@ -16,3 +16,7 @@ gem "solid_queue", "~> 1.7"
 group :development, :test do
   gem "rspec-rails", "~> 8.1"
 end
+
+group :test do
+  gem "simplecov", "~> 0.22", require: false
+end
