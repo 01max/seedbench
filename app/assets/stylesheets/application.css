@@ -86,6 +86,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .cover-placeholder { width: 27px; height: 38px; display: grid; place-items: center; background: #5c4969; color: #f8e9cb; border-left: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); font: 16px Georgia, serif; }
 .release-checklist { min-width: 0; border-left: 1px solid var(--border); padding: 10px; background: var(--background); }
 .release-checklist > h2 { margin-bottom: 6px !important; }
+.checklist-heading { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+.checklist-heading button { padding: 0 4px; }
+.refresh-state { color: var(--muted); font-size: 10px; margin-bottom: 5px !important; }
 .check-row { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
 .check-row > div { display: flex; justify-content: space-between; gap: 4px; }
 .check-row small, .check-row p { font-size: 11px; color: var(--muted); }
@@ -127,7 +130,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .work-layout { grid-template-columns: 205px minmax(0, 1fr); }
   .release-workspace { display: flex; flex-direction: column; }
   .release-checklist { border-left: 0; border-top: 1px solid var(--border); }
-  .release-checklist turbo-frame { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 10px; }
+  .release-checklist .status-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 10px; }
   .release-activity { display: none; }
   .queue-columns, .queue-row { grid-template-columns: minmax(0, 1fr) 61px; }
   .queue-format, .queue-columns > :nth-child(2) { display: none; }

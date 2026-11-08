@@ -30,9 +30,8 @@ class ReleaseChecksController < ApplicationController
   end
 
   def render_status(status: :ok)
-    @release.reload
-    @snapshot = Releases::Snapshot.call(release: @release)
-    @checklist = Releases::Checklist.call(release: @release, snapshot: @snapshot)
+    state = Releases::Status.call(release_id: @release.id)
+    @release, @snapshot, @checklist, @workflow_active = state.release, state.snapshot, state.checklist, state.active
     render partial: "releases/status", status: status
   end
 end

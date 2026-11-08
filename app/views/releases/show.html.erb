@@ -30,8 +30,8 @@
         <footer class="work-footer">
           <span>Alt ↑↓ : livre · Ctrl/⌘ S : enregistrer</span>
           <div class="work-actions">
-            <% ["Préparer", "Brouillon C411", "Publier"].each do |label| %>
-              <button class="work-button" type="button" disabled><%= label %></button>
+            <% { "prepare" => "Préparer", "draft" => "Brouillon C411", "publish" => "Publier" }.each do |kind, label| %>
+              <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: kind) %>" disabled title="Action indisponible"><%= label %></button>
             <% end %>
             <button class="work-button" type="submit" form="release-editor">Enregistrer</button>
             <button class="work-button primary" type="button" data-action="editor#next" <%= "disabled" unless @queue.next_id %>>Enregistrer et suivant</button>

@@ -30,9 +30,14 @@ class ReleasesController < ApplicationController
   def load_workspace
     @queue = Releases::Queue.call(**params.permit(:q, :state, :page).to_h.symbolize_keys, release_id: params[:id])
     @release = @queue.selected
-    @snapshot = Releases::Snapshot.call(release: @release) if @release
-    @checklist = Releases::Checklist.call(release: @release, snapshot: @snapshot) if @release
-    @editor_values = Releases::EditorValues.call(release: @release) if @release
+    load_selection if @release
+  end
+
+  def load_selection
+    @snapshot = Releases::Snapshot.call(release: @release)
+    @checklist = Releases::Checklist.call(release: @release, snapshot: @snapshot)
+    @editor_values = Releases::EditorValues.call(release: @release)
+    @workflow_active = @release.workflow_operations.exists?(state: %w[pending running])
   end
 
   def render_save_error(message, status)

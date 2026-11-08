@@ -161,7 +161,9 @@ export default class extends Controller {
     }
     if (form === this.formTarget) {
       event.preventDefault()
-      await this.flush()
+      const action = event.submitter?.getAttribute("formaction")
+      if (action) await this.performAction(action)
+      else await this.flush()
       return
     }
     if (!this.dirty && !this.saving) return
@@ -190,6 +192,24 @@ export default class extends Controller {
 
   next() {
     this.navigate(this.nextUrlValue)
+  }
+
+  async performAction(url) {
+    if (!(await this.flush())) return
+    try {
+      const response = await fetch(url, {
+        method: "PATCH", body: new FormData(this.formTarget), credentials: "same-origin",
+        headers: { "Accept": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || "" }
+      })
+      const data = await response.json()
+      if (response.status === 409) this.showConflict(data)
+      if (data.revision !== undefined) this.updateRevision(data.revision)
+      this.errorTarget.textContent = data.message || "Action terminée. Consultez les contrôles."
+      this.errorTarget.hidden = false
+    } catch {
+      this.errorTarget.textContent = "Action impossible. Le texte enregistré reste conservé."
+      this.errorTarget.hidden = false
+    }
   }
 
   shortcut(event) {
