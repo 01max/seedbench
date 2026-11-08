@@ -1,0 +1,31 @@
+name: seedbench-quality
+
+services:
+  quality:
+    profiles: [quality]
+    image: seedbench-quality:local
+    build:
+      context: .
+      target: quality
+    user: "1000:1000"
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    pids_limit: 256
+    mem_limit: 2g
+    cpus: 2
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=512m
+      - /state:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=32m
+      - /scratch:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=32m
+      - /payloads:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=32m
+    environment:
+      RAILS_ENV: test
+      SEEDBENCH_QUALITY: "1"
+      SECRET_KEY_BASE: synthetic-test-secret-with-no-production-use
+      SEEDBENCH_STATE_ROOT: /state
+      SEEDBENCH_SCRATCH_ROOT: /scratch
+      SEEDBENCH_PAYLOAD_ROOT: /payloads
+      COVERAGE_DIR: /tmp/coverage

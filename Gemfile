@@ -12,3 +12,7 @@ gem "stimulus-rails", "~> 1.3"
 gem "tailwindcss-rails", "~> 4.6"
 gem "bootsnap", require: false
 gem "solid_queue", "~> 1.7"
+
+group :development, :test do
+  gem "rspec-rails", "~> 8.1"
+end
