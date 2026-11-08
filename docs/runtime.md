@@ -63,7 +63,7 @@ A fresh clone without `.env`, operator ebooks, or private evidence passed
 host Ruby and Node absent from its executable search path. The initial foundation
 passed six examples, including a real Turbo/Stimulus browser interaction and a
 blocked unexpected HTTP request. The expanded domain/workflow suite passes
-193 examples with 99.77% application line coverage; the enforced minimum is 90%.
+201 examples with 99.76% application line coverage; the enforced minimum is 90%.
 
 Both unloaded-source probes failed coverage despite passing examples. Lint
 probes failed for every configured department, formatting, and all four method

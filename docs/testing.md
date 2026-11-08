@@ -60,11 +60,12 @@ No Docker socket is mounted into application or quality containers.
 
 Access checks cover unauthenticated pages and actions, inherited artifact
 responses, forged cookies, Devise inactivity expiry and active-session renewal,
-password-reset revocation, HTTPS cookie
-flags, copied-cookie rejection after logout, Devise session rotation, and invalid
+password-reset revocation, HTTPS cookie flags, copied-cookie rejection after
+logout, Devise session rotation, account locking and timed unlock, and invalid
 CSRF tokens on authenticated writes. Migration checks retain the original bcrypt
 hash through the Devise upgrade and rollback, revoke legacy cookies, and preserve
-the single-operator constraint. Browser checks exercise
+the single-operator constraint. The locking migration also retains sessions and
+restores the legacy throttle constraints on rollback. Browser checks exercise
 login, provider-specific credential forms, masked results, future-only defaults,
 and deliberate release assignment. Adapter checks use WebMock and synthetic
 credentials, including rejected redirects, oversized/invalid responses, network

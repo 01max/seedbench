@@ -67,7 +67,7 @@ RSpec.describe "Private access boundary" do
 
   it "requires fresh authentication after password recovery" do
     sign_in_operator
-    Authentication::ResetPassword.call(password: "New protected password", password_confirmation: "New protected password")
+    Operator.sole.update!(password: "New protected password", password_confirmation: "New protected password")
     get settings_path
 
     expect(response).to redirect_to(new_operator_session_path)

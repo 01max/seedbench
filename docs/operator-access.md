@@ -26,9 +26,10 @@ rejection as an incorrect password. The terminal reset command also unlocks the
 account.
 
 The Devise session controller adds explicit CSRF verification. The application
-uses Devise's authentication guard and current-operator helpers. Passwords and session identifiers are filtered from
-request parameters. Expired session rows can be removed with the session store's
-`db:sessions:trim` task; schedule it periodically for long-lived deployments.
+uses Devise's authentication guard and current-operator helpers. Passwords and
+session identifiers are filtered from request parameters. Expired session rows
+can be removed with the session store's `db:sessions:trim` task; schedule it
+periodically for long-lived deployments.
 
 Upgrading preserves the existing bcrypt password hash under Devise's
 `encrypted_password` column. Old custom login cookies are invalidated, so sign
@@ -51,10 +52,11 @@ input echo is disabled. Use at least 12 characters and at most 72 bytes.
 
 Never put a password in command arguments, shell history, or environment
 variables. The command accepts no arguments and prints only prompts and the
-result. A successful reset atomically replaces the password hash, revokes all
-existing login sessions, and clears the account lock. Invalid input preserves
-the current password and sessions. Restarting containers alone does not reset
-the account or its sessions.
+result. The terminal adapter assigns the new password through Devise and clears
+the account lock in one transaction. Devise invalidates existing authentication
+sessions when the password salt changes, without deleting session rows manually.
+Invalid input preserves the current password, sessions, and lock state.
+Restarting containers alone does not reset the account or its sessions.
 
 Implementation references: [Devise](https://github.com/heartcombo/devise),
 [Rails Active Record session store](https://github.com/rails/activerecord-session_store),

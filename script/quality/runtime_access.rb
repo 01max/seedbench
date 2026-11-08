@@ -23,7 +23,7 @@ module RuntimeAccess
   end
 
   def self.prepare
-    Authentication::ResetPassword.call(password: PASSWORD, password_confirmation: PASSWORD)
+    Operator.create!(id: 1, password: PASSWORD, password_confirmation: PASSWORD)
     cookies = {}
     login = request(Net::HTTP::Get, "/session/new", cookies)
     token = Nokogiri::HTML(login.body).at_css('meta[name="csrf-token"]')["content"]
@@ -56,7 +56,7 @@ module RuntimeAccess
     verify_defaults
     abort "Encryption key changed" unless Digest::SHA256.file(key_path).hexdigest == scratch.join("runtime-encryption-hash").read
     abort "Encryption key permissions too broad" unless (key_path.stat.mode & 0o077).zero?
-    Authentication::ResetPassword.call(password: "Replacement synthetic runtime password", password_confirmation: "Replacement synthetic runtime password")
+    Operator.sole.update!(password: "Replacement synthetic runtime password", password_confirmation: "Replacement synthetic runtime password")
     abort "Reset did not revoke browser session" unless request(Net::HTTP::Get, "/", cookies).code == "302"
     abort "Old password remained usable" if Operator.sole.valid_password?(PASSWORD)
     puts "Login, CSRF, encrypted credentials, key/session persistence, future defaults and password-reset revocation verified."
