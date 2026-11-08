@@ -20,9 +20,15 @@ File.binwrite(source, "Seedbench synthetic durable payload\n")
 inode = source.stat.ino
 File.rename(source, destination)
 abort "Rename changed file identity" unless destination.stat.ino == inode
-connection = ApplicationRecord.connection
-connection.create_table(:synthetic_markers) do |table|
-  table.string :payload_hash, null: false
+release = Releases::Create.call(title: "Synthetic runtime book", author: "Test author")
+PayloadRevision.create!(release: release, number: 1, original_filename: "synthetic.epub", format: "epub",
+  size_bytes: destination.size, sha256: Digest::SHA256.file(destination).hexdigest, locator: destination.basename.to_s)
+ContentRevision.create!(release: release, kind: "bbcode", number: 1, body: "Preserved human content", origin: "human", input_revision: 0)
+Rails.application.config.x.storage.fetch(:scratch).join("runtime-release-id").write(release.id.to_s)
+begin
+  ApplicationRecord.connection.execute("UPDATE release_events SET name = 'changed'")
+  abort "Loaded SQL schema lost its history guard"
+rescue ActiveRecord::StatementInvalid => error
+  raise unless error.message.include?("append-only")
 end
-connection.execute("INSERT INTO synthetic_markers (payload_hash) VALUES (#{connection.quote(Digest::SHA256.file(destination).hexdigest)})")
-puts "Application image, assets, non-root storage, same-file rename, and separate databases verified."
+puts "Application image, assets, SQL history guards, domain state and same-file rename verified."

@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 bundle exec rails db:prepare db:migrate zeitwerk:check
+bundle exec annotaterb models --frozen
 RAILS_ENV=production FORCE_SSL=1 ASSUME_SSL=0 bundle exec rails runner script/quality/check_ssl.rb
 bundle exec rspec
 script/quality/verify_coverage

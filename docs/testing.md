@@ -58,21 +58,44 @@ wrap Docker Compose. `bin/test` forwards RSpec arguments, including `--seed`.
 then verifies the production application image with disposable Compose projects.
 No Docker socket is mounted into application or quality containers.
 
+Model schema comments are maintained with [AnnotateRb](https://github.com/drwl/annotaterb).
+Run `bin/annotate` after changing migrations or models. It builds the quality
+image, prepares disposable databases, and annotates a temporary source copy,
+then returns only model files to the checkout. No host Ruby, writable source
+mount, operator data, or persistent application database is required.
+
+Annotations include columns, indexes, and foreign keys, with database names
+omitted so they are stable across environments. Specs, fixtures, factories,
+and serializers are excluded. Development database tasks also refresh them
+automatically in a writable source checkout; set `ANNOTATERB_SKIP_ON_DB_TASKS=1`
+to skip that hook. CI runs `annotaterb models --frozen` against its disposable
+database and fails when comments are stale. AnnotateRb is excluded from the
+production bundle.
+
 An isolated production-mode request check enables forced SSL without assumed
 SSL. It requires plain HTTP `/up` to return 200, application pages to redirect
 to HTTPS, and requests forwarded as HTTPS to render normally.
 
-The runtime check uses no network or published ports. It verifies served assets,
-non-root file access and same-inode rename, writes a synthetic primary-database
-marker, removes a worker container, enqueues work while that worker is absent,
-and recreates the worker against the same queue database. It then recreates web
-and checks the saved primary state, job result, and unchanged payload hash. A
-second run uses fresh named volumes at alternate container roots containing
-spaces, with service UID/GID 65534, already present in the base image. A third
-uses temporary host folders and container roots with spaces. Cleanup removes
-only each generated project's volumes and temporary folders. The synthetic job
-is loaded only through the smoke worker's explicit command; it is not part of
-the application job namespace.
+The runtime check uses no network or published ports. It creates actual release,
+payload, human-content, provider-assignment and event records, and verifies
+served assets, non-root access, same-inode rename, and the loaded SQL history
+guards. A producer process exits after committing its operation intent but
+before queue insertion; the periodic recovery job must dispatch that operation.
+
+The real `WorkflowOperationJob` then executes a synthetic compute/apply definition.
+Repeated deliveries must create only one evidence record and completion event.
+A computation is paused while a newer human edit commits; its late result must
+be discarded. Another worker is killed during computation, recreated against the
+same databases, and recovered with a new attempt token after the synthetic lease
+is expired. Its old token cannot replace the accepted result. Finally web is
+recreated and all retained domain state and payload hashes are checked.
+
+This runs with default named volumes, alternate named-volume roots and UID/GID
+65534, and existing synthetic bind folders/container roots containing spaces.
+Cleanup removes only generated project volumes and temporary folders. Synthetic
+handler definitions are installed only by the verification worker's explicit
+fixture command. The production code-owned definition map does not pretend to
+implement inspection, publication or other later feature handlers.
 
 Production/test migrations do not dump schema into the read-only application
 image. Schema updates belong in source changes; runtime migrations only update

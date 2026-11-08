@@ -1,3 +1,9 @@
-development: {}
+development: &recovery
+  recover_workflow_dispatch:
+    class: WorkflowDispatchRecoveryJob
+    schedule: every 10 seconds
+
 test: {}
-production: {}
+
+production:
+  <<: *recovery

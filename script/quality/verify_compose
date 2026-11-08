@@ -38,13 +38,38 @@ compose up -d --no-build --wait
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/prepare_runtime.rb
 compose stop worker
 compose rm -f worker
-compose exec -T web bin/container-entrypoint bin/rails runner 'require Rails.root.join("script/quality/fixture_job"); SyntheticPersistenceJob.perform_later; abort "Worker unexpectedly ran" if Rails.application.config.x.storage.fetch(:scratch).join("queue-proof").exist?'
+if compose exec -T web bin/container-entrypoint bin/rails runner script/quality/interrupt_dispatch.rb; then
+  exit 1
+else
+  status=$?
+  [ "$status" -eq 29 ] || exit "$status"
+fi
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb verify_gap
 compose up -d --no-build --no-deps worker
-remaining=30
-until compose exec -T web bin/container-entrypoint ruby -e 'exit(File.exist?(File.join(ENV.fetch("SEEDBENCH_SCRATCH_ROOT"), "queue-proof")) ? 0 : 1)' >/dev/null 2>&1; do
-  remaining=$((remaining - 1))
-  [ "$remaining" -gt 0 ] || exit 1
-  sleep 1
-done
+wait_for_sql() {
+  query=$1
+  database=${2:-production.sqlite3}
+  remaining=60
+  until compose exec -T web sh -c 'test "$(sqlite3 -readonly "$SEEDBENCH_STATE_ROOT/$2" "$1")" = 1' sh "$query" "$database" >/dev/null 2>&1; do
+    remaining=$((remaining - 1))
+    [ "$remaining" -gt 0 ] || exit 1
+    sleep 1
+  done
+}
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-dispatch' AND state = 'succeeded'"
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb queue_duplicates
+wait_for_sql "SELECT COUNT(*) = 0 FROM solid_queue_jobs WHERE class_name = 'WorkflowOperationJob' AND finished_at IS NULL" production_queue.sqlite3
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb start_stale
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'stale-compute' AND state = 'running'"
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb release_stale
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'stale-compute' AND state = 'stale'"
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb start_crash
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-compute' AND state = 'running'"
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb checkpoint_crash
+compose kill -s SIGKILL worker
+compose rm -f worker
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb recover_crash
+compose up -d --no-build --no-deps worker
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-compute' AND state = 'succeeded'"
 compose up -d --no-build --no-deps --force-recreate --wait web
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/check_runtime.rb

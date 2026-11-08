@@ -4,6 +4,7 @@
 !.ruby-version
 !.rspec
 !.rubocop.yml
+!.annotaterb.yml
 !Rakefile
 !config.ru
 !app/

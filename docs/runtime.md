@@ -16,9 +16,11 @@ Ruby and Rails use the supported patched releases selected from their official
 | --- | --- |
 | Ruby / Rails | 4.0.9 / 8.1.4.1 |
 | sqlite3 gem / embedded SQLite | 2.10.2 / 3.54.1 |
+| SQLite schema/verification CLI | 3.46.1 |
 | Puma / Solid Queue | 8.0.2 / 1.7.2 |
 | RSpec Rails / SimpleCov | 8.1.0 / 0.22.0 |
 | RuboCop / Rails Omakase | 1.92.2 / 1.1.0 |
+| AnnotateRb (development only) | 4.26.0 |
 | RuboCop Rails / Performance / RSpec | 2.38.0 / 1.27.0 / 3.10.2 |
 | Capybara / Selenium / WebMock | 3.40.0 / 4.52.0 / 3.34.0 |
 | Tailwind Rails / standalone compiler | 4.7.0 / 4.3.4 |
@@ -54,10 +56,10 @@ the application secret is kept in that volume rather than baked into the image.
 
 A fresh clone without `.env`, operator ebooks, or private evidence passed
 `bin/setup`, `bin/dev -d --wait`, seeded `bin/test`, `bin/lint`, and `bin/ci` with
-host Ruby and Node absent from its executable search path. The foundation suite
+host Ruby and Node absent from its executable search path. The initial foundation
 passed six examples, including a real Turbo/Stimulus browser interaction and a
-blocked unexpected HTTP request. Application Ruby coverage was 100% for the
-current small foundation; the enforced minimum is 90%.
+blocked unexpected HTTP request. The expanded domain/workflow suite passes
+99 examples with 99.58% application line coverage; the enforced minimum is 90%.
 
 Both unloaded-source probes failed coverage despite passing examples. Lint
 probes failed for every configured department, formatting, and all four method
@@ -67,11 +69,13 @@ offenses.
 The runtime checks passed with disposable named volumes and with existing
 synthetic host folders and container roots containing spaces. They verified
 served assets, unprivileged storage access, same-inode rename, separate databases,
-queued work surviving worker container replacement, and app state/payload hashes
-surviving web replacement. Cleanup removed only generated verification state.
+committed dispatch intents surviving process exit before queue insertion,
+duplicate-delivery suppression, obsolete-result rejection after human edits,
+recovery after killing a worker, and domain state/payload hashes surviving
+container replacement. Cleanup removed only generated verification state.
 
 These checks establish the application foundation. Operator authentication,
 ebook workflows, provider actions, and acceptance on an actual deployment host
 remain separate work. No live C411 publication or production Deluge operation
-was performed. See [quality checks](testing.md), [storage configuration](storage-configuration.md),
+was performed. See [durable state](domain-state.md), [quality checks](testing.md), [storage configuration](storage-configuration.md),
 and the earlier [provider/tool observations](provider-tooling.md).

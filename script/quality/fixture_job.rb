@@ -1,8 +1,9 @@
 require_relative "../../config/environment"
+require_relative "workflow_fixture"
 
-# This synthetic job is loaded only by the disposable runtime verification stack.
-class SyntheticPersistenceJob < ApplicationJob
-  def perform
-    File.write(Rails.application.config.x.storage.fetch(:scratch).join("queue-proof"), "completed")
-  end
-end
+# The isolated runtime stack installs this synthetic definition before starting jobs.
+Workflows::Definitions.send(:remove_const, :ENTRIES)
+Workflows::Definitions.const_set(:ENTRIES, {
+  "synthetic" => Workflows::Definitions::Definition.new(
+    compute: SyntheticWorkflow::Compute, apply: SyntheticWorkflow::Apply, effect: "local")
+}.freeze)
