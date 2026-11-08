@@ -59,3 +59,6 @@ passed into containers by these configurations. Setup makes no provider calls.
 
 Service ownership and error conventions are documented in
 [application boundaries](docs/architecture.md).
+
+Verified versions and fresh-checkout evidence are recorded in
+[supported runtime](docs/runtime.md).
