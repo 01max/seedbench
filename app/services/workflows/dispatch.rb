@@ -1,8 +1,53 @@
 module Workflows
   class Dispatch
+    PROCESS_FAILURES = %w[SolidQueue::Processes::ProcessPrunedError SolidQueue::Processes::ProcessExitError SolidQueue::Processes::ProcessMissingError].freeze
+
     def self.call(operation_id:)
       ActiveRecord.after_all_transactions_commit { enqueue(operation_id) }
     end
+
+    def self.recover(operation_id:)
+      return unless WorkflowOperationJob.queue_adapter.is_a?(ActiveJob::QueueAdapters::SolidQueueAdapter)
+
+      ActiveRecord.after_all_transactions_commit { reconcile(operation_id) }
+    end
+
+    def self.reconcile(operation_id)
+      operation = WorkflowOperation.find(operation_id)
+      intent = operation.dispatch_intent
+      return unless operation.state == "pending" && intent.state == "dispatched"
+
+      receipt = intent.job_id
+      lost = receipt_lost?(receipt)
+      reconcile_receipt(operation, intent, receipt, lost)
+    end
+    private_class_method :reconcile
+
+    def self.receipt_lost?(receipt)
+      job = SolidQueue::Job.find_by(id: receipt, class_name: WorkflowOperationJob.name)
+      job.nil? || PROCESS_FAILURES.include?(job.failed_execution&.exception_class)
+    end
+    private_class_method :receipt_lost?
+
+    def self.reconcile_receipt(operation, intent, receipt, lost)
+      operation.release.with_lock do
+        operation.reload
+        intent.reload
+        return unless operation.state == "pending" && intent.state == "dispatched" && intent.job_id == receipt
+
+        lost ? redeliver(operation, intent) : intent.update!(updated_at: Time.current)
+      end
+    end
+    private_class_method :reconcile_receipt
+
+    def self.redeliver(operation, intent)
+      receipt = intent.job_id
+      intent.update!(state: "pending", dispatch_token: nil, claimed_until: nil, job_id: nil, dispatched_at: nil, error_code: "delivery_lost")
+      Releases::RecordEvent.call(release_id: operation.release_id, name: "operation.delivery_recovered",
+        data: { operation_id: operation.id, queue_job_id: receipt })
+      ActiveRecord.after_all_transactions_commit { call(operation_id: operation.id) }
+    end
+    private_class_method :redeliver
 
     def self.enqueue(operation_id)
       operation = WorkflowOperation.find(operation_id)

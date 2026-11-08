@@ -62,6 +62,13 @@ recovery job handles committed pending intents and expired dispatch claims.
 Queueing twice around a lost receipt is safe because execution claims the
 operation identity and commits local effects with completion history atomically.
 
+Recovery also checks accepted queue receipts for operations that have not yet
+claimed an application attempt. Missing jobs and jobs failed by a lost worker
+process are redelivered; healthy queued/claimed jobs and ordinary execution
+errors retain their receipts. Queue inspection happens after application commit,
+and the operation and receipt are rechecked under the release lock before retry.
+Healthy receipts are touched so bounded scans also reach later pending work.
+
 Computation and I/O run outside the application write transaction; a handler's
 apply step performs only local persistence inside it. Definitions are explicit,
 code-owned compute/apply/effect entries. No provider or feature handler is assumed
