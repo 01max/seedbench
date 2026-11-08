@@ -12,6 +12,9 @@ if [ "${1:-}" = --binds ]; then
   export SEEDBENCH_STATE_SOURCE="$temporary/state folder" SEEDBENCH_SCRATCH_SOURCE="$temporary/scratch folder" SEEDBENCH_PAYLOAD_SOURCE="$temporary/payload folder"
   mkdir "$SEEDBENCH_STATE_SOURCE" "$SEEDBENCH_SCRATCH_SOURCE" "$SEEDBENCH_PAYLOAD_SOURCE"
   chmod 777 "$SEEDBENCH_STATE_SOURCE" "$SEEDBENCH_SCRATCH_SOURCE" "$SEEDBENCH_PAYLOAD_SOURCE"
+elif [ "${1:-}" = --named-overrides ]; then
+  export SEEDBENCH_STATE_ROOT='/alternate state' SEEDBENCH_SCRATCH_ROOT='/alternate scratch' SEEDBENCH_PAYLOAD_ROOT='/alternate payloads'
+  export SEEDBENCH_UID=65534 SEEDBENCH_GID=65534
 fi
 compose() {
   if [ "$binds" = true ]; then

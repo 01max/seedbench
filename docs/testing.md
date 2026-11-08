@@ -63,10 +63,12 @@ non-root file access and same-inode rename, writes a synthetic primary-database
 marker, removes a worker container, enqueues work while that worker is absent,
 and recreates the worker against the same queue database. It then recreates web
 and checks the saved primary state, job result, and unchanged payload hash. A
-second run repeats this using temporary host folders and container roots with
-spaces. Cleanup removes only each generated project's volumes and temporary
-folders. The synthetic job is loaded only through the smoke worker's explicit
-command; it is not part of the application job namespace.
+second run uses fresh named volumes at alternate container roots containing
+spaces, with service UID/GID 65534, already present in the base image. A third
+uses temporary host folders and container roots with spaces. Cleanup removes
+only each generated project's volumes and temporary folders. The synthetic job
+is loaded only through the smoke worker's explicit command; it is not part of
+the application job namespace.
 
 Production/test migrations do not dump schema into the read-only application
 image. Schema updates belong in source changes; runtime migrations only update

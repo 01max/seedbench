@@ -5,6 +5,12 @@ x-application: &application
   build:
     context: .
     target: application
+    args:
+      APP_UID: ${SEEDBENCH_UID:-1000}
+      APP_GID: ${SEEDBENCH_GID:-1000}
+      STATE_ROOT: ${SEEDBENCH_STATE_ROOT:-/state}
+      SCRATCH_ROOT: ${SEEDBENCH_SCRATCH_ROOT:-/scratch}
+      PAYLOAD_ROOT: ${SEEDBENCH_PAYLOAD_ROOT:-/payloads}
   user: "${SEEDBENCH_UID:-1000}:${SEEDBENCH_GID:-1000}"
   read_only: true
   cap_drop: [ALL]

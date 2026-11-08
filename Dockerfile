@@ -31,7 +31,18 @@ COPY . .
 RUN SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
 
 FROM base AS application
-ENV BUNDLE_WITHOUT=development:test
+ARG APP_UID=1000
+ARG APP_GID=1000
+ARG STATE_ROOT=/state
+ARG SCRATCH_ROOT=/scratch
+ARG PAYLOAD_ROOT=/payloads
+ENV BUNDLE_WITHOUT=development:test \
+    SEEDBENCH_STATE_ROOT=${STATE_ROOT} SEEDBENCH_SCRATCH_ROOT=${SCRATCH_ROOT} \
+    SEEDBENCH_PAYLOAD_ROOT=${PAYLOAD_ROOT}
+RUN groupmod --non-unique --gid "$APP_GID" rails \
+    && usermod --non-unique --uid "$APP_UID" --gid rails rails \
+    && mkdir -p "$SEEDBENCH_STATE_ROOT" "$SEEDBENCH_SCRATCH_ROOT" "$SEEDBENCH_PAYLOAD_ROOT" \
+    && chown rails:rails "$SEEDBENCH_STATE_ROOT" "$SEEDBENCH_SCRATCH_ROOT" "$SEEDBENCH_PAYLOAD_ROOT"
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build --chown=rails:rails /app /app
 RUN rm -rf /app/tmp /app/log \

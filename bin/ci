@@ -3,4 +3,5 @@ set -eu
 cd "$(dirname "$0")/.."
 bin/quality script/quality/ci
 script/quality/verify_compose
+script/quality/verify_compose --named-overrides
 script/quality/verify_compose --binds

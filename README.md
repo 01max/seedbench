@@ -36,6 +36,11 @@ initialized once in the state volume with restricted permissions. Preserve that
 volume when replacing containers. `bin/compose down` stops the stack without
 removing its persistent volumes.
 
+Compose passes the configured service UID/GID and container roots to the image
+build, so fresh named volumes inherit matching directory ownership. Rebuild with
+`bin/setup` or `bin/dev` after changing those settings. Existing volume contents
+retain their ownership; rebuilding does not change permissions on stored files.
+
 To mount existing host folders, copy `compose.env.example` to the ignored
 `compose.env`, set the three sources, and combine `compose.yaml` with
 `compose.binds.yaml`. For example:

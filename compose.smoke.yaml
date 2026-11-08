@@ -1,6 +1,6 @@
 x-smoke: &smoke
   image: seedbench:verification
-  user: "1000:1000"
+  user: "${SEEDBENCH_UID:-1000}:${SEEDBENCH_GID:-1000}"
   network_mode: none
   environment:
     RAILS_ENV: production
