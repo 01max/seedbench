@@ -50,4 +50,21 @@ RSpec.describe Ebooks::Parser do
     _, _, report = inspect_fixture(name: "bad.epub")
     expect(report).to eq("error" => "corrupt")
   end
+
+  it "measures PDF pages and source-linked text without changing the original" do
+    _, payload, report = inspect_fixture(name: "book.pdf")
+    expect(report).to include("error" => nil, "structure" => include("page_count" => 1, "ocr" => false))
+    expect(report.fetch("samples")).to include(include("source" => "pdf:page:1", "text" => include("Synthetic PDF")))
+    expect(payload.sha256).to eq(Digest::SHA256.file(directory.join("book.pdf")).hexdigest)
+  end
+
+  it "keeps OCR material outside the payload and removes temporary sidecars" do
+    _, payload, = inspect_fixture(name: "scan.pdf")
+    report = described_class.call(payload: payload, ocr: true)
+    expect(report).to include("error" => nil, "structure" => include("pages_without_text_in_sample" => [ 1 ]))
+    expect(report.fetch("samples")).to include(include("source" => "ocr:pdf:page:1", "text" => include("synthetique")))
+    expect(Rails.application.config.x.storage.fetch(:scratch).glob("inspection-*" )).to be_empty
+    expect(payload.sha256).to eq(Digest::SHA256.file(directory.join("scan.pdf")).hexdigest)
+  end
+
 end

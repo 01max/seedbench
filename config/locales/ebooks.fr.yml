@@ -14,3 +14,4 @@ fr:
       unsupported_format: "Ce format n’est pas encore pris en charge par l’inspecteur."
       unsupported_compression: "L’EPUB utilise une compression non prise en charge."
       unsupported_cover: "Une couverture intégrée ne peut pas être analysée en sécurité."
+      tool_failed: "Le lecteur a refusé le fichier. Vérifiez son intégrité et son éventuelle protection. Les pages non lues ne sont pas vérifiées."

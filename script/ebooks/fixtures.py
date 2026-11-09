@@ -17,5 +17,27 @@ def epub(root):
         book.writestr("cover.png", image.getvalue())
 
 
+def pdf(root):
+    from reportlab.pdfgen.canvas import Canvas
+    from reportlab.lib.utils import ImageReader
+    canvas = Canvas(str(root / "book.pdf"))
+    canvas.setTitle("Synthetic PDF")
+    canvas.setAuthor("Test author")
+    canvas.drawString(60, 700, "Synthetic PDF text for inspection.")
+    canvas.showPage()
+    canvas.save()
+    image = Image.new("RGB", (1600, 2000), "white")
+    from PIL import ImageDraw, ImageFont
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 50)
+    draw.text((100, 200), "Document synthetique pour OCR", fill="black", font=font)
+    canvas = Canvas(str(root / "scan.pdf"))
+    canvas.drawImage(ImageReader(image), 0, 0, width=595, height=842)
+    canvas.showPage()
+    canvas.save()
+
+
 if __name__ == "__main__":
-    epub(pathlib.Path(sys.argv[1]))
+    root = pathlib.Path(sys.argv[1])
+    epub(root)
+    pdf(root)

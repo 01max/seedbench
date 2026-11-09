@@ -4,6 +4,7 @@ import json
 import pathlib
 import re
 import sys
+import subprocess
 import xml.etree.ElementTree as ET
 import zipfile
 from urllib.parse import unquote, urlsplit
@@ -122,14 +123,59 @@ def epub(source, work):
                 "metadata": observations, "samples": samples, "covers": covers}
 
 
+def command(arguments, work):
+    with (work / "tool-output").open("wb") as output, (work / "tool-errors").open("wb") as errors:
+        completed = subprocess.run(arguments, stdout=output, stderr=errors, pass_fds=(3,), timeout=40, check=False)
+    require(completed.returncode == 0, "tool_failed")
+    require((work / "tool-output").stat().st_size <= 256 * 1024, "resource_limit")
+    return (work / "tool-output").read_text(errors="replace")
+
+
+def pdf(source, work, ocr):
+    with open(source, "rb") as stream:
+        require(stream.read(5) == b"%PDF-", "signature_mismatch")
+    info = command(["pdfinfo", source], work)
+    fields = dict(line.split(":", 1) for line in info.splitlines() if ":" in line)
+    require(not fields.get("Encrypted", "").strip().startswith("yes"), "encrypted")
+    pages = int(fields.get("Pages", "0").strip())
+    require(0 < pages <= 2000, "resource_limit")
+    samples, blank = [], []
+    selected = sorted({1, min(2, pages), pages})
+    for page in selected:
+        target = work / ("text-" + str(page))
+        command(["pdftotext", "-f", str(page), "-l", str(page), "-layout", source, str(target)], work)
+        require(target.stat().st_size <= MAX_ENTRY, "resource_limit")
+        content = target.read_text(errors="replace").strip()
+        if not content:
+            blank.append(page)
+        samples.append({"source": "pdf:page:" + str(page), "text": content[:SAMPLE]})
+    metadata = [{"field": key.lower(), "value": fields[key].strip()[:2000], "source": "pdfinfo:" + key}
+                for key in ("Title", "Author", "Creator", "Producer", "CreationDate") if fields.get(key, "").strip()]
+    covers = []
+    command(["pdftoppm", "-f", "1", "-l", "1", "-singlefile", "-scale-to", "1600", "-png", source, str(work / "page")], work)
+    covers.append(cover((work / "page.png").read_bytes(), "pdf:page:1:rendered", work))
+    if ocr:
+        for page in selected:
+            prefix = work / ("ocr-page-" + str(page))
+            command(["pdftoppm", "-f", str(page), "-l", str(page), "-singlefile", "-scale-to", "2000", "-png", source, str(prefix)], work)
+            command(["tesseract", str(prefix) + ".png", str(prefix), "-l", "fra", "--psm", "6", "txt"], work)
+            require(prefix.with_suffix(".txt").stat().st_size <= MAX_ENTRY, "resource_limit")
+            samples.append({"source": "ocr:pdf:page:" + str(page), "text": prefix.with_suffix(".txt").read_text(errors="replace")[:SAMPLE]})
+    return {"structure": {"page_count": pages, "sampled_pages": selected, "pages_without_text_in_sample": blank,
+                           "scope": "PDF structure and selected pages; completeness not established", "ocr": ocr},
+            "metadata": metadata, "samples": samples, "covers": covers}
+
+
 def main():
     source, format_name, workspace = sys.argv[1:4]
     work = pathlib.Path(workspace)
     try:
-        require(format_name == "epub", "unsupported_format")
-        result = epub(source, work)
-        result["parser"] = "epub-1"
+        require(format_name in ("epub", "pdf"), "unsupported_format")
+        result = epub(source, work) if format_name == "epub" else pdf(source, work, sys.argv[4] == "true")
+        result["parser"] = format_name + "-1"
         result["error"] = None
+    except subprocess.TimeoutExpired:
+        result = {"error": "resource_limit"}
     except Invalid as error:
         result = {"error": str(error)}
     except (KeyError, ValueError, StopIteration, ET.ParseError, zipfile.BadZipFile, OSError):
