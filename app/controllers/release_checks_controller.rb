@@ -5,7 +5,7 @@ class ReleaseChecksController < ApplicationController
     change_mark
     render_status
   rescue Releases::RevisionConflict => error
-    @check_error = "Le livre a changé (révision #{error.actual_revision}). Relisez les contrôles."
+    @check_error = t("workbench.errors.review_conflict", revision: error.actual_revision)
     render_status(status: :conflict)
   rescue Releases::MarkCheck::NotManual, Releases::AcknowledgeFinding::NotUncertain, Releases::AcknowledgeFinding::StaleFinding => error
     @check_error = error.message

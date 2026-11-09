@@ -35,13 +35,13 @@ module Releases
     private
 
     def validate_changes(changes)
-      raise InvalidChanges.new(base: "Champs de saisie invalides.") unless valid_fields?(changes)
+      raise InvalidChanges.new(base: I18n.t("workbench.errors.invalid_fields")) unless valid_fields?(changes)
 
       values = changes.stringify_keys
       errors = values.filter_map do |field, value|
-        [ field, "La valeur de #{field} est invalide ou trop longue." ] unless valid_value?(field, value)
+        [ field, I18n.t("workbench.errors.invalid_value", field: I18n.t("workbench.fields.#{field}")) ] unless valid_value?(field, value)
       end.to_h
-      errors["title"] = "Le titre est requis." if values.key?("title") && values["title"].blank?
+      errors["title"] = I18n.t("workbench.errors.title_required") if values.key?("title") && values["title"].blank?
       raise InvalidChanges.new(errors) if errors.any?
 
       values
@@ -57,7 +57,7 @@ module Releases
 
     def persist
       @payload = @release.payload_revisions.order(number: :desc).first
-      raise InvalidChanges.new(edition: "Associez un fichier avant de modifier ses faits d’édition.") if !@payload && (@changes.keys & EditorValues::FACTS).any?
+      raise InvalidChanges.new(edition: I18n.t("workbench.errors.payload_required")) if !@payload && (@changes.keys & EditorValues::FACTS).any?
 
       @revision = @release.input_revision + 1
       append_facts if @payload

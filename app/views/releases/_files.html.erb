@@ -1,6 +1,6 @@
-<h2>Fichier déposé</h2>
+<h2><%= t("workbench.files.title") %></h2>
 <% if @snapshot.payload %>
-  <dl class="release-facts"><dt>Nom original</dt><dd><%= @snapshot.payload.original_filename %></dd><dt>Taille</dt><dd><%= number_to_human_size(@snapshot.payload.size_bytes) %></dd><dt>SHA-256</dt><dd class="fingerprint"><%= @snapshot.payload.sha256 %></dd><dt>Nom proposé</dt><dd><%= @release.proposed_name.presence || "À définir" %></dd></dl>
-  <p>Le fichier déposé est conservé sans modifier ses octets.</p>
-<% else %><p>Aucun fichier associé à cette release.</p><% end %>
-<% if @snapshot.preparation %><h3>Préparation conservée</h3><p class="fingerprint"><%= @snapshot.preparation.payload_name %></p><p><%= workflow_label(@release.preparation_state) %></p><% end %>
+  <dl class="release-facts"><dt><%= t("workbench.files.original") %></dt><dd><%= @snapshot.payload.original_filename %></dd><dt><%= t("workbench.files.size") %></dt><dd><%= number_to_human_size(@snapshot.payload.size_bytes) %></dd><dt><%= t("workbench.files.sha256") %></dt><dd class="fingerprint"><%= @snapshot.payload.sha256 %></dd><dt><%= t("workbench.files.proposed") %></dt><dd><%= @release.proposed_name.presence || t("workbench.files.undefined") %></dd></dl>
+  <p><%= t("workbench.files.preserved") %></p>
+<% else %><p><%= t("workbench.files.missing") %></p><% end %>
+<% if @snapshot.preparation %><h3><%= t("workbench.files.preparation") %></h3><p class="fingerprint"><%= @snapshot.preparation.payload_name %></p><p><%= workflow_label(@release.preparation_state) %></p><% end %>

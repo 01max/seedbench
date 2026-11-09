@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["frame", "message"]
-  static values = { url: String, interval: { type: Number, default: 1500 }, limit: { type: Number, default: 30 } }
+  static values = { messages: Object, url: String, interval: { type: Number, default: 1500 }, limit: { type: Number, default: 30 } }
 
   connect() {
     this.connected = true
@@ -27,14 +27,14 @@ export default class extends Controller {
     clearTimeout(this.timer)
     if (!this.connected || this.formBusy || this.unavailable || document.hidden) return
     if (!this.active) {
-      this.messageTarget.textContent = "État local à jour"
+      this.messageTarget.textContent = this.messagesValue.current
       return
     }
     if (this.attempts >= this.limit) {
-      this.messageTarget.textContent = "Actualisation en pause"
+      this.messageTarget.textContent = this.messagesValue.paused
       return
     }
-    this.messageTarget.textContent = "Actualisation automatique"
+    this.messageTarget.textContent = this.messagesValue.automatic
     const interval = Number.isFinite(this.intervalValue) ? Math.max(1000, this.intervalValue) : 1500
     this.timer = setTimeout(() => this.load(), interval)
   }
@@ -91,6 +91,6 @@ export default class extends Controller {
     event.preventDefault()
     this.unavailable = true
     clearTimeout(this.timer)
-    this.messageTarget.textContent = "Actualisation indisponible. Réessayez."
+    this.messageTarget.textContent = this.messagesValue.unavailable
   }
 }

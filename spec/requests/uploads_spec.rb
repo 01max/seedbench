@@ -15,7 +15,7 @@ RSpec.describe "Batch upload" do
     post uploads_path, params: { files: [ ebook_upload, ebook_upload("Bad.zip") ] }
     follow_redirect!
 
-    expect(response.body).to include("1 fichier(s) ajouté(s)", "Bad.zip", "Format non pris en charge")
+    expect(response.body).to include("1 fichier ajouté", "Bad.zip", "Format non pris en charge")
     expect(Release.count).to eq(1)
     expect(PreparationRevision.count).to eq(0)
   end

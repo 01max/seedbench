@@ -1,11 +1,11 @@
 module Releases
   class MarkCheck
     class NotManual < StandardError; end
-    LABELS = { "edition_review" => "Édition relue", "text_review" => "Texte relu" }.freeze
+    KEYS = %w[edition_review text_review].freeze
 
     def self.call(release_id:, key:, checked:, expected_revision:)
-      raise NotManual, "Ce contrôle est automatique et ne peut pas être coché manuellement." unless LABELS.key?(key)
-      raise ArgumentError, "A checklist mark must be true or false." unless [ true, false ].include?(checked)
+      raise NotManual, I18n.t("workbench.errors.automatic_check") unless KEYS.include?(key)
+      raise ArgumentError, I18n.t("workbench.errors.invalid_mark") unless [ true, false ].include?(checked)
 
       release = Release.find(release_id)
       release.with_lock do

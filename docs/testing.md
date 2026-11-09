@@ -50,8 +50,16 @@ Workbench browser checks cover the dark/light desktop palette and density,
 85-release queue. Editing checks hold real save/status responses to exercise
 typing during a save, Save and next, and older status arrival. Failed filtering,
 navigation, concurrent edits, and reload recovery must preserve entered text.
+Undo regressions cover returning to saved text before and during an in-flight
+save. Two-client checks require loading unseen prose before reviewing its newer
+revision. Duplicate filters follow the latest check for the current inputs.
 Request checks reject forged automatic checks and verify that local work makes
 no provider calls. All book names and content in these checks are synthetic.
+
+Workbench copy is kept in `config/locales/workbench.fr.yml`. Request checks use
+an alternate translated catalog to verify runtime labels, both Stimulus message
+payloads, validation errors, and manual-review controls independently of display
+labels. Machine state and review-owner codes remain independent of translations.
 
 Chromium's `--no-sandbox` flag applies only to this unprivileged, synthetic,
 network-isolated quality container. It avoids a privileged browser sandbox setup;

@@ -9,8 +9,8 @@ class UploadsController < ApplicationController
   private
 
   def finish_upload(result)
-    flash[:upload_errors] = result.errors.map { |error| "#{error.filename} : #{error.message}" }
+    flash[:upload_errors] = result.errors.map { |error| t("workbench.uploads.rejection", filename: error.filename, message: error.message) }
     location = result.releases.any? ? release_path(result.releases.first) : root_path
-    redirect_to location, status: :see_other, notice: "#{result.releases.size} fichier(s) ajouté(s). Inspection en attente."
+    redirect_to location, status: :see_other, notice: t("workbench.uploads.accepted", count: result.releases.size)
   end
 end

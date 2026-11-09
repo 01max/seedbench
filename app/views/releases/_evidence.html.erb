@@ -1,9 +1,9 @@
-<h2>Sources et observations</h2>
-<% if @snapshot.evidence.empty? %><p class="editor-hint">Aucune observation disponible.</p><% end %>
+<h2><%= t("workbench.evidence.title") %></h2>
+<% if @snapshot.evidence.empty? %><p class="editor-hint"><%= t("workbench.evidence.missing") %></p><% end %>
 <% @snapshot.evidence.each do |item| %>
-  <details class="source-detail"><summary><%= item.source %> · <%= item.kind %></summary><p>Source <%= item.evidence_key %>, relevée le <%= l(item.captured_at, format: :short) %></p><pre><%= JSON.pretty_generate(item.data) %></pre></details>
+  <details class="source-detail"><summary><%= item.source %> · <%= item.kind %></summary><p><%= t("workbench.evidence.captured", key: item.evidence_key, date: l(item.captured_at, format: :short)) %></p><pre><%= JSON.pretty_generate(item.data) %></pre></details>
 <% end %>
-<% @snapshot.findings.each do |finding| %><section class="finding-detail"><h3><%= finding.message %></h3><p><%= finding.severity == "failure" ? "Échec vérifiable" : "Observation à relire" %> · version <%= finding.number %></p><pre><%= JSON.pretty_generate(finding.data) %></pre></section><% end %>
-<h3>Couvertures conservées</h3>
-<% if @snapshot.covers.empty? %><p>Aucune couverture disponible.</p><% end %>
-<div class="cover-candidates"><% @snapshot.covers.each do |cover| %><article><h4>Version <%= cover.number %> · <%= cover.source_kind %></h4><p><%= cover.width %> × <%= cover.height %> px</p><p class="fingerprint"><%= cover.source_locator %></p><pre><%= JSON.pretty_generate(cover.edition_evidence) %></pre></article><% end %></div>
+<% @snapshot.findings.each do |finding| %><section class="finding-detail"><h3><%= finding.message %></h3><p><%= t("workbench.evidence.finding", severity: t("workbench.evidence.#{finding.severity == 'failure' ? 'failure' : 'uncertainty'}"), number: finding.number) %></p><pre><%= JSON.pretty_generate(finding.data) %></pre></section><% end %>
+<h3><%= t("workbench.evidence.covers") %></h3>
+<% if @snapshot.covers.empty? %><p><%= t("workbench.evidence.no_cover") %></p><% end %>
+<div class="cover-candidates"><% @snapshot.covers.each do |cover| %><article><h4><%= t("workbench.evidence.cover", number: cover.number, source: cover.source_kind) %></h4><p><%= t("workbench.evidence.dimensions", width: cover.width, height: cover.height) %></p><p class="fingerprint"><%= cover.source_locator %></p><pre><%= JSON.pretty_generate(cover.edition_evidence) %></pre></article><% end %></div>

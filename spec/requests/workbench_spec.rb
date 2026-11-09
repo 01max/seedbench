@@ -25,7 +25,7 @@ RSpec.describe "Release workbench" do
     sign_in_operator
     get root_path, params: { q: "Author 64" }
 
-    expect(response.body).to include("Synthetic 64", "1 releases")
+    expect(response.body).to include("Synthetic 64", "1 release")
     expect(response.body).not_to include("Synthetic 63")
   end
 end

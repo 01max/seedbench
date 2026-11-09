@@ -25,7 +25,7 @@ module Payloads
       Staged.new(path: @path, locator: "staging/#{@path.basename}", filename: @filename,
         format: @format, size: size, sha256: sha256)
     rescue SystemCallError, IOError
-      raise StorageFailure, "Stockage indisponible. Vérifiez l’espace libre et les droits du dossier monté."
+      raise StorageFailure, I18n.t("workbench.uploads.errors.unavailable_storage")
     ensure
       File.unlink(@path) if @owns_file && !@completed && @path.exist?
     end
@@ -33,13 +33,13 @@ module Payloads
     private
 
     def validate_upload!
-      raise InvalidUpload, "Choisissez un fichier EPUB, PDF ou MOBI." unless @upload.respond_to?(:original_filename) && @upload.respond_to?(:read)
+      raise InvalidUpload, I18n.t("workbench.uploads.errors.choose_file") unless @upload.respond_to?(:original_filename) && @upload.respond_to?(:read)
 
       @filename = @upload.original_filename.to_s
-      raise InvalidUpload, "Le nom du fichier est invalide." if @filename.blank? || !@filename.valid_encoding? || @filename.match?(%r{[\\/\x00-\x1f\x7f]})
+      raise InvalidUpload, I18n.t("workbench.uploads.errors.invalid_filename") if @filename.blank? || !@filename.valid_encoding? || @filename.match?(%r{[\\/\x00-\x1f\x7f]})
 
       @format = File.extname(@filename).delete_prefix(".").downcase
-      raise InvalidUpload, "Format non pris en charge : choisissez EPUB, PDF ou MOBI." unless FORMATS.include?(@format)
+      raise InvalidUpload, I18n.t("workbench.uploads.errors.unsupported_format") unless FORMATS.include?(@format)
     end
 
     def staging_directory
@@ -48,7 +48,7 @@ module Payloads
       begin
         Dir.mkdir(directory, 0o700)
       rescue Errno::EEXIST
-        raise StorageFailure, "Le dossier de dépôt doit être un dossier privé sans lien symbolique." if directory.symlink? || !directory.directory?
+        raise StorageFailure, I18n.t("workbench.uploads.errors.unsafe_directory") if directory.symlink? || !directory.directory?
       end
       directory
     end
@@ -63,7 +63,7 @@ module Payloads
         output.flush
         output.fsync
       end
-      raise InvalidUpload, "Le fichier est vide." if size.zero?
+      raise InvalidUpload, I18n.t("workbench.uploads.errors.empty_file") if size.zero?
 
       [ size, digest.hexdigest ]
     end
@@ -72,7 +72,7 @@ module Payloads
       size = 0
       while (chunk = @upload.read(CHUNK_BYTES)) && !chunk.empty?
         size += chunk.bytesize
-        raise InvalidUpload, "Le fichier dépasse la limite de 100 Mio." if size > MAX_BYTES
+        raise InvalidUpload, I18n.t("workbench.uploads.errors.too_large", size: MAX_BYTES / 1.megabyte) if size > MAX_BYTES
 
         output.write(chunk)
         digest.update(chunk)

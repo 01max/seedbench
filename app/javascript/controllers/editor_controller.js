@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["form", "status", "error", "conflict", "serverValues"]
-  static values = { releaseId: Number, previousUrl: String, nextUrl: String }
+  static values = { releaseId: Number, previousUrl: String, nextUrl: String, messages: Object }
 
   connect() {
     this.connected = true
@@ -35,7 +35,7 @@ export default class extends Controller {
   change(event) {
     if (event.target.form !== this.formTarget) return
     this.dirty = Boolean(this.saving) || JSON.stringify(this.valuesFromForm()) !== this.baseline
-    this.setStatus(this.dirty ? "Modifications en attente" : "Enregistré")
+    this.setStatus(this.dirty ? this.messagesValue.pending : this.messagesValue.saved)
     this.remember()
     this.schedule()
   }
@@ -71,7 +71,7 @@ export default class extends Controller {
 
   async performSave() {
     const captured = this.valuesFromForm()
-    this.setStatus("Enregistrement…")
+    this.setStatus(this.messagesValue.saving)
     this.errorTarget.hidden = true
     try {
       const response = await fetch(this.formTarget.action, {
@@ -81,13 +81,13 @@ export default class extends Controller {
       const data = await response.json()
       if (!response.ok) {
         if (response.status === 409) this.showConflict(data)
-        this.showError(data.message || data.error || "Enregistrement refusé. Votre saisie est conservée.")
+        this.showError(data.message || data.error || this.messagesValue.refused)
         return false
       }
       this.acceptSave(data.revision, captured)
       return true
     } catch {
-      this.showError("Enregistrement impossible. Votre saisie est conservée. Vérifiez la connexion et réessayez.")
+      this.showError(this.messagesValue.failed)
       return false
     }
   }
@@ -98,7 +98,7 @@ export default class extends Controller {
     this.dirty = JSON.stringify(this.valuesFromForm()) !== this.baseline
     this.conflicted = false
     this.conflictTarget.hidden = true
-    this.setStatus(this.dirty ? "Modifications en attente" : "Enregistré")
+    this.setStatus(this.dirty ? this.messagesValue.pending : this.messagesValue.saved)
     this.element.querySelector(".release-heading h1").textContent = captured.title
     const selected = this.element.querySelector('.queue-row[aria-current="page"] .queue-title')
     if (selected) selected.textContent = captured.title
@@ -114,7 +114,7 @@ export default class extends Controller {
   showError(message) {
     this.errorTarget.textContent = message
     this.errorTarget.hidden = false
-    this.setStatus("Non enregistré")
+    this.setStatus(this.messagesValue.unsaved)
     this.remember()
   }
 
@@ -142,7 +142,7 @@ export default class extends Controller {
     this.conflicted = false
     this.conflictTarget.hidden = true
     this.errorTarget.hidden = true
-    this.setStatus("Version enregistrée chargée")
+    this.setStatus(this.messagesValue.server_loaded)
     this.forgetDraft()
     this.preview()
   }
@@ -217,10 +217,10 @@ export default class extends Controller {
       const data = await response.json()
       if (response.status === 409) this.showConflict(data)
       if (data.revision !== undefined) this.updateRevision(data.revision)
-      this.errorTarget.textContent = data.message || "Action terminée. Consultez les contrôles."
+      this.errorTarget.textContent = data.message || this.messagesValue.action_completed
       this.errorTarget.hidden = false
     } catch {
-      this.errorTarget.textContent = "Action impossible. Le texte enregistré reste conservé."
+      this.errorTarget.textContent = this.messagesValue.action_failed
       this.errorTarget.hidden = false
     }
   }
@@ -264,7 +264,7 @@ export default class extends Controller {
       this.writeValues(draft.values)
       this.revisionInput.value = draft.revision
       this.dirty = true
-      this.setStatus("Saisie restaurée")
+      this.setStatus(this.messagesValue.draft_restored)
       if (draft.revision !== server.current_revision) this.showConflict(server)
       else this.schedule()
     } catch {

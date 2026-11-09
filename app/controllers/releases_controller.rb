@@ -15,7 +15,7 @@ class ReleasesController < ApplicationController
       format.html { redirect_to release_path(release), status: :see_other, notice: t("releases.saved") }
     end
   rescue Releases::RevisionConflict
-    render_save_error("Une version plus récente est enregistrée. Comparez les textes avant de choisir.", :conflict)
+    render_save_error(t("workbench.errors.save_conflict"), :conflict)
   rescue Releases::Save::InvalidChanges => error
     render_save_error(error.message, :unprocessable_content)
   end

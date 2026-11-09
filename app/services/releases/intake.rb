@@ -6,13 +6,13 @@ module Releases
     MAX_FILES = 50
 
     def self.call(uploads:)
-      raise InvalidBatch, "Choisissez entre 1 et 50 fichiers." unless uploads.is_a?(Array) && uploads.size.between?(1, MAX_FILES)
+      raise InvalidBatch, I18n.t("workbench.uploads.errors.invalid_batch", count: MAX_FILES) unless uploads.is_a?(Array) && uploads.size.between?(1, MAX_FILES)
 
       releases, errors = [], []
       uploads.each do |upload|
         releases << accept(upload)
       rescue Payloads::StageUpload::InvalidUpload, Payloads::StageUpload::StorageFailure => error
-        name = upload.respond_to?(:original_filename) ? upload.original_filename.to_s : "Fichier manquant"
+        name = upload.respond_to?(:original_filename) ? upload.original_filename.to_s : I18n.t("workbench.uploads.missing_file")
         errors << Rejection.new(filename: name, message: error.message)
       end
       Result.new(releases: releases, errors: errors)

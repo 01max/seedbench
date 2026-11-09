@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<%= I18n.locale %>">
   <head>
     <title><%= content_for(:title) || t("application.name") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -12,14 +12,14 @@
   </head>
   <body data-controller="appearance">
     <% if current_operator %>
-      <nav aria-label="Navigation principale" class="app-nav">
-        <%= link_to root_path, class: "app-brand" do %><span class="brand-mark" aria-hidden="true">SB</span> Seedbench<% end %>
-        <span class="nav-context">Atelier d’ebooks</span>
+      <nav aria-label="<%= t("workbench.navigation.label") %>" class="app-nav">
+        <%= link_to root_path, class: "app-brand" do %><span class="brand-mark" aria-hidden="true"><%= t("workbench.brand_mark") %></span> <%= t("application.name") %><% end %>
+        <span class="nav-context"><%= t("workbench.navigation.context") %></span>
         <div class="app-nav-actions">
           <%= yield :toolbar %>
-          <%= turbo_frame_tag "appearance" do %><%= link_to "Apparence", appearance_path %><% end %>
-          <%= link_to "Réglages", settings_path %>
-          <%= button_to "Se déconnecter", destroy_operator_session_path, method: :delete %>
+          <%= turbo_frame_tag "appearance" do %><%= link_to t("workbench.navigation.appearance"), appearance_path %><% end %>
+          <%= link_to t("workbench.navigation.settings"), settings_path %>
+          <%= button_to t("workbench.navigation.sign_out"), destroy_operator_session_path, method: :delete %>
         </div>
       </nav>
     <% end %>

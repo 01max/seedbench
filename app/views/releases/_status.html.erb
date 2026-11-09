@@ -6,30 +6,30 @@
   <% end %>
   <% @checklist.each do |item| %>
     <div class="check-row" data-check-key="<%= item.key %>" data-check-state="<%= item.state %>" data-uncertain="<%= item.finding.present? %>">
-      <div><span class="check-name"><span class="check-symbol" aria-hidden="true"><%= (item.finding && !item.checked) ? "!" : {"done" => "✓", "blocked" => "!", "pending" => "○", "optional" => "—"}.fetch(item.state) %></span><span><%= item.label %></span></span><small><%= item.owner %></small></div>
-      <p><span class="<%= "sr-only" if item.required %>"><%= item.required ? "Requis. " : "Facultatif · " %></span><%= item.note %></p>
-      <% if item.owner == "Vous" %>
+      <div><span class="check-name"><span class="check-symbol" aria-hidden="true"><%= (item.finding && !item.checked) ? "!" : {"done" => "✓", "blocked" => "!", "pending" => "○", "optional" => "—"}.fetch(item.state) %></span><span><%= item.label %></span></span><small><%= t("workbench.checklist.owners.#{item.owner}") %></small></div>
+      <p><span class="<%= "sr-only" if item.required %>"><%= t("workbench.status.#{item.required ? 'required' : 'optional'}") %></span><%= item.note %></p>
+      <% if item.owner == :operator %>
         <%= form_with url: release_checks_path(@release), scope: :mark, data: { turbo_frame: dom_id(@release, :status) }, class: "manual-check-form" do |form| %>
           <%= form.hidden_field :key, value: item.key %>
           <%= form.hidden_field :expected_revision, value: @release.input_revision %>
           <% if item.finding %><%= form.hidden_field :finding_id, value: item.finding.id %><%= form.hidden_field :number, value: item.finding.number %><% end %>
-          <label><%= form.check_box :checked, checked: item.checked, id: "mark-#{item.key}", data: { action: "change->checklist#submit" } %> <%= item.finding ? "Accepter cette incertitude" : item.label %></label>
-          <%= form.submit "Appliquer", class: "work-button quiet" %>
+          <label><%= form.check_box :checked, checked: item.checked, id: "mark-#{item.key}", data: { action: "change->checklist#submit" } %> <%= item.finding ? t("workbench.status.accept") : item.label %></label>
+          <%= form.submit t("workbench.status.apply"), class: "work-button quiet" %>
         <% end %>
       <% end %>
     </div>
   <% end %>
   <% @snapshot.findings.select { |finding| finding.severity == "failure" }.each do |finding| %><p class="work-warning"><%= finding.message %></p><% end %>
-  <details class="status-dimensions" data-detail-key="dimensions"><summary>États des opérations</summary>
-    <% { "Inspection" => @release.inspection_state, "Préparation" => @release.preparation_state, "Brouillon C411" => @release.draft_state, "Publication" => @release.publication_state, "Premier seeding" => @release.seeding_state }.each do |label, state| %><p><%= label %> : <%= workflow_label(state) %></p><% end %>
+  <details class="status-dimensions" data-detail-key="dimensions"><summary><%= t("workbench.status.dimensions") %></summary>
+    <% { "inspection" => @release.inspection_state, "preparation" => @release.preparation_state, "draft" => @release.draft_state, "publication" => @release.publication_state, "seeding" => @release.seeding_state }.each do |key, state| %><p><%= t("workbench.status.dimension", label: t("workbench.checklist.#{key}.label"), state: workflow_label(state)) %></p><% end %>
   </details>
-  <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= kind == "draft" ? "Brouillon" : "Soumission" %> #<%= snapshot.remote_id %><%= " · absent" if snapshot.remote_deleted %></p><% end %>
+  <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= t("workbench.status.remote", kind: t("workbench.status.#{kind == 'draft' ? 'draft' : 'submission'}"), id: snapshot.remote_id) %><%= t("workbench.status.absent") if snapshot.remote_deleted %></p><% end %>
   <% @snapshot.operations.each do |operation| %>
     <details class="operation-state" data-detail-key="operation_<%= operation.id %>">
-      <summary>Opération #<%= operation.id %> : <%= workflow_label(operation.state) %></summary>
-      <p>Étape : <%= operation_phase_label(operation.phase) %></p>
-      <% if operation.error_code %><p>Diagnostic : <%= operation.error_code %></p><% end %>
-      <% if operation.external_reference.present? %><p>Identités externes conservées</p><pre><%= JSON.pretty_generate(operation.external_reference) %></pre><% end %>
+      <summary><%= t("workbench.status.operation", id: operation.id, state: workflow_label(operation.state)) %></summary>
+      <p><%= t("workbench.status.phase", phase: operation_phase_label(operation.phase)) %></p>
+      <% if operation.error_code %><p><%= t("workbench.status.diagnostic", code: operation.error_code) %></p><% end %>
+      <% if operation.external_reference.present? %><p><%= t("workbench.status.external_identity") %></p><pre><%= JSON.pretty_generate(operation.external_reference) %></pre><% end %>
     </details>
   <% end %>
   </div>

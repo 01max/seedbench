@@ -15,7 +15,7 @@ RSpec.describe Releases::Checklist do
     release = build_release_graph
     release.update!(inspection_state: "succeeded")
     release.findings.create!(payload_revision: release.payload_revisions.sole, code: "corrupt", number: 1, severity: "failure", message: "Corrupt file", input_revision: 0)
-    Releases::MarkCheck::LABELS.each_key { |key| Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: 0) }
+    Releases::MarkCheck::KEYS.each { |key| Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: 0) }
     items = described_class.call(release: release).index_by(&:key)
 
     expect(items.fetch("text_review").state).to eq("done")

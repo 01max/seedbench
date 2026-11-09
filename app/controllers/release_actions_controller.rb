@@ -17,7 +17,7 @@ class ReleaseActionsController < ApplicationController
 
   def render_conflict
     release = Release.find(params.expect(:id))
-    render json: { message: "Le livre a changé. Enregistrez la saisie relue avant cette action.",
+    render json: { message: t("workbench.errors.action_conflict"),
       current_revision: release.input_revision, values: Releases::EditorValues.call(release: release) }, status: :conflict
   end
 end

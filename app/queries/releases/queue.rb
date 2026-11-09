@@ -1,8 +1,7 @@
 module Releases
   class Queue
     PAGE_SIZE = 40
-    STATES = { "all" => "Tous les états", "review" => "À vérifier", "inspection" => "À inspecter",
-      "prepared" => "Préparés", "published" => "Publiés", "duplicate" => "Doublons" }.freeze
+    STATES = %w[all review inspection prepared published duplicate].freeze
     Page = Data.define(:records, :selected, :total, :page, :pages, :position, :previous_id, :next_id, :criteria)
 
     def self.call(q: "", state: "all", page: 1, release_id: nil)
@@ -10,7 +9,7 @@ module Releases
     end
 
     def initialize(q:, state:, page:, release_id:)
-      @criteria = { q: q.to_s.strip.first(200), state: STATES.key?(state) ? state : "all" }
+      @criteria = { q: q.to_s.strip.first(200), state: STATES.include?(state) ? state : "all" }
       @scope = filter(search(Release.all)).order(:id)
       @page = [ page.to_i, 1 ].max
       @selected = Release.find(release_id) if release_id.present?
