@@ -197,3 +197,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .inspection-measures { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; margin: .75rem 0; }
 .inspection-measures dd { margin: 0; overflow-wrap: anywhere; }
 .source-detail summary { overflow-wrap: anywhere; }
+
+.bbcode-preview { padding: 1rem; border: 1px solid var(--border); background: var(--panel); }
+.rendered-bbcode { line-height: 1.65; overflow-wrap: anywhere; }
+.rendered-bbcode img { display: inline-block; max-width: 100%; max-height: 480px; width: auto; height: auto; }
+.rendered-bbcode ul, .rendered-bbcode ol { padding-inline-start: 1.5rem; list-style: revert; }
+.rendered-bbcode pre { white-space: pre-wrap; background: var(--inset); padding: .75rem; }
+.bb-center { text-align: center; }
+.bb-left { text-align: left; }
+.bb-right { text-align: right; }
+.bb-image-placeholder { display: inline-block; padding: 1rem; border: 1px dashed var(--border); color: var(--muted); }

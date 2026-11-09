@@ -42,6 +42,10 @@
   </section>
   <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence_frame" %></section>
   <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
+    <section class="bbcode-preview" data-preview-url="<%= release_content_preview_path(@release) %>">
+      <h2><%= t("content.preview.title") %></h2><p class="editor-hint"><%= t("content.preview.scope") %></p>
+      <p role="alert" hidden data-preview-error></p><article class="rendered-bbcode" data-preview-output aria-live="polite"></article>
+    </section>
     <article class="local-preview"><h2 data-preview-field="title"><%= @release.title %></h2><p data-preview-field="author"><%= @release.author %></p><h3><%= t("workbench.fields.presentation") %></h3><div class="preserved-text" data-preview-field="presentation"><%= content_body(@snapshot, "presentation") %></div><h3><%= t("workbench.fields.notes") %></h3><div class="preserved-text" data-preview-field="notes"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint"><%= t("workbench.editor.preview_hint") %></p></article>
   </section>
 </section>

@@ -14,6 +14,13 @@ fr:
       print: "ISBN de l’édition imprimée"
       not_applicable: "Pas d’ISBN numérique applicable"
     no_notes: "Aucune."
+    preview:
+      title: "Aperçu de la description BBCode"
+      scope: "Rendu local sécurisé, proche du format standard ; l’affichage exact sur C411 peut différer. Seule la couverture hébergée vérifiée est chargée."
+      image_pending: "Image non chargée : couverture à sélectionner et héberger."
+      cover: "Couverture sélectionnée"
+      spoiler: "Afficher le contenu"
+      youtube: "Ouvrir la vidéo YouTube"
     nfo:
       title: "Titre"
       author: "Auteur(s)"
@@ -47,6 +54,9 @@ fr:
       nfo_size: "Le NFO dépasse la limite de 3 Mo."
       nfo_field: "Le NFO doit renseigner une seule fois la valeur exacte : %{field}."
   workbench:
+    editor:
+      messages:
+        preview_failed: "Aperçu indisponible. Votre texte est conservé ; réessayez."
     fields:
       publisher: "Éditeur"
       publication_year: "Année de parution"

@@ -46,6 +46,7 @@ module Content
         @errors << 'unsupported_tag'
         return @stack.last.children << literal
       end
+      check_argument(closing, tag, argument)
       return close(tag, literal) if closing == '/'
       return code if tag == 'code'
 
@@ -53,6 +54,10 @@ module Content
       node = Node.new(tag: tag, argument: argument, children: [])
       @stack.last.children << node
       @stack << node unless tag == 'hr'
+    end
+
+    def check_argument(closing, tag, argument)
+      @errors << 'invalid_attribute' if argument && (closing == '/' || tag == 'code')
     end
 
     def close(tag, literal)
