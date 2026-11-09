@@ -1,13 +1,17 @@
 <% content_for :toolbar do %>
-  <details class="upload-menu">
-    <summary class="work-button"><%= t("workbench.uploads.add") %></summary>
-    <%= form_with url: uploads_path, multipart: true, class: "upload-form" do |form| %>
-      <%= form.label :files, t("workbench.uploads.files") %>
-      <%= form.file_field :files, multiple: true, accept: ".epub,.pdf,.mobi", required: true %>
-      <p><%= t("workbench.uploads.limits", count: Releases::Intake::MAX_FILES, size: Payloads::StageUpload::MAX_BYTES / 1.megabyte) %></p>
-      <%= form.submit t("workbench.uploads.submit"), class: "work-button primary" %>
-    <% end %>
-  </details>
+  <%= form_with url: uploads_path, multipart: true, class: "upload-form", aria: { label: t("workbench.uploads.add") },
+        data: { controller: "upload", upload_messages_value: t("workbench.uploads.messages").to_json,
+                action: "turbo:submit-start->upload#start turbo:submit-end->upload#finish turbo:fetch-request-error->upload#failed" } do |form| %>
+    <%= form.label :files, t("workbench.uploads.files"), data: { upload_target: "fallback" } %>
+    <%= form.file_field :files, multiple: true, accept: ".epub,.pdf,.mobi", required: true, aria: { describedby: "upload-limits" },
+          data: { upload_target: "input fallback", action: "change->upload#selected" } %>
+    <%= form.submit t("workbench.uploads.submit"), class: "work-button primary", data: { upload_target: "fallback" } %>
+    <button type="button" class="work-button primary upload-trigger" hidden data-upload-target="trigger" data-action="upload#choose"
+            aria-describedby="upload-limits" title="<%= t("workbench.uploads.files") %> · <%= t("workbench.uploads.limits", count: Releases::Intake::MAX_FILES, size: Payloads::StageUpload::MAX_BYTES / 1.megabyte) %>"><%= t("workbench.uploads.add") %></button>
+    <button type="button" class="work-button quiet" hidden data-upload-target="reset" data-action="upload#changeSelection"><%= t("workbench.uploads.change") %></button>
+    <p class="sr-only" id="upload-limits"><%= t("workbench.uploads.files") %>. <%= t("workbench.uploads.limits", count: Releases::Intake::MAX_FILES, size: Payloads::StageUpload::MAX_BYTES / 1.megabyte) %></p>
+    <p class="upload-error" role="alert" hidden data-upload-target="error"></p>
+  <% end %>
 <% end %>
 <main id="workbench" aria-label="<%= t("workbench.title") %>"
       <% if @release %>data-controller="editor" data-editor-release-id-value="<%= @release.id %>"
@@ -15,7 +19,6 @@
       data-editor-previous-url-value="<%= @queue.previous_id ? queue_path(@queue.previous_id, criteria: @queue.criteria) : "" %>"
       data-editor-next-url-value="<%= @queue.next_id ? queue_path(@queue.next_id, criteria: @queue.criteria) : "" %>"
       data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember keydown@window->editor#shortcut workspace-tabs:shown->editor#preview"<% end %>>
-  <% Array(flash[:upload_errors]).each do |error| %><p role="alert" class="work-alert"><%= error %></p><% end %>
   <div class="work-layout">
     <%= render "queue" %>
     <% if @release %>

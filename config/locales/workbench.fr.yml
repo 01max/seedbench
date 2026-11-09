@@ -29,10 +29,20 @@ fr:
       save_next: "Enregistrer et suivant"
       shortcuts: "Alt ↑↓ : livre · Ctrl/⌘ S : enregistrer"
     uploads:
-      add: "+ Ajouter des ebooks"
+      add: "Importer des ebooks"
       files: "Fichiers EPUB, PDF ou MOBI"
       limits: "%{count} fichiers par lot, %{size} Mio par fichier."
       submit: "Importer"
+      change: "Changer la sélection"
+      messages:
+        add: "Importer des ebooks"
+        selected:
+          one: "Importer %{count} fichier"
+          other: "Importer %{count} fichiers"
+        importing:
+          one: "Importation de %{count} fichier…"
+          other: "Importation de %{count} fichiers…"
+        failed: "L’importation n’a pas pu être confirmée. Vérifiez la file avant de réessayer."
       accepted:
         one: "%{count} fichier ajouté. Inspection en attente."
         other: "%{count} fichiers ajoutés. Inspection en attente."
@@ -47,6 +57,10 @@ fr:
         unsafe_directory: "Le dossier de dépôt doit être un dossier privé sans lien symbolique."
         empty_file: "Le fichier est vide."
         too_large: "Le fichier dépasse la limite de %{size} Mio."
+    notifications:
+      label: "Notifications"
+      dismiss: "Fermer la notification"
+      upload_errors: "Des fichiers n’ont pas été importés."
     fields:
       title: "Titre"
       author: "Auteur"

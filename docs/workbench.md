@@ -7,6 +7,11 @@ batch, with a 100 MiB limit per file. Each accepted file creates an independent
 release and records its original filename, byte count, and SHA-256. Rejected
 files have individual errors; accepted files remain available.
 
+Choose **Importer des ebooks** to open the file picker. Selecting files starts
+the import automatically after any pending editor changes are saved. The button
+shows progress while importing. Success messages and per-file errors appear in
+dismissible notifications; a completely rejected batch has no success message.
+
 Puma request bodies and Rack multipart files use private temporary storage under
 the configured scratch volume, independently of the container's `/tmp` tmpfs.
 Allow scratch capacity for both buffering layers (up to twice the batch size),
