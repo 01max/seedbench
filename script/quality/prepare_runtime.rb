@@ -2,6 +2,7 @@ require "digest"
 require "net/http"
 require_relative "runtime_access"
 require_relative "runtime_workbench"
+require_relative "runtime_uploads"
 
 abort "Runtime must be unprivileged" if Process.uid.zero?
 abort "Image contains operator material" if %w[/app/.env /app/.git /app/private /app/tmp/ebooks].any? { |path| File.exist?(path) }
@@ -36,4 +37,5 @@ rescue ActiveRecord::StatementInvalid => error
   raise unless error.message.include?("append-only")
 end
 RuntimeAccess.prepare
+RuntimeUploads.verify
 puts "Application image, assets, SQL history guards, domain state and same-file rename verified."

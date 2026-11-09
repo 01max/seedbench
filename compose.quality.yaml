@@ -23,6 +23,7 @@ services:
       - /payloads:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=32m
     environment:
       RAILS_ENV: test
+      TMPDIR: /tmp
       SEEDBENCH_QUALITY: "1"
       SECRET_KEY_BASE: synthetic-test-secret-with-no-production-use
       SEEDBENCH_STATE_ROOT: /state

@@ -124,6 +124,10 @@ Each runtime layout also saves full presentation, BBCode, and multiline NFO,
 records a reversible review mark and uncertainty acknowledgement, and verifies
 them after worker and web replacement. The authenticated editor is reopened and
 parsed as HTML5 to check its actual textarea values and checked state.
+It also submits two synthetic 80 MiB files through real Puma multipart HTTP,
+with valid authentication and CSRF, while retaining the production 256 MiB
+`/tmp` limit. Request buffering must use the configured scratch volume, and
+both staged files must retain their original sizes and SHA-256 hashes.
 
 This runs with default named volumes, alternate named-volume roots and UID/GID
 65534, and existing synthetic bind folders/container roots containing spaces.

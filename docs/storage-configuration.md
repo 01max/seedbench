@@ -54,6 +54,14 @@ mapping. The application web/worker services validate writable roots on startup.
 Production mount permissions and client identity still require deployment
 acceptance; the executable example below is a separate filesystem probe.
 
+The entrypoint defaults `TMPDIR` to a private `request-uploads` directory under
+the configured scratch root. Puma and Rack use it for request and multipart
+buffering before the accepted bytes are staged on the payload mount. Provision
+scratch for up to twice the total upload batch size (up to 10 GiB for the
+maximum 50 × 100 MiB batch), plus other temporary work. An explicit `TMPDIR`
+override must be an absolute writable directory without a symlink and have
+equivalent capacity. The isolated quality service uses its disposable `/tmp`.
+
 ## Filesystem requirements
 
 Staging defaults to an application-owned directory within the configured

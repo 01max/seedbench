@@ -10,6 +10,12 @@ FileUtils.mkdir_p(%w[/tmp/rails-home /tmp/rails-tmp /tmp/rails-log])
     path.start_with?("/") && File.directory?(path) && File.writable?(path)
 end
 
+ENV["TMPDIR"] ||= File.join(ENV.fetch("SEEDBENCH_SCRATCH_ROOT"), "request-uploads")
+FileUtils.mkdir_p(ENV.fetch("TMPDIR"), mode: 0o700)
+abort "TMPDIR must be an existing writable absolute directory without a symlink" unless
+  ENV.fetch("TMPDIR").start_with?("/") && File.directory?(ENV.fetch("TMPDIR")) &&
+    !File.symlink?(ENV.fetch("TMPDIR")) && File.writable?(ENV.fetch("TMPDIR"))
+
 unless ENV["SECRET_KEY_BASE"] || ENV["SECRET_KEY_BASE_DUMMY"]
   key_path = File.join(ENV.fetch("SEEDBENCH_STATE_ROOT"), "secret_key_base")
   begin

@@ -7,6 +7,12 @@ batch, with a 100 MiB limit per file. Each accepted file creates an independent
 release and records its original filename, byte count, and SHA-256. Rejected
 files have individual errors; accepted files remain available.
 
+Puma request bodies and Rack multipart files use private temporary storage under
+the configured scratch volume, independently of the container's `/tmp` tmpfs.
+Allow scratch capacity for both buffering layers (up to twice the batch size),
+in addition to space for the accepted files on the payload volume. Temporary
+buffers are removed after the request completes.
+
 Uploads are streamed into private staging below the configured payload root.
 Original bytes are retained. File extensions admit uploads; signature, structure,
 encryption, and edition inspection are not implemented yet. A successful upload
