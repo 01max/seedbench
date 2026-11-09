@@ -44,7 +44,7 @@ RSpec.describe "Ebook import", type: :system do
     expect(page).to have_css('.flash-message--error[role="alert"]', text: "Unsupported.zip")
     expect(PayloadRevision.pluck(:sha256)).to eq([ Digest::SHA256.hexdigest(bytes) ] * 2)
     expect(PayloadRevision.all.map { |payload| Rails.application.config.x.storage.fetch(:payload).join(payload.locator).binread }).to eq([ bytes, bytes ])
-    expect(WorkflowOperation.where.not(kind: "inspection", effect: "local")).to be_empty
+    expect(WorkflowOperation.where("kind != ? OR effect != ?", "inspection", "local")).to be_empty
     save_workbench_screenshot("import-results-dark.png")
   end
 

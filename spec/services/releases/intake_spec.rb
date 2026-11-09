@@ -11,7 +11,7 @@ RSpec.describe Releases::Intake do
     expect(result.errors.map(&:filename)).to eq([ "Bad.zip" ])
     expect(PayloadRevision.pluck(:format)).to contain_exactly("epub", "pdf", "mobi")
     expect(ProviderAssignment.count).to eq(12)
-    expect(WorkflowOperation.where.not(kind: "inspection", effect: "local")).to be_empty
+    expect(WorkflowOperation.where("kind != ? OR effect != ?", "inspection", "local")).to be_empty
   end
 
   it "records original identity and preserves staged bytes on the configured mount" do

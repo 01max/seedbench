@@ -63,7 +63,7 @@ RSpec.describe Ebooks::Parser do
     report = described_class.call(payload: payload, ocr: true)
     expect(report).to include("error" => nil, "structure" => include("pages_without_text_in_sample" => [ 1 ]))
     expect(report.fetch("samples")).to include(include("source" => "ocr:pdf:page:1", "text" => include("synthetique")))
-    expect(Rails.application.config.x.storage.fetch(:scratch).glob("inspection-*" )).to be_empty
+    expect(Rails.application.config.x.storage.fetch(:scratch).glob("inspection-*")).to be_empty
     expect(payload.sha256).to eq(Digest::SHA256.file(directory.join("scan.pdf")).hexdigest)
   end
 
@@ -91,5 +91,4 @@ RSpec.describe Ebooks::Parser do
       expect(report).to eq("error" => "encrypted")
     end
   end
-
 end

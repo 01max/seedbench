@@ -1,6 +1,7 @@
 module Ebooks
   class Record
     def self.call(operation:, result:)
+      result["candidates"] = Candidates.call(report: result)
       release = operation.release
       payload = release.payload_revisions.find(operation.parameters.fetch("payload_revision_id"))
       evidence = evidence_for(operation, payload, result)

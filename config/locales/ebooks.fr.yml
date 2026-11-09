@@ -15,3 +15,6 @@ fr:
       unsupported_compression: "L’EPUB utilise une compression non prise en charge."
       unsupported_cover: "Une couverture intégrée ne peut pas être analysée en sécurité."
       tool_failed: "Le lecteur a refusé le fichier. Vérifiez son intégrité et son éventuelle protection. Les pages non lues ne sont pas vérifiées."
+    review:
+      invalid_isbn: "L’ISBN n’a pas une forme ou une clé de contrôle valide. Cela ne vérifie pas l’édition."
+      invalid_candidate: "Cette proposition n’appartient pas au fichier actuel ou ne peut pas être adoptée."
