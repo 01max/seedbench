@@ -66,8 +66,11 @@ module Releases
     end
 
     def content_steps
-      present = %w[bbcode nfo].all? { |kind| @snapshot.contents[kind]&.body.present? }
-      [ item('content', state: 'pending', note: I18n.t("workbench.checklist.content.#{present ? 'present' : 'missing'}")) ]
+      states = Content::Status.call(release: @release).kinds.values.pluck(:state)
+      complete = states.all?('ready')
+      state = complete ? 'done' : 'pending'
+      note = I18n.t("content.checklist.#{complete ? 'ready' : 'review'}")
+      [ item('content', state: state, note: note) ]
     end
 
     def optional_steps

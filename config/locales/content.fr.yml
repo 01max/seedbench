@@ -14,6 +14,29 @@ fr:
       print: "ISBN de l’édition imprimée"
       not_applicable: "Pas d’ISBN numérique applicable"
     no_notes: "Aucune."
+    actions:
+      review_facts: "Valider les faits affichés"
+      propose_bbcode: "Proposer le BBCode"
+      propose_nfo: "Proposer le NFO"
+      cover: "Proposer l’URL de couverture"
+      refresh: "Actualiser les textes"
+      accept: "Accepter cette proposition"
+      confirm: "Conserver et valider le %{kind} actuel"
+      completed: "Action locale terminée. Les textes restent modifiables."
+    states:
+      missing: "À créer"
+      stale: "À relire : données modifiées"
+      invalid: "À corriger"
+      ready: "Texte validé"
+    checklist:
+      ready: "BBCode et NFO cohérents avec les données actuelles"
+      review: "Créer, corriger ou relire les textes et leurs données"
+    stale_help: "Les données ou la provenance ont changé. Le texte a été conservé. Comparez une nouvelle proposition ou confirmez le texte actuel après correction."
+    proposal: "Proposition %{kind} nº %{number}"
+    cover_only: "Couverture uniquement"
+    proposal_help: "Comparez avant d’accepter. Les modifications effectuées depuis cette proposition sont protégées."
+    saved_version: "Version enregistrée"
+    proposed_version: "Proposition"
     preview:
       title: "Aperçu de la description BBCode"
       scope: "Rendu local sécurisé, proche du format standard ; l’affichage exact sur C411 peut différer. Seule la couverture hébergée vérifiée est chargée."
@@ -38,6 +61,10 @@ fr:
       notes: "Notes"
       release_name: "Release"
     errors:
+      invalid_action: "Cette action de contenu n’est pas disponible."
+      cover_patch: "Une description au format ebook et une couverture hébergée vérifiée sont nécessaires."
+      stale_proposal: "Le texte ou ses faits ont changé depuis cette proposition. Créez une nouvelle proposition."
+      invalid_content: "Corrigez les erreurs du texte avant de confirmer sa relecture."
       invalid_attribute: "Une balise contient une adresse, un attribut ou un contenu non autorisé."
       french_required: "Confirmez la présence de français dans la langue retenue."
       unsupported_tag: "Une balise BBCode n’est pas prise en charge par la politique locale."
@@ -54,6 +81,12 @@ fr:
       nfo_size: "Le NFO dépasse la limite de 3 Mo."
       nfo_field: "Le NFO doit renseigner une seule fois la valeur exacte : %{field}."
   workbench:
+    events:
+      content:
+        facts_reviewed: "Faits affichés validés"
+        proposed: "Proposition de texte créée"
+        accepted: "Proposition de texte acceptée"
+        confirmed: "Texte actuel relu et conservé"
     editor:
       messages:
         preview_failed: "Aperçu indisponible. Votre texte est conservé ; réessayez."

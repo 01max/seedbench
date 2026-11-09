@@ -36,6 +36,7 @@ class ReleasesController < ApplicationController
   def load_selection
     @snapshot = Releases::Snapshot.call(release: @release)
     @checklist = Releases::Checklist.call(release: @release, snapshot: @snapshot)
+    @content_workspace = Content::Workspace.call(release: @release)
     @editor_values = Releases::EditorValues.call(release: @release)
     @workflow_active = @release.workflow_operations.exists?(state: %w[pending running])
   end

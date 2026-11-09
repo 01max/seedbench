@@ -4,6 +4,7 @@
       <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= t("workbench.tabs.#{key}") %></button>
     <% end %>
   </div>
+  <%= render "content_frame" %>
   <p role="alert" class="work-alert" hidden data-editor-target="error"></p>
   <section class="save-conflict" hidden data-editor-target="conflict" aria-label="<%= t("workbench.editor.conflict_label") %>">
     <h2><%= t("workbench.editor.conflict_title") %></h2><p><%= t("workbench.editor.conflict_help") %></p>

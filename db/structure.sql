@@ -262,7 +262,16 @@ CREATE UNIQUE INDEX "index_manual_checks_on_release_id_and_key_and_number" ON "m
 CREATE TRIGGER manual_checks_no_update BEFORE UPDATE ON manual_checks BEGIN SELECT RAISE(ABORT, 'Checklist history is append-only'); END;
 CREATE TRIGGER manual_checks_no_delete BEFORE DELETE ON manual_checks BEGIN SELECT RAISE(ABORT, 'Checklist history is append-only'); END;
 CREATE TRIGGER manual_checks_no_replace BEFORE INSERT ON manual_checks WHEN EXISTS (SELECT 1 FROM manual_checks WHERE id = NEW.id OR (release_id = NEW.release_id AND key = NEW.key AND number = NEW.number)) BEGIN SELECT RAISE(ABORT, 'Checklist history is append-only'); END;
+CREATE TABLE IF NOT EXISTS "content_proposals" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "kind" varchar NOT NULL, "input_revision" integer NOT NULL, "bodies" json DEFAULT '{}' NOT NULL, "dependencies" json DEFAULT '{}' NOT NULL, "bases" json DEFAULT '{}' NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_861d810079"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT content_proposal_kind CHECK (kind IN ('replacement', 'cover')), CONSTRAINT content_proposal_revision CHECK (input_revision >= 0), CONSTRAINT content_proposal_bodies CHECK (json_valid(bodies) AND json_type(bodies) = 'object'), CONSTRAINT content_proposal_dependencies CHECK (json_valid(dependencies) AND json_type(dependencies) = 'object'), CONSTRAINT content_proposal_bases CHECK (json_valid(bases) AND json_type(bases) = 'object'));
+CREATE INDEX "index_content_proposals_on_release_id" ON "content_proposals" ("release_id");
+CREATE TRIGGER content_proposals_no_update BEFORE UPDATE ON content_proposals BEGIN SELECT RAISE(ABORT, 'Proposal history is append-only'); END;
+CREATE TRIGGER content_proposals_no_delete BEFORE DELETE ON content_proposals BEGIN SELECT RAISE(ABORT, 'Proposal history is append-only'); END;
+CREATE TRIGGER content_proposals_no_replace BEFORE INSERT ON content_proposals WHEN EXISTS (SELECT 1 FROM content_proposals WHERE id = NEW.id) BEGIN SELECT RAISE(ABORT, 'Proposal history is append-only'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261109150000'),
 ('20261109100000'),
 ('20261109090000'),
 ('20261108220000'),
@@ -274,3 +283,4 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20261108160000'),
 ('20261108143000'),
 ('20261108140000');
+

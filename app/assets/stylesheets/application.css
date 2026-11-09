@@ -207,3 +207,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .bb-left { text-align: left; }
 .bb-right { text-align: right; }
 .bb-image-placeholder { display: inline-block; padding: 1rem; border: 1px dashed var(--border); color: var(--muted); }
+
+.content-review { border-bottom: 1px solid var(--border); margin-bottom: .6rem; padding-bottom: .5rem; }
+.content-controls, .content-states { display: flex; flex-wrap: wrap; align-items: start; gap: .4rem; }
+.content-states { color: var(--muted); gap: .5rem 1rem; }
+.content-states details { max-width: 100%; }
+.content-states p { max-width: 45rem; }
+.content-proposal { margin-top: .6rem; }
+.content-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.content-comparison pre { padding: .5rem; background: var(--inset); max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.5 ui-monospace, monospace; }
+@media (max-width: 650px) { .content-comparison { grid-template-columns: 1fr; } }

@@ -1,0 +1,47 @@
+<% state = @content_workspace.status %>
+<% proposals = @content_workspace.proposals %>
+<%= turbo_frame_tag dom_id(@release, :content) do %>
+  <section class="content-review" data-evidence-revision="<%= @release.input_revision %>" data-reviewed-values="<%= @content_workspace.values.to_json %>">
+    <% if @content_error %><p role="alert" class="work-alert"><%= @content_error %></p><% end %>
+    <% if @content_notice %><p role="status" class="editor-hint"><%= @content_notice %></p><% end %>
+    <div class="content-controls">
+      <% %w[review_facts propose_bbcode propose_nfo cover].each do |kind| %>
+        <%= form_with url: release_content_action_path(@release), scope: :content do |form| %>
+          <%= form.hidden_field :kind, value: kind %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+          <%= form.submit t("content.actions.#{kind}"), class: "work-button quiet" %>
+        <% end %>
+      <% end %>
+      <%= link_to t("content.actions.refresh"), release_content_action_path(@release), class: "work-button quiet" %>
+    </div>
+    <div class="content-states">
+      <% state.kinds.each do |kind, item| %>
+        <details data-content-kind="<%= kind %>" data-content-state="<%= item[:state] %>">
+          <summary><strong><%= kind.upcase %></strong> · <%= t("content.states.#{item[:state]}") %></summary>
+          <% item[:issues].each do |issue| %><p class="editor-hint"><%= issue[:message] %></p><% end %>
+          <% if item[:state] == "stale" %>
+            <p class="editor-hint"><%= t("content.stale_help") %></p>
+            <%= form_with url: release_content_action_path(@release), scope: :content do |form| %>
+              <%= form.hidden_field :kind, value: "confirm_#{kind}" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+              <%= form.submit t("content.actions.confirm", kind: kind.upcase), class: "work-button" %>
+            <% end %>
+          <% end %>
+        </details>
+      <% end %>
+    </div>
+    <% proposals.each do |proposal| %>
+      <details class="content-proposal" data-proposal-id="<%= proposal.id %>" <%= "open" if proposal.id == @selected_proposal_id %>>
+        <summary><%= t("content.proposal", kind: proposal.bodies.keys.map(&:upcase).join(", "), number: proposal.id) %><%= " · #{t('content.cover_only')}" if proposal.kind == "cover" %></summary>
+        <p class="editor-hint"><%= t("content.proposal_help") %></p>
+        <% proposal.bodies.each do |kind, body| %>
+          <% base = @content_workspace.bases[proposal.bases[kind]] %>
+          <div class="content-comparison"><section><h3><%= t("content.saved_version") %></h3><pre><%= base&.body %></pre></section><section><h3><%= t("content.proposed_version") %></h3><pre><%= body %></pre></section></div>
+        <% end %>
+        <%= form_with url: release_content_action_path(@release), scope: :content do |form| %>
+          <%= form.hidden_field :kind, value: "accept" %><%= form.hidden_field :proposal_id, value: proposal.id %>
+          <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+          <%= form.submit t("content.actions.accept"), class: "work-button primary" %>
+        <% end %>
+      </details>
+    <% end %>
+  </section>
+<% end %>

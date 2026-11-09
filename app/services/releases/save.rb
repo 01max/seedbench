@@ -69,8 +69,8 @@ module Releases
 
       @revision = @release.input_revision + 1
       append_facts if @payload
-      append_content
       finish_save
+      append_content
       Ebooks::Findings.call(release: @release, payload: @payload) if @payload
     end
 
@@ -89,11 +89,15 @@ module Releases
       end
     end
 
+    def content_dependencies(kind)
+      %w[bbcode nfo].include?(kind) ? Content::Capture.call(release: @release, kind: kind) : {}
+    end
+
     def append_content
       @changes.slice(*EditorValues::CONTENT).each do |kind, body|
         number = @release.content_revisions.where(kind: kind).maximum(:number).to_i + 1
         @release.content_revisions.create!(payload_revision: @payload, kind: kind, body: body, number: number,
-          input_revision: @revision, origin: 'human')
+          input_revision: @revision, origin: 'human', dependencies: content_dependencies(kind))
       end
     end
   end
