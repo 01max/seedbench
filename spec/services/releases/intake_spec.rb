@@ -39,4 +39,36 @@ RSpec.describe Releases::Intake do
       expect { described_class.call(uploads: uploads) }.to raise_error(described_class::InvalidBatch)
     end
   end
+
+  it "cleans the stage when a database transaction cannot start" do
+    allow(Release).to receive(:transaction).and_raise(ActiveRecord::ConnectionNotEstablished)
+
+    expect { described_class.call(uploads: [ ebook_upload ]) }.to raise_error(ActiveRecord::ConnectionNotEstablished)
+    expect(Rails.application.config.x.storage.fetch(:payload).glob("staging/*")).to be_empty
+  end
+
+  context "with real commits" do
+    self.use_transactional_tests = false
+
+    around do |example|
+      configuration = ApplicationRecord.connection_db_config
+      ApplicationRecord.establish_connection(adapter: "sqlite3", database: ":memory:")
+      ApplicationRecord.connection_pool.with_connection do |connection|
+        connection.raw_connection.execute_batch(Rails.root.join("db/structure.sql").read)
+      end
+      example.run
+    ensure
+      ApplicationRecord.establish_connection(configuration)
+    end
+
+    it "preserves committed payload bytes and recoverable intent when dispatch raises" do
+      allow(Workflows::Dispatch).to receive(:call).and_raise(ActiveRecord::StatementInvalid, "Synthetic dispatch database failure")
+
+      expect { described_class.call(uploads: [ ebook_upload ]) }.to raise_error(ActiveRecord::StatementInvalid)
+      payload = PayloadRevision.sole
+      path = Rails.application.config.x.storage.fetch(:payload).join(payload.locator)
+      expect(Digest::SHA256.file(path).hexdigest).to eq(payload.sha256)
+      expect(payload.release.workflow_operations.sole.dispatch_intent).to have_attributes(state: "pending")
+    end
+  end
 end
