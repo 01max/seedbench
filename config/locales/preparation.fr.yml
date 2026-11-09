@@ -1,6 +1,9 @@
 fr:
   preparation:
     errors:
+      published_locked: "Le nom d’un fichier publié, en cours de publication ou déjà confié au client torrent est verrouillé."
+      operation_expired: "La préparation a été interrompue. Attendez sa reprise avant de recommencer."
+      mapping_changed: "Le montage a changé depuis le début du déplacement. Rétablissez la racine d’origine avant de reprendre."
       unsafe_path: "Chemin non sûr : utilisez les racines montées, sans lien symbolique ni traversée de dossier."
       storage_unavailable: "Stockage indisponible. Vérifiez les montages et les droits du compte de service."
       payload_changed: "L’identité du fichier a changé : taille, empreinte ou emplacement différent. Le fichier est conservé ; corrigez le montage ou réimportez-le."

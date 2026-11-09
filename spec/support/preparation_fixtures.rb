@@ -26,6 +26,7 @@ module PreparationFixtures
     release.update!(proposed_name: name)
     operation = release.workflow_operations.create!(kind: 'preparation', request_key: SecureRandom.uuid, effect: 'filesystem',
       input_revision: release.input_revision, parameters: { payload_revision_id: release.payload_revisions.sole.id, release_name: name })
+    operation.update!(state: 'running', attempt_token: SecureRandom.uuid, lease_expires_at: 5.minutes.from_now)
     operation.create_dispatch_intent!(release: release)
     operation
   end
