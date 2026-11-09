@@ -15,17 +15,19 @@ RSpec.describe Providers::C411::EbookNaming do
   end
 
   it 'normalizes the legacy NOTAG and video suffix without repeating it' do
-    name = 'Titre.Auteur.FRENCH.NOTAG.VFF-NOTAG.[EPUB]-NOTAG'
-    names = described_class.from_release(name: name, format: 'epub')
-    repeated = described_class.from_release(name: names.release, format: 'epub')
-    expect(repeated).to eq(names)
-    expect(names.release).to eq('Titre.Auteur.FRENCH.[EPUB]-NOTAG')
-    expect(names.payload.scan('NOTAG').size).to eq(1)
-    expect(names.torrent).to end_with('.NOTAG.torrent')
+    [ 'Titre.Auteur.FRENCH.NOTAG.VFF-NOTAG.[EPUB]-NOTAG',
+      'Titre.Auteur.FRENCH.[EPUB].NOTAG.VFF-NOTAG', 'Titre.Auteur.FRENCH.[EPUB]-NOTAG-NOTAG' ].each do |name|
+      names = described_class.from_release(name: name, format: 'epub')
+      repeated = described_class.from_release(name: names.release, format: 'epub')
+      expect(repeated).to eq(names)
+      expect(names.release).to eq('Titre.Auteur.FRENCH.[EPUB]-NOTAG')
+      expect(names.payload.scan('NOTAG').size).to eq(1)
+      expect(names.torrent).to end_with('.NOTAG.torrent')
+    end
   end
 
   it 'rejects unsafe, mismatched, oversized and video names' do
-    [ '../Book.[EPUB]-NOTAG', 'Book.[PDF]-NOTAG', 'Book.VFF.[EPUB]-NOTAG', "#{'A' * 240}.[EPUB]-NOTAG" ].each do |name|
+    [ '../Book.[EPUB]-NOTAG', 'Book.[PDF]-NOTAG', 'Book.VFF.[EPUB]-NOTAG', 'Book.vff.[EPUB]-NOTAG', 'Book.Author.[EPUB]-NOTAG', 'Book.FRENCH.[EPUB]-NOTAG', "#{'A' * 240}.[EPUB]-NOTAG" ].each do |name|
       expect { described_class.from_release(name: name, format: 'epub') }.to raise_error(described_class::InvalidName)
     end
   end

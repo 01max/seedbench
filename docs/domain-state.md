@@ -88,8 +88,11 @@ Local apply work, completion, and history share one transaction, so a failed
 apply rolls back partial database changes.
 
 Recovery requeues expired local computations with a new attempt identity.
-Remote or filesystem effects instead become `outcome_unknown`; they are never
-blindly replayed. Another request key cannot bypass an unresolved non-local
+Remote and unrecognized filesystem effects instead become `outcome_unknown`;
+they are never blindly replayed. Canonical payload preparation is explicitly
+recoverable: its retained move journal reconciles file identity and location
+before replay. Interrupted or obsolete moves cannot silently duplicate files or
+accept stale preparation. See [payload preparation](payload-preparation.md). Another request key cannot bypass an unresolved non-local
 operation of the same kind. This does not claim exactly-once external behavior:
 provider-specific idempotency and reconciliation remain required.
 

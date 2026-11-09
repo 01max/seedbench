@@ -11,13 +11,13 @@ module PreparationFixtures
     end
   end
 
-  def staged_preparation_release
+  def staged_preparation_release(format: 'epub', bytes: "Synthetic preparation bytes\n")
     release = Releases::Create.call(title: 'Synthetic book', author: 'Test Author')
-    path = Rails.application.config.x.storage.fetch(:payload).join('staging', "#{SecureRandom.uuid}.epub")
+    path = Rails.application.config.x.storage.fetch(:payload).join('staging', "#{SecureRandom.uuid}.#{format}")
     path.parent.mkpath
-    path.binwrite("Synthetic preparation bytes\n")
-    release.payload_revisions.create!(number: 1, locator: "staging/#{path.basename}", original_filename: 'Original.epub',
-      format: 'epub', sha256: Digest::SHA256.file(path).hexdigest, size_bytes: path.size)
+    path.binwrite(bytes)
+    release.payload_revisions.create!(number: 1, locator: "staging/#{path.basename}", original_filename: "Original.#{format}",
+      format: format, sha256: Digest::SHA256.file(path).hexdigest, size_bytes: path.size)
     release.evidence_items.create!(payload_revision: release.payload_revisions.sole, evidence_key: "inspection-#{release.id}", kind: 'inspection', source: 'Synthetic inspection', captured_at: Time.current, input_revision: 0, data: { error: nil, structure: {} })
     release.update!(inspection_state: 'succeeded')
     release

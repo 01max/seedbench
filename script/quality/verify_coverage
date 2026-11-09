@@ -18,11 +18,13 @@ Dir.mktmpdir('seedbench-coverage-') do |temporary|
     end
   RUBY
   File.write(File.join(source, 'spec/coverage_probe_spec.rb'), assertion)
+  source_lines = Dir.glob(File.join(source, '{app,lib}/**/*.rb')).sum { |path| File.foreach(path).count }
+  probe_lines = [ 240, (source_lines / 9) + 1 ].max
 
   %w[app/services lib].each do |directory|
     probe = File.join(source, directory, 'unloaded_coverage_probe.rb')
     FileUtils.mkdir_p(File.dirname(probe))
-    lines = Array.new(240) { '    value += 1' }.join("\n")
+    lines = Array.new(probe_lines) { '    value += 1' }.join("\n")
     File.write(probe, "class UnloadedCoverageProbe\n  def self.call\n    value = 0\n#{lines}\n    value\n  end\nend\n")
     report = File.join(temporary, directory.tr('/', '-'))
     environment = { 'COVERAGE_DIR' => report, 'BUNDLE_GEMFILE' => File.join(source, 'Gemfile') }

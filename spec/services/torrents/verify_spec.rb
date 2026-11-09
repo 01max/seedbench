@@ -3,11 +3,15 @@ require 'rails_helper'
 RSpec.describe Torrents::Verify do
   around { |example| with_preparation_storage { example.run } }
 
-  let(:release) { staged_preparation_release }
+  let(:bytes) { "Synthetic preparation bytes\n" }
+  let(:release) { staged_preparation_release(bytes: bytes) }
   let(:operation) { preparation_operation(release) }
   let(:names) { Providers::C411::EbookNaming.from_release(name: operation.parameters.fetch('release_name'), format: 'epub') }
-  let(:paths) { Preparation::Paths.new }
   let(:payload) { release.payload_revisions.sole }
+
+  def paths
+    Preparation::Paths.new
+  end
 
   def prepare_torrent
     Preparation::Move.call(operation: operation, names: names)
@@ -33,7 +37,7 @@ RSpec.describe Torrents::Verify do
     result = prepare_torrent
     path = paths.path(result.locator, kind: :state)
     original = Torrents::Bencode.decode(path.binread)
-    [ { 'name' => 'Other.epub' }, { 'length' => 123 }, { 'private' => 0 }, { 'files' => [] } ].each do |change|
+    [ { 'name' => 'Other.epub' }, { 'name.utf-8' => 'Other.epub' }, { 'length' => 123 }, { 'private' => 0 }, { 'files' => [] }, { 'files.utf-8' => [] } ].each do |change|
       data = original.deep_dup
       data.fetch('info').merge!(change)
       path.binwrite(Torrents::Bencode.encode(data))
@@ -51,6 +55,21 @@ RSpec.describe Torrents::Verify do
     data.fetch('info')['piece length'] = 3
     path.binwrite(Torrents::Bencode.encode(data))
     expect { verify(path) }.to raise_error(Preparation::Failure, /torrent/)
+  end
+
+  context 'with several pieces' do
+    let(:bytes) { ('A' * 1_048_576) + ('B' * 1_048_576) + 'Final piece' }
+
+    it 'detects a mismatch in the last piece after the earlier pieces match' do
+      result = prepare_torrent
+      path = paths.path(result.locator, kind: :state)
+      data = Torrents::Bencode.decode(path.binread)
+      pieces = data.fetch('info').fetch('pieces')
+      expect(pieces.bytesize).to eq(60)
+      pieces.setbyte(pieces.bytesize - 1, pieces.getbyte(pieces.bytesize - 1) ^ 255)
+      path.binwrite(Torrents::Bencode.encode(data))
+      expect { verify(path) }.to raise_error(Preparation::Failure, /morceaux/)
+    end
   end
 
   it 'rejects changed payload bytes while preserving the file and torrent' do

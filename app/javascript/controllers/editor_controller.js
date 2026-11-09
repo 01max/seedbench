@@ -114,11 +114,16 @@ export default class extends Controller {
 
   evidenceLoaded(event) {
     const frame = event.target
+    const preparation = frame.querySelector("[data-preparation-state]")
+    if (preparation) {
+      this.refreshPreparation(frame, preparation)
+      this.preparationCompleted(preparation)
+      return
+    }
     const metadata = frame.querySelector("[data-evidence-revision]")
     if (!metadata) return
     if (!frame.querySelector("[data-status-sequence]")) frame.dispatchEvent(new CustomEvent("evidence:updated", { bubbles: true }))
     const revision = Number(metadata.dataset.evidenceRevision)
-    this.refreshPreparation(frame, metadata)
     if (revision <= Number(this.revisionInput.value)) return
     const values = JSON.parse(metadata.dataset.reviewedValues || "null")
     if (!values) return
@@ -236,7 +241,7 @@ export default class extends Controller {
         if (this.dirty || this.saving) this.showConflict({ current_revision: data.revision, values: data.values })
         else {
           this.writeValues(data.values)
-          this.acceptSave(data.revision, data.values)
+          this.acceptSave(data.revision, this.valuesFromForm())
         }
       }
       if (response.ok) this.element.dispatchEvent(new CustomEvent("workbench:action", { bubbles: true }))
@@ -246,6 +251,16 @@ export default class extends Controller {
       this.errorTarget.textContent = this.messagesValue.action_failed
       this.errorTarget.hidden = false
     }
+  }
+
+  preparationCompleted(metadata) {
+    if (metadata.dataset.preparationState !== "prepared" || !metadata.dataset.preparationApprovedRevision) return
+    const approved = Number(metadata.dataset.preparationApprovedRevision)
+    const completed = Number(metadata.dataset.preparationCompletedRevision)
+    const observed = Number(metadata.dataset.preparationObservedRevision)
+    if (Number(this.revisionInput.value) !== approved || observed !== completed) return
+    if (this.dirty || this.saving) this.showConflict({ current_revision: completed, values: JSON.parse(this.baseline) })
+    else this.updateRevision(completed)
   }
 
   refreshPreparation(frame, metadata) {

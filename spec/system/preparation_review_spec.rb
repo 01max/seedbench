@@ -22,7 +22,7 @@ RSpec.describe 'Canonical payload review', type: :system do
     expect(page).to have_css('[data-check-key="preparation"][data-check-state="done"]', wait: 5)
     click_button 'Fichiers', exact: true
     expect(page).to have_text('Synthetic.book.Test.Author.FRENCH-NOTAG.epub')
-    expect(page).to have_text('Aucun envoi à C411 ni à Deluge')
+    expect(page).not_to have_css('.save-conflict:not([hidden])')
     save_workbench_screenshot('canonical-preparation.png')
   end
 

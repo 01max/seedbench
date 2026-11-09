@@ -25,7 +25,8 @@ RSpec.describe Releases::Checklist do
 
   it 'derives prepared, hosted, duplicate and observed outcome states from persisted records' do
     release = build_release_graph
-    release.update!(inspection_state: 'succeeded', preparation_state: 'prepared', publication_state: 'published', seeding_state: 'succeeded')
+    mark_preparation_current(release)
+    release.update!(inspection_state: 'succeeded', publication_state: 'published', seeding_state: 'succeeded')
     items = described_class.call(release: release).index_by(&:key)
 
     %w[inspection preparation cover duplicates publication seeding draft].each do |key|

@@ -21,7 +21,7 @@ RSpec.describe Content::Status do
 
   it 'detects stale NFO when preparation becomes current' do
     accept_generated('nfo')
-    release.reload.update!(preparation_state: 'prepared')
+    mark_preparation_current(release)
     expect(described_class.call(release: release).kinds['nfo'][:state]).to eq('stale')
   end
 

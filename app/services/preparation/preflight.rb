@@ -36,6 +36,7 @@ module Preparation
         target = @target.parent.join(".preparation-probe-#{SecureRandom.uuid}")
         Rename.call(source: Pathname.new(file.path), destination: target)
         File.unlink(target)
+        [ @source.parent, @target.parent ].uniq.each { |parent| File.open(parent, &:fsync) }
       end
     end
   end

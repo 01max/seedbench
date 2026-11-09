@@ -15,7 +15,7 @@ module Providers
         end
 
         def from_release(name:, format:)
-          match = name.to_s.match(/\A(.+)\.\[(EPUB|PDF|MOBI)\]-([a-zA-Z0-9]+)\z/i)
+          match = normalize_suffix(name.to_s).match(/\A(.+)\.\[(EPUB|PDF|MOBI)\]-([a-zA-Z0-9]+)\z/i)
           invalid! unless match && match[2].downcase == format
 
           base = match[1]
@@ -24,6 +24,11 @@ module Providers
         end
 
         private
+
+        def normalize_suffix(name)
+          match = name.match(/\A(.+\.\[(?:EPUB|PDF|MOBI)\])((?:[.-](?:NOTAG|VFF))+)\z/i)
+          match && match[2].match?(/NOTAG/i) ? "#{match[1]}-NOTAG" : name
+        end
 
         def words(value)
           result = value.to_s.unicode_normalize(:nfc).scan(/[\p{L}\p{N}]+/).join('.')
@@ -44,7 +49,9 @@ module Providers
 
         def validate_base!(base)
           invalid! unless base.match?(/\A[\p{L}\p{N}]+(?:\.[\p{L}\p{N}]+)*\z/)
-          invalid! if base.split('.').any? { |part| %w[VFF VFI MULTI 1080p 720p WEBRip BluRay].include?(part) }
+          parts = base.split('.')
+          invalid! unless parts.length >= 3 && parts.last == 'FRENCH'
+          invalid! if parts.any? { |part| part.match?(/\A(?:VFF|VFI|MULTI|1080p|720p|WEBRip|BluRay)\z/i) }
         end
 
         def invalid!

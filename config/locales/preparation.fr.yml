@@ -1,5 +1,10 @@
 fr:
   workbench:
+    events:
+      preparation:
+        verified: "Fichier et torrent vérifiés"
+        failed: "Échec de la préparation"
+        invalidated: "Préparation à refaire"
     fields:
       proposed_name: "Nom de release"
   preparation:

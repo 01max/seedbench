@@ -41,11 +41,15 @@ module Torrents
     end
 
     def single_file?
-      @info.is_a?(Hash) && @info['private'] == 1 && !@info.key?('files') && !@info.key?('meta version')
+      @info.is_a?(Hash) && @info['private'] == 1 && !@info.key?('files') && !@info.key?('files.utf-8') && !@info.key?('meta version')
     end
 
     def matching_file?
-      @info['name'] == @name.b && @info['length'] == @payload.size_bytes
+      @info['name'] == @name.b && @info['length'] == @payload.size_bytes && utf8_name_matches?
+    end
+
+    def utf8_name_matches?
+      !@info.key?('name.utf-8') || @info['name.utf-8'] == @name.b
     end
 
     def verify_pieces!

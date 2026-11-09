@@ -34,9 +34,9 @@ light themes, compact desktop review, and narrower screens.
 > **Development preview.** Batch upload and persistent local review are available.
 > Background ebook inspection and source-linked fact review are also available.
 > Local BBCode/NFO generation and safe preview are available.
-> Torrent preparation, cover hosting, AI
-> assistance, C411 drafts/publication, and seeding are still being built.
-> Prepare, Draft, and Publish are currently disabled.
+> Explicit canonical-file preparation and verified local torrents are available.
+> Cover hosting, AI assistance, C411 drafts/publication, and seeding are still being built.
+> Draft and Publish are currently disabled.
 
 ## Features
 
@@ -48,6 +48,7 @@ light themes, compact desktop review, and narrower screens.
 | **Compare edition evidence** | Look up an ISBN in Open Library, compare source-linked candidates, and explicitly adopt reviewed facts. Checksum validity and digital-edition authenticity remain separate. |
 | **Review in one place** | Edit metadata, presentation, notes, and complete BBCode/NFO. Open files, source evidence, history, and an escaped local prose preview when needed. |
 | **Assemble release text** | Generate exact-template BBCode and factual NFO as reviewable proposals. Preview unsaved BBCode safely, keep full manual edits, and review text affected by changed facts or covers. |
+| **Prepare explicitly** | Review a release name, move the same file into the configured payload folder, and verify a private single-file torrent. Re-prepare after name changes; published names stay locked. |
 | **Keep your edits** | Autosave while you work or use Save and next. Failed saves keep your text and selected book; concurrent edits require an explicit choice. |
 | **Follow the checks** | Keep manual review marks with reversible history. Automatic checks reflect recorded observations, and uncertainty acknowledgements stay tied to their findings. |
 | **Choose your workspace** | Use dark or light mode, switch tabs from the keyboard, and review on desktop or narrower screens. |
@@ -83,7 +84,10 @@ without echo. The default bind is loopback, and the app has one operator account
 2. **Review the evidence.** Wait for inspection, then open **Sources** to compare
    extracted metadata and samples. Adopt verified values, look up an ISBN, or run
    optional PDF OCR. Fill in presentation, BBCode/NFO, and manual review marks.
-3. **Save and move on.** Use **Enregistrer et suivant** to save pending edits
+3. **Prepare when ready.** Review **Nom de release**, use **Suggérer un nom** if
+   needed, then **Préparer**. The [preparation guide](docs/payload-preparation.md)
+   explains safe moves, local torrents, and recovery; this makes no remote write.
+4. **Save and move on.** Use **Enregistrer et suivant** to save pending edits
    before selecting the next book. A failed save keeps you on the current one.
 
 | Shortcut | Action |
@@ -188,6 +192,7 @@ services. No host Ruby, Node, browser driver, or ebook-tool installation is need
 | Looking for… | Start here |
 | :--- | :--- |
 | Upload limits, review, keyboard controls, and draft recovery | [Ebook workbench](docs/workbench.md) |
+| Naming, canonical moves, private torrents, and interruption recovery | [Payload preparation](docs/payload-preparation.md) |
 | Host mounts, path mapping, permissions, and scratch capacity | [Storage configuration](docs/storage-configuration.md) |
 | Login, password reset, sessions, and HTTPS settings | [Operator access](docs/operator-access.md) |
 | Credentials, defaults, and connection-check scope | [Provider settings](docs/provider-settings.md) |

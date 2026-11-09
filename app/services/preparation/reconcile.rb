@@ -35,7 +35,6 @@ module Preparation
 
         identity = Identity.call(path: source, payload: move.payload_revision)
         raise Failure.new(:payload_changed) unless [ identity.dev, identity.ino ] == [ move.source_device, move.source_inode ]
-
       end
     end
   end

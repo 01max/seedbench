@@ -89,7 +89,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .work-warning, .work-alert { padding: 6px 8px; color: var(--warning); background: var(--warning-bg); border-radius: 3px; font-size: 11px; margin-bottom: 9px !important; }
 .editor-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 8px; margin-block: 9px 10px; }
 .editor-fields label { display: block; color: var(--muted); font-size: 11px; }
-.editor-fields :is(input, select), .editor-area textarea { display: block; width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 3px; background: var(--inset); padding: 4px 6px; margin-top: 3px; color: var(--foreground); }
+.editor-fields :is(input, select), .editor-section input, .editor-area textarea { display: block; width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 3px; background: var(--inset); padding: 4px 6px; margin-top: 3px; color: var(--foreground); }
 .editor-section { display: block; margin: 8px 0 5px; }
 .editor-area textarea { resize: vertical; min-height: 168px; padding: 8px; font-size: 12px; line-height: 1.55; }
 .editor-area .code-editor { min-height: 439px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; line-height: 1.7; }

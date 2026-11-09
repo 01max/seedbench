@@ -84,5 +84,16 @@ compose rm -f worker
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb recover_crash
 compose up -d --no-build --no-deps worker
 wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-compute' AND state = 'succeeded'"
+compose stop worker
+compose rm -f worker
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/preparation_probe.rb start
+compose up -d --no-build --no-deps worker
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-preparation' AND state = 'running'"
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/preparation_probe.rb await_rename
+compose kill -s SIGKILL worker
+compose rm -f worker
+compose exec -T web bin/container-entrypoint bin/rails runner script/quality/preparation_probe.rb recover
+compose up -d --no-build --no-deps worker
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-preparation' AND state = 'succeeded'"
 compose up -d --no-build --no-deps --force-recreate --wait web
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/check_runtime.rb

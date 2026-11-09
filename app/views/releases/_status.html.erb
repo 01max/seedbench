@@ -1,6 +1,7 @@
 <%= turbo_frame_tag dom_id(@release, :status), data: { controller: "checklist", status_poll_target: "frame" } do %>
   <div class="status-content" data-status-sequence="<%= @snapshot.events.first&.sequence || 0 %>" data-active-operations="<%= @workflow_active || false %>">
-  <span hidden data-evidence-revision="<%= @release.input_revision %>" data-reviewed-values="<%= Releases::EditorValues.call(release: @release).to_json %>" data-preparation-state="<%= @release.preparation_state %>" data-has-preparation="<%= @snapshot.preparation.present? %>"></span>
+  <% preparation_operation = @snapshot.operations.find { |operation| operation.kind == "preparation" && operation.state == "succeeded" && operation.result["preparation_id"] == @snapshot.preparation&.id } %>
+  <span hidden data-preparation-state="<%= @release.preparation_state %>" data-has-preparation="<%= @snapshot.preparation.present? %>" data-preparation-approved-revision="<%= preparation_operation&.input_revision %>" data-preparation-completed-revision="<%= preparation_operation&.input_revision&.+(1) %>" data-preparation-observed-revision="<%= @release.input_revision %>"></span>
   <% if @check_error %>
     <p role="alert" class="work-alert"><%= @check_error %></p>
     <%= link_to t("releases.reload_saved"), release_path(@release), class: "work-button", data: { turbo_frame: "_top" } %>

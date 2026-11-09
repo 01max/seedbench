@@ -10,10 +10,7 @@ module Preparation
     end
 
     def call
-      if @result['error_code']
-        @release.update!(preparation_state: 'failed')
-        return { failed: true, error_code: @result.fetch('error_code') }
-      end
+      return record_failure if @result['error_code']
 
       preparation = append_preparation
       PayloadMove.find_by!(workflow_operation_id: @operation.id).update!(state: 'completed')
@@ -23,6 +20,13 @@ module Preparation
     end
 
     private
+
+    def record_failure
+      @release.update!(preparation_state: 'failed')
+      code = @result.fetch('error_code')
+      Releases::RecordEvent.call(release_id: @release.id, name: 'preparation.failed', data: { operation_id: @operation.id, error_code: code })
+      { failed: true, error_code: code }
+    end
 
     def append_preparation
       payload = @release.payload_revisions.find(@operation.parameters.fetch('payload_revision_id'))
