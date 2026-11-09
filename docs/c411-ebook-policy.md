@@ -1,7 +1,7 @@
 # C411 ebook policy
 
 Authenticated documentation and the ebook upload form were reviewed on
-2026-11-08. This records published rules and observed form behavior; it does
+2026-11-08 and rechecked through the authenticated browser on 2026-11-09. This records published rules and observed form behavior; it does
 not establish publication acceptance. Production publication remains forbidden.
 See [API observations](c411-api.md) for verified draft fields, attachment shape,
 slot limits, responses, and the remote concurrency limitation.
@@ -85,7 +85,11 @@ The authenticated [API guide](https://c411.org/user/integrations/guide) document
 A tag list does not establish every nesting, escaping, or renderer rule. Literal
 bracket escaping and malformed-tag handling remain unverified. Local preview
 must sanitize active content and unsafe links without claiming exact site
-rendering. HTML is a separate permission-controlled format and must not be
+rendering. The local content policy preserves the operator template and applies
+bounded, conservative tag/attribute rules. Generated literal brackets use numeric
+entities for safe local display; because C411's literal escaping remains unproven,
+those descriptions receive a blocking rendering-review diagnostic before remote
+submission. This does not silently establish a site escaping contract. HTML is a separate permission-controlled format and must not be
 silently substituted for BBCode.
 
 ## Cover quality and allowed hosts
