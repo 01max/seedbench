@@ -34,7 +34,7 @@ export default class extends Controller {
 
   change(event) {
     if (event.target.form !== this.formTarget) return
-    this.dirty = JSON.stringify(this.valuesFromForm()) !== this.baseline
+    this.dirty = Boolean(this.saving) || JSON.stringify(this.valuesFromForm()) !== this.baseline
     this.setStatus(this.dirty ? "Modifications en attente" : "Enregistré")
     this.remember()
     this.schedule()
@@ -243,8 +243,7 @@ export default class extends Controller {
       if (this.dirty) {
         sessionStorage.setItem(this.storageKey, JSON.stringify({ revision: Number(this.revisionInput.value), values: this.valuesFromForm() }))
       } else {
-        const draft = JSON.parse(sessionStorage.getItem(this.storageKey) || "null")
-        if (!draft || JSON.stringify(draft.values) === this.baseline) sessionStorage.removeItem(this.storageKey)
+        sessionStorage.removeItem(this.storageKey)
       }
     } catch {
       // Editing remains available when browser storage is disabled or full.
