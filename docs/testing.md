@@ -140,7 +140,10 @@ both staged files must retain their original sizes and SHA-256 hashes.
 This runs with default named volumes, alternate named-volume roots and UID/GID
 65534, and existing synthetic bind folders/container roots containing spaces.
 Cleanup removes only generated project volumes and temporary folders. Synthetic
-handler definitions are installed only by the verification worker's explicit
+bind contents are removed as the application UID after services stop, before
+the host removes its generated parent folders. This preserves private staging
+permissions even when the CI runner and application have different UIDs.
+Synthetic handler definitions are installed only by the verification worker's explicit
 fixture command. The production code-owned definition map does not pretend to
 implement inspection, publication or other later feature handlers.
 
