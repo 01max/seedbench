@@ -91,6 +91,9 @@ credentials, including rejected redirects, oversized/invalid responses, network
 failures, and a check completed after credential rotation.
 
 The password console is tested through a pseudo-terminal with echo disabled.
+The actual Rails runner also receives SIGIO during entry and confirmation in
+a separate process and disposable database. It must retain the entered password
+without echoing it; Ctrl-C must still cancel without initializing the account.
 The actual runner command has also been exercised in disposable state, with the
 synthetic password absent from its transcript and process arguments. No test
 uses the deployment password command against operator volumes.
