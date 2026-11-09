@@ -25,7 +25,7 @@ compose() {
 }
 cleanup_bind_folders() {
   compose stop
-  compose run --rm --no-deps --no-build -T --entrypoint ruby web -rfileutils -e '
+  compose run --rm --no-deps -T --entrypoint ruby web -rfileutils -e '
     abort "Use only disposable runtime fixtures" unless ENV["SEEDBENCH_RUNTIME_VERIFICATION"] == "1"
     %w[SEEDBENCH_STATE_ROOT SEEDBENCH_SCRATCH_ROOT SEEDBENCH_PAYLOAD_ROOT].each do |key|
       root = ENV.fetch(key)
