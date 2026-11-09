@@ -7,7 +7,7 @@ module Workflows
         release.with_lock do
           operation.reload
           return unless operation.state == 'pending'
-          return reject_stale(operation) if operation.input_revision != release.input_revision
+          return reject_stale(operation) if operation.input_revision != release.input_revision && !Definitions.fetch(operation.kind).recoverable
 
           activate(operation)
         end

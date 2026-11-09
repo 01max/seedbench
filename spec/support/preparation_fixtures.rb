@@ -18,6 +18,7 @@ module PreparationFixtures
     path.binwrite("Synthetic preparation bytes\n")
     release.payload_revisions.create!(number: 1, locator: "staging/#{path.basename}", original_filename: 'Original.epub',
       format: 'epub', sha256: Digest::SHA256.file(path).hexdigest, size_bytes: path.size)
+    release.evidence_items.create!(payload_revision: release.payload_revisions.sole, evidence_key: "inspection-#{release.id}", kind: 'inspection', source: 'Synthetic inspection', captured_at: Time.current, input_revision: 0, data: { error: nil, structure: {} })
     release.update!(inspection_state: 'succeeded')
     release
   end

@@ -1,6 +1,24 @@
 fr:
+  workbench:
+    fields:
+      proposed_name: "Nom de release"
   preparation:
+    name: "Nom de release"
+    suggest: "Suggérer un nom"
+    name_help: "Vérifiez le titre, l’auteur et la langue, suggérez le nom puis corrigez la team si elle est connue. Le nom est enregistré sans déplacer le livre."
+    queued: "Préparation demandée. Le résultat apparaîtra dans la liste des vérifications."
+    suggested: "Nom proposé enregistré. Vérifiez-le avant de préparer le fichier."
+    reprepare: "Re-préparer"
+    local_only: "Torrent local vérifié avec une annonce inactive. Aucun envoi à C411 ni à Deluge."
+    canonical: "Fichier canonique"
+    torrent: "Torrent local"
+    info_hash: "Empreinte du torrent"
+    refresh: "Actualiser les fichiers"
+    stale_note: "Le nom ou les fichiers ont changé. Une nouvelle préparation explicite est nécessaire."
     errors:
+      stale: "La préparation n’est plus valide. Vérifiez le nom et les fichiers puis utilisez Re-préparer."
+      inspection_required: "Un livre lié et une inspection réussie sans échec certain sont nécessaires avant la préparation."
+      input_changed: "La révision a changé pendant la préparation. Les modifications et le fichier ont été conservés. Re-préparez la révision actuelle."
       invalid_torrent: "Le torrent ne décrit pas exactement un fichier privé avec le nom, la taille et les morceaux attendus."
       torrent_mismatch: "Les empreintes des morceaux du torrent ne correspondent pas au fichier canonique."
       torrent_creation: "La création locale du torrent a échoué ou dépassé le délai prévu. Le livre est conservé à son emplacement enregistré."

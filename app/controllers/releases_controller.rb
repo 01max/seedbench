@@ -16,7 +16,7 @@ class ReleasesController < ApplicationController
     end
   rescue Releases::RevisionConflict
     render_save_error(t('workbench.errors.save_conflict'), :conflict)
-  rescue Releases::Save::InvalidChanges => error
+  rescue Releases::Save::InvalidChanges, Preparation::Failure => error
     render_save_error(error.message, :unprocessable_content)
   end
 
@@ -34,6 +34,7 @@ class ReleasesController < ApplicationController
   end
 
   def load_selection
+    Preparation::Observe.call(release: @release)
     @snapshot = Releases::Snapshot.call(release: @release)
     @checklist = Releases::Checklist.call(release: @release, snapshot: @snapshot)
     @content_workspace = Content::Workspace.call(release: @release)

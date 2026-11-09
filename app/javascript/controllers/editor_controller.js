@@ -116,8 +116,9 @@ export default class extends Controller {
     const frame = event.target
     const metadata = frame.querySelector("[data-evidence-revision]")
     if (!metadata) return
-    frame.dispatchEvent(new CustomEvent("evidence:updated", { bubbles: true }))
+    if (!frame.querySelector("[data-status-sequence]")) frame.dispatchEvent(new CustomEvent("evidence:updated", { bubbles: true }))
     const revision = Number(metadata.dataset.evidenceRevision)
+    this.refreshPreparation(frame, metadata)
     if (revision <= Number(this.revisionInput.value)) return
     const values = JSON.parse(metadata.dataset.reviewedValues || "null")
     if (!values) return
@@ -231,13 +232,37 @@ export default class extends Controller {
       })
       const data = await response.json()
       if (response.status === 409) this.showConflict(data)
-      if (data.revision !== undefined) this.updateRevision(data.revision)
+      if (response.ok && data.values) {
+        if (this.dirty || this.saving) this.showConflict({ current_revision: data.revision, values: data.values })
+        else {
+          this.writeValues(data.values)
+          this.acceptSave(data.revision, data.values)
+        }
+      }
+      if (response.ok) this.element.dispatchEvent(new CustomEvent("workbench:action", { bubbles: true }))
       this.errorTarget.textContent = data.message || this.messagesValue.action_completed
       this.errorTarget.hidden = false
     } catch {
       this.errorTarget.textContent = this.messagesValue.action_failed
       this.errorTarget.hidden = false
     }
+  }
+
+  refreshPreparation(frame, metadata) {
+    const state = metadata.dataset.preparationState
+    if (!state || frame.id.includes("preparation")) return
+    const button = this.element.querySelector('[data-prepare-allowed]')
+    if (button) {
+      button.disabled = state === "running" || button.dataset.prepareAllowed !== "true"
+      if (metadata.dataset.hasPreparation === "true") button.textContent = button.dataset.reprepareLabel
+    }
+    const sequence = frame.querySelector("[data-status-sequence]")?.dataset.statusSequence
+    if (state === "running" || sequence === this.preparationSequence) return
+    this.preparationSequence = sequence
+    const files = this.element.querySelector("turbo-frame[data-preparation-url]")
+    if (!files) return
+    if (files.src) files.reload()
+    else files.src = files.dataset.preparationUrl
   }
 
   shortcut(event) {

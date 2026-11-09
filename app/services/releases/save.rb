@@ -8,7 +8,7 @@ module Releases
         super(errors.values.join(' '))
       end
     end
-    LIMITS = { 'title' => 500, 'author' => 500, 'isbn' => 64, 'edition' => 2000, 'language' => 120,
+    LIMITS = { 'proposed_name' => 230, 'title' => 500, 'author' => 500, 'isbn' => 64, 'edition' => 2000, 'language' => 120,
       'publisher' => 500, 'publication_year' => 4, 'isbn_kind' => 20,
       'presentation' => 100_000, 'notes' => 100_000, 'bbcode' => 250_000, 'nfo' => 250_000 }.freeze
 
@@ -67,6 +67,7 @@ module Releases
       @payload = @release.payload_revisions.order(number: :desc).first
       raise InvalidChanges.new(edition: I18n.t('workbench.errors.payload_required')) if !@payload && (@changes.keys & EditorValues::FACTS).any?
 
+      Preparation::Invalidate.call(release: @release, changes: @changes)
       @revision = @release.input_revision + 1
       append_facts if @payload
       finish_save
@@ -82,7 +83,7 @@ module Releases
     end
 
     def append_facts
-      @changes.slice(*EditorValues::METADATA, *EditorValues::FACTS).each do |field, value|
+      @changes.slice('title', 'author', *EditorValues::FACTS).each do |field, value|
         number = @release.reviewed_facts.where(field: field).maximum(:number).to_i + 1
         @release.reviewed_facts.create!(payload_revision: @payload, field: field, value: value, number: number,
           actor: 'operator', reviewed_at: Time.current)

@@ -15,7 +15,8 @@ module Workflows
           operation.reload
           return operation unless operation.state == 'running' && operation.lease_expires_at <= Time.current
 
-          operation.effect == 'local' ? requeue(operation) : mark_unknown(operation)
+          recoverable = operation.effect == 'local' || Definitions.fetch(operation.kind).recoverable
+          recoverable ? requeue(operation) : mark_unknown(operation)
           operation
         end
       end

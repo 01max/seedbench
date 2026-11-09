@@ -31,8 +31,10 @@ module Workflows
       end
 
       def unresolved_effect?(release, kind)
-        release.workflow_operations.where(kind: kind).where.not(effect: 'local')
-          .where("state IN ('pending', 'running', 'outcome_unknown') OR (state = 'stale' AND attempts > 0)").exists?
+        operations = release.workflow_operations.where(kind: kind).where.not(effect: 'local')
+        return true if operations.exists?(state: %w[pending running outcome_unknown])
+
+        !Definitions.fetch(kind).recoverable && operations.where(state: 'stale').where('attempts > 0').exists?
       end
 
       def existing_request(operation, kind, revision, parameters)
