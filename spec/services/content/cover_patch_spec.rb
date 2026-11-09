@@ -6,6 +6,7 @@ RSpec.describe Content::CoverPatch do
   it 'changes only the cover URL after explicit acceptance of the patch' do
     draft = Content::Generate.call(release: release)
     body = draft.bodies['bbcode'].sub('https://images.invalid/synthetic.png', 'https://old.invalid/cover.png').sub('Présentation originale de test.', 'Prose humaine à conserver.\n[quote]Texte relu[/quote]')
+    body = body.sub('Aucune.', 'Conserver https://old.invalid/cover.png dans ces notes.')
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: body })
     proposal = described_class.call(release_id: release.id, expected_revision: release.reload.input_revision)
     expect(release.content_revisions.where(kind: 'bbcode').last.body).to eq(body)

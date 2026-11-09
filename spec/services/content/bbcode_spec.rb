@@ -4,6 +4,7 @@ RSpec.describe Content::Bbcode do
   it 'detects invalid nesting and unsupported tags' do
     expect(described_class.call(source: '[b][i]text[/b][/i]').errors).to include('invalid_nesting')
     expect(described_class.call(source: '[script]unsafe[/script]').errors).to include('unsupported_tag')
+    expect(described_class.call(source: '[unfinished').errors).to include('unsupported_tag')
   end
 
   it 'keeps code contents inert and handles list items' do

@@ -22,7 +22,7 @@
         <label><%= t("workbench.fields.edition") %><%= form.text_field :edition, value: @editor_values.fetch("edition"), maxlength: 2000, data: { edit_field: "edition" } %></label>
         <label><%= t("workbench.fields.language") %><%= form.text_field :language, value: @editor_values.fetch("language"), maxlength: 120, data: { edit_field: "language" } %></label>
         <% %w[publisher publication_year].each do |field| %><label><%= t("workbench.fields.#{field}") %><%= form.text_field field, value: @editor_values.fetch(field), maxlength: Releases::Save::LIMITS.fetch(field), data: { edit_field: field } %></label><% end %>
-        <label><%= t("workbench.fields.isbn_kind") %><%= form.select :isbn_kind, t("content.isbn_kinds").map { |key, label| [label, key] }, { selected: @editor_values.fetch("isbn_kind").presence || "unknown" }, data: { edit_field: "isbn_kind" } %></label>
+        <label><%= t("workbench.fields.isbn_kind") %><%= form.select :isbn_kind, %w[unknown digital print not_applicable].map { |key| [t("content.isbn_kinds.#{key}", default: key), key] }, { selected: @editor_values.fetch("isbn_kind").presence || "unknown" }, data: { edit_field: "isbn_kind" } %></label>
         <label><%= t("workbench.fields.format") %><input value="<%= @snapshot.payload&.format&.upcase %>" readonly></label>
       </div>
       <label class="editor-section"><%= t("workbench.fields.presentation") %><%= form.text_area :presentation, value: @editor_values.fetch("presentation"), rows: 7, maxlength: 100000, data: { edit_field: "presentation" } %></label>

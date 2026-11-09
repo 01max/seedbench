@@ -37,8 +37,14 @@ module Content
       if @scanner.scan(TOKEN)
         token(@scanner[1], @scanner[2].downcase, @scanner[3], @scanner.matched)
       else
-        @stack.last.children << (@scanner.scan(/[^\[]+/) || @scanner.getch)
+        plain_text
       end
+    end
+
+    def plain_text
+      chunk = @scanner.scan(/[^\[]+/)
+      @errors << 'unsupported_tag' unless chunk
+      @stack.last.children << (chunk || @scanner.getch)
     end
 
     def token(closing, tag, argument, literal)

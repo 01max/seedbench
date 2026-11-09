@@ -217,3 +217,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .content-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
 .content-comparison pre { padding: .5rem; background: var(--inset); max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.5 ui-monospace, monospace; }
 @media (max-width: 650px) { .content-comparison { grid-template-columns: 1fr; } }
+
+@media (min-width: 801px) {
+  body:has(#workbench) { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  #workbench { flex: 1; min-height: 0; }
+  .work-layout { height: 100%; min-height: 0; }
+  .work-main, .release-workspace, .editor-area, .work-queue { min-height: 0; }
+  .editor-area, .work-queue { overflow-y: auto; }
+  .release-checklist { max-height: none; min-height: 0; }
+}

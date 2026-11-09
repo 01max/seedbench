@@ -32,4 +32,20 @@ RSpec.describe Content::Validation do
     expect(errors(bbcode: body.sub('Value presentation', '<script>alert(1)</script>'))).to include('unsafe_html')
     expect(errors(bbcode: body.sub('https://images.invalid/cover.png', 'https://other.invalid/cover.png'))).to include('cover')
   end
+
+  it 'rejects fabricated page counts and altered optional edition facts' do
+    expect(errors(nfo_body: nfo + "\nPages du PDF : 999")).to include('nfo_field')
+    expect(errors(nfo_body: nfo + "\nÉditeur : Wrong publisher")).to include('nfo_field')
+  end
+
+  it 'allows full manual presentation edits while preserving factual checks' do
+    expect(errors(bbcode: body.sub('Value presentation', 'Prose rédigée directement dans le BBCode.'))).to be_empty
+  end
+
+  it 'accepts the documented English NFO labels without weakening factual checks' do
+    english = nfo.sub('Titre :', 'Title :').sub('Auteur(s) :', 'Author / illustrator :').sub('Langue :', 'Language :')
+      .sub('Fichier(s) :', 'Content files :').sub('Taille :', 'Payload size :')
+    expect(errors(nfo_body: english)).to be_empty
+    expect(errors(nfo_body: english.sub('EPUB', 'PDF'))).to include('nfo_field')
+  end
 end

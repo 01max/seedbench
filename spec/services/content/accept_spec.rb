@@ -26,4 +26,12 @@ RSpec.describe Content::Accept do
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { publisher: 'New publisher' })
     expect { described_class.call(release_id: release.id, proposal_id: proposal.id, expected_revision: release.reload.input_revision) }.to raise_error(described_class::StaleProposal)
   end
+
+  it 'accepts an NFO proposal after an unrelated manual BBCode edit' do
+    candidate = Content::Propose.call(release_id: release.id, expected_revision: release.input_revision, kind: 'nfo')
+    Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: 'Prose manuelle indépendante' })
+    described_class.call(release_id: release.id, proposal_id: candidate.id, expected_revision: release.reload.input_revision)
+    expect(release.content_revisions.where(kind: 'bbcode').last.body).to eq('Prose manuelle indépendante')
+    expect(release.content_revisions.where(kind: 'nfo').last.body).to eq(candidate.bodies['nfo'])
+  end
 end

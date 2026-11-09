@@ -44,6 +44,19 @@ fr:
       cover: "Couverture sélectionnée"
       spoiler: "Afficher le contenu"
       youtube: "Ouvrir la vidéo YouTube"
+    nfo_aliases:
+      title: [Title]
+      author: [Author, "Author / illustrator"]
+      language: [Language]
+      files: ["Content files"]
+      size: ["Payload size"]
+      publisher: [Publisher]
+      publication_year: ["Publication year"]
+      digital_isbn: ["Digital ISBN"]
+      print_isbn: ["Print ISBN"]
+      edition: [Edition]
+      pages: ["Pages in file"]
+      documents: ["EPUB documents"]
     nfo:
       title: "Titre"
       author: "Auteur(s)"
@@ -96,5 +109,9 @@ fr:
       isbn_kind: "Nature de l’ISBN"
       cover: "Couverture"
       digital_isbn: "ISBN numérique"
+      pages: "Pages du PDF"
+      documents: "Documents EPUB"
+      print_isbn: "ISBN de l’édition imprimée"
+      release_name: "Release"
       files: "Fichier(s)"
       size: "Taille"

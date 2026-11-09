@@ -43,8 +43,10 @@ appearance controls, and logout. Dark and light preferences persist locally.
 Review, BBCode, NFO, files, history, sources, and preview have separate tabs.
 Presentation, notes, complete BBCode/NFO, and reviewed title, author, ISBN,
 edition, and language are editable. Source evidence and stored cover provenance
-are shown on demand. Preview displays escaped local prose; BBCode rendering and
-content validation remain pending.
+are shown on demand. Preview renders current, including unsaved, BBCode safely.
+Content generation creates proposals for explicit acceptance; dependency changes
+flag text for review without replacing it. See the [content guide](ebook-content.md)
+for metadata confirmation, NFO validation and targeted cover-URL proposals.
 
 Changes autosave after a short pause. Save acts immediately. Save and next,
 previous/next links, filtering, and form actions flush pending edits before

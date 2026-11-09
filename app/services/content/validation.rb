@@ -3,6 +3,7 @@ require 'cgi'
 module Content
   class Validation
     Policy = Providers::C411::EbookContent
+    NFO_OPTIONAL = %w[publisher publication_year digital_isbn print_isbn edition pages documents release_name].freeze
     NFO_LABELS = %w[title author format language files size].freeze
 
     def self.call(bbcode:, nfo:, expected: {}, cover_url: nil)
@@ -47,16 +48,30 @@ module Content
     def validate_nfo
       return [ issue('nfo_size') ] if @nfo.bytesize > 3_000_000
 
-      NFO_LABELS.filter_map { |field| issue('nfo_field', field) unless valid_nfo_field?(field) }
+      fields = NFO_LABELS + NFO_OPTIONAL.select { |field| nfo_lines(field).any? || (%w[pages documents].include?(field) && @expected[field].present?) }
+      fields.filter_map { |field| issue('nfo_field', field) unless valid_nfo_field?(field) }
     end
 
     def valid_nfo_field?(field)
-      label = I18n.t("content.nfo.#{field}")
-      lines = @nfo.lines.grep(/\A#{Regexp.escape(label)} : /)
+      lines = nfo_lines(field)
       expected = @expected[field]
-      return false unless lines.one? && !lines.first.strip.in?([ "#{label} :", "#{label} : #{I18n.t('content.unknown')}" ])
+      return false unless expected_available?(field, expected) && nfo_value?(lines)
 
-      !expected || lines.first.strip == "#{label} : #{expected}"
+      !expected || lines.first == expected.to_s.gsub(/[\r\n]+/, ' ')
+    end
+
+    def expected_available?(field, expected)
+      NFO_LABELS.include?(field) || (expected.present? && expected != I18n.t('content.unknown'))
+    end
+
+    def nfo_value?(lines)
+      lines.one? && lines.first.present? && lines.first != I18n.t('content.unknown')
+    end
+
+    def nfo_lines(field)
+      labels = [ I18n.t("content.nfo.#{field}") ] + Array(I18n.t("content.nfo_aliases.#{field}", default: []))
+      pattern = /\A(?:#{Regexp.union(labels)}) : (.*)\z/
+      @nfo.lines.filter_map { |line| pattern.match(line.strip)&.captures&.first }
     end
 
     def issue(code, field = nil)

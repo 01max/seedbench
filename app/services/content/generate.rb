@@ -15,11 +15,17 @@ module Content
     def call
       bodies = { 'bbcode' => Policy.assemble(values: description_values), 'nfo' => nfo }
       dependencies = bodies.keys.index_with { |kind| Dependencies.call(inputs: @inputs, values: @values, kind: kind) }
-      issues = Validation.call(bbcode: bodies['bbcode'], nfo: bodies['nfo'], expected: @values, cover_url: @inputs.hosting&.direct_url)
-      Draft.new(bodies: bodies, dependencies: dependencies, expected: @values, issues: issues + input_issues)
+      issues = Validation.call(bbcode: bodies['bbcode'], nfo: bodies['nfo'], expected: expected, cover_url: @inputs.hosting&.direct_url)
+      Draft.new(bodies: bodies, dependencies: dependencies, expected: expected, issues: issues + input_issues)
     end
 
     private
+
+    def expected
+      @values.merge('pages' => @inputs.structure['page_count'], 'documents' => @inputs.structure['spine_documents'],
+        'print_isbn' => @inputs.fact('isbn_kind') == 'print' ? @inputs.fact('isbn') : nil,
+        'release_name' => @inputs.prepared? ? @inputs.preparation.release_name : nil)
+    end
 
     def description_values
       @values.transform_values { |value| Policy.escape(value) }.merge('cover' => @inputs.hosting&.direct_url.to_s)

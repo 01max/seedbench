@@ -25,4 +25,20 @@ RSpec.describe Content::Render do
     expect(document.text).to include('[b]literal')
     expect(document.css('strong')).to be_empty
   end
+
+  it 'bounds deeply nested or oversized markup without changing its source' do
+    source = ('[b]' * 1000) + 'content' + ('[/b]' * 1000)
+    result = described_class.call(source: source)
+    expect(result.errors).to include('markup_limit')
+    expect(source).to start_with('[b]' * 1000)
+    expect(described_class.call(source: 'x' * 250_001).errors).to include('markup_limit')
+  end
+
+  it 'rejects unsafe style attributes and keeps passive tags safe' do
+    html = described_class.call(source: '[color=url(javascript:bad)]text[/color][spoiler=Lire]secret[/spoiler][size=12]taille[/size][hr]').html
+    document = Nokogiri::HTML5.fragment(html)
+    expect(document.css('[style]').pluck('style').join).not_to include('javascript', 'url(')
+    expect(document.at_css('details summary').text).to eq('Lire')
+    expect(document.at_css('hr')).to be_present
+  end
 end

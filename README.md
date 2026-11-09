@@ -33,7 +33,8 @@ light themes, compact desktop review, and narrower screens.
 > [!NOTE]
 > **Development preview.** Batch upload and persistent local review are available.
 > Background ebook inspection and source-linked fact review are also available.
-> Content assembly, torrent preparation, cover hosting, AI
+> Local BBCode/NFO generation and safe preview are available.
+> Torrent preparation, cover hosting, AI
 > assistance, C411 drafts/publication, and seeding are still being built.
 > Prepare, Draft, and Publish are currently disabled.
 
@@ -46,6 +47,7 @@ light themes, compact desktop review, and narrower screens.
 | **Inspect without rewriting** | Background EPUB/PDF/MOBI inspection checks structure and extracts metadata, page or document counts, text samples, and cover candidates. Optional PDF OCR leaves the original untouched. |
 | **Compare edition evidence** | Look up an ISBN in Open Library, compare source-linked candidates, and explicitly adopt reviewed facts. Checksum validity and digital-edition authenticity remain separate. |
 | **Review in one place** | Edit metadata, presentation, notes, and complete BBCode/NFO. Open files, source evidence, history, and an escaped local prose preview when needed. |
+| **Assemble release text** | Generate exact-template BBCode and factual NFO as reviewable proposals. Preview unsaved BBCode safely, keep full manual edits, and review text affected by changed facts or covers. |
 | **Keep your edits** | Autosave while you work or use Save and next. Failed saves keep your text and selected book; concurrent edits require an explicit choice. |
 | **Follow the checks** | Keep manual review marks with reversible history. Automatic checks reflect recorded observations, and uncertainty acknowledgements stay tied to their findings. |
 | **Choose your workspace** | Use dark or light mode, switch tabs from the keyboard, and review on desktop or narrower screens. |
