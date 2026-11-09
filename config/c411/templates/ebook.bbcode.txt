@@ -1,0 +1,18 @@
+[center][img]%{cover}[/img][/center]
+
+[center][b]%{title}[/b][/center]
+
+
+
+[b]Auteur(s) :[/b] %{author}
+[b]Éditeur :[/b] %{publisher}
+[b]Parution :[/b] %{publication_year}
+[b]ISBN numérique :[/b] %{digital_isbn}
+[b]Langue :[/b] %{language}
+
+[b]Présentation :[/b] %{presentation}
+
+[b]Fichier(s) :[/b] %{files}
+[b]Taille :[/b] %{size}
+
+Notes supplémentaire : %{notes}

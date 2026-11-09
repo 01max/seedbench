@@ -89,7 +89,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .work-warning, .work-alert { padding: 6px 8px; color: var(--warning); background: var(--warning-bg); border-radius: 3px; font-size: 11px; margin-bottom: 9px !important; }
 .editor-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 8px; margin-block: 9px 10px; }
 .editor-fields label { display: block; color: var(--muted); font-size: 11px; }
-.editor-fields input, .editor-area textarea { display: block; width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 3px; background: var(--inset); padding: 4px 6px; margin-top: 3px; color: var(--foreground); }
+.editor-fields :is(input, select), .editor-area textarea { display: block; width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 3px; background: var(--inset); padding: 4px 6px; margin-top: 3px; color: var(--foreground); }
 .editor-section { display: block; margin: 8px 0 5px; }
 .editor-area textarea { resize: vertical; min-height: 168px; padding: 8px; font-size: 12px; line-height: 1.55; }
 .editor-area .code-editor { min-height: 439px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; line-height: 1.7; }
@@ -197,3 +197,32 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .inspection-measures { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; margin: .75rem 0; }
 .inspection-measures dd { margin: 0; overflow-wrap: anywhere; }
 .source-detail summary { overflow-wrap: anywhere; }
+
+.bbcode-preview { padding: 1rem; border: 1px solid var(--border); background: var(--panel); }
+.rendered-bbcode { line-height: 1.65; overflow-wrap: anywhere; }
+.rendered-bbcode img { display: inline-block; max-width: 100%; max-height: 480px; width: auto; height: auto; }
+.rendered-bbcode ul, .rendered-bbcode ol { padding-inline-start: 1.5rem; list-style: revert; }
+.rendered-bbcode pre { white-space: pre-wrap; background: var(--inset); padding: .75rem; }
+.bb-center { text-align: center; }
+.bb-left { text-align: left; }
+.bb-right { text-align: right; }
+.bb-image-placeholder { display: inline-block; padding: 1rem; border: 1px dashed var(--border); color: var(--muted); }
+
+.content-review { border-bottom: 1px solid var(--border); margin-bottom: .6rem; padding-bottom: .5rem; }
+.content-controls, .content-states { display: flex; flex-wrap: wrap; align-items: start; gap: .4rem; }
+.content-states { color: var(--muted); gap: .5rem 1rem; }
+.content-states details { max-width: 100%; }
+.content-states p { max-width: 45rem; }
+.content-proposal { margin-top: .6rem; }
+.content-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.content-comparison pre { padding: .5rem; background: var(--inset); max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.5 ui-monospace, monospace; }
+@media (max-width: 650px) { .content-comparison { grid-template-columns: 1fr; } }
+
+@media (min-width: 801px) {
+  body:has(#workbench) { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  #workbench { flex: 1; min-height: 0; }
+  .work-layout { height: 100%; min-height: 0; }
+  .work-main, .release-workspace, .editor-area, .work-queue { min-height: 0; }
+  .editor-area, .work-queue { overflow-y: auto; }
+  .release-checklist { max-height: none; min-height: 0; }
+}

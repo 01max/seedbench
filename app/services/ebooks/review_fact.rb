@@ -1,7 +1,7 @@
 module Ebooks
   class ReviewFact
     class InvalidCandidate < StandardError; end
-    FIELDS = %w[title author isbn edition language].freeze
+    FIELDS = %w[title author isbn edition language publisher].freeze
 
     class << self
       def call(release_id:, evidence_id:, candidate_index:, expected_revision:)

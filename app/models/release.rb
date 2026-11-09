@@ -19,6 +19,7 @@
 #  updated_at        :datetime         not null
 #
 class Release < ApplicationRecord
+  has_many :content_proposals, dependent: :restrict_with_exception
   has_many :manual_checks, dependent: :restrict_with_exception
   has_many :workflow_operations, dependent: :restrict_with_exception
   has_many :dispatch_intents, dependent: :restrict_with_exception

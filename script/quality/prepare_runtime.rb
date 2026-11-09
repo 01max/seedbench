@@ -2,6 +2,7 @@ require 'digest'
 require 'net/http'
 require_relative 'runtime_access'
 require_relative 'runtime_workbench'
+require_relative 'runtime_content'
 require_relative 'runtime_uploads'
 require_relative 'runtime_ebooks'
 
@@ -30,6 +31,7 @@ release = Releases::Create.call(title: 'Synthetic runtime book', author: 'Test a
 PayloadRevision.create!(release: release, number: 1, original_filename: 'synthetic.epub', format: 'epub',
   size_bytes: destination.size, sha256: Digest::SHA256.file(destination).hexdigest, locator: destination.basename.to_s)
 RuntimeWorkbench.prepare(release)
+RuntimeContent.prepare(release)
 Rails.application.config.x.storage.fetch(:scratch).join('runtime-release-id').write(release.id.to_s)
 begin
   ApplicationRecord.connection.execute("UPDATE release_events SET name = 'changed'")

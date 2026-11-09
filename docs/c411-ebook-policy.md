@@ -1,7 +1,7 @@
 # C411 ebook policy
 
 Authenticated documentation and the ebook upload form were reviewed on
-2026-11-08. This records published rules and observed form behavior; it does
+2026-11-08 and rechecked through the authenticated browser on 2026-11-09. This records published rules and observed form behavior; it does
 not establish publication acceptance. Production publication remains forbidden.
 See [API observations](c411-api.md) for verified draft fields, attachment shape,
 slot limits, responses, and the remote concurrency limitation.
@@ -85,22 +85,28 @@ The authenticated [API guide](https://c411.org/user/integrations/guide) document
 A tag list does not establish every nesting, escaping, or renderer rule. Literal
 bracket escaping and malformed-tag handling remain unverified. Local preview
 must sanitize active content and unsafe links without claiming exact site
-rendering. HTML is a separate permission-controlled format and must not be
+rendering. The local content policy preserves the operator template and applies
+bounded, conservative tag/attribute rules. Generated literal brackets use numeric
+entities for safe local display; because C411's literal escaping remains unproven,
+those descriptions receive a blocking rendering-review diagnostic before remote
+submission. This does not silently establish a site escaping contract. HTML is a separate permission-controlled format and must not be
 silently substituted for BBCode.
 
 ## Cover quality and allowed hosts
 
 The reviewed ebook, description, upload, creation, and publication pages require
 a representative image but do not specify a numeric cover-resolution minimum.
-The existing operator quality rule supplies the measurable portrait threshold:
-**at least 600 × 900 native pixels at the exact hosted URL**. Enlarged thumbnails
-and upscaled low-detail images do not qualify. Edition correspondence, visible
+The operator quality target is **600 × 900 native pixels at the exact hosted
+URL**, rather than a minimum requirement. A smaller verified portrait is usable
+when it is the available cover; a small image is preferable to no image. Prefer
+native detail over enlarged thumbnails. Edition correspondence, visible
 sharpness, compression artifacts, and watermarks require review. Other aspect
 ratios need documented comparable-detail review; no automatic acceptance
 threshold is asserted for them.
 
 Check both source and hosted dimensions. The synthetic Postimages check served
-512 × 768 from a 600 × 900 source, so it fails the operator's portrait threshold.
+512 × 768 from a 600 × 900 source. It falls below the quality target but remains
+usable as a smaller cover.
 That observation does not establish whether C411 accepts the host.
 
 The [HTML presentation policy](https://c411.org/wiki/prez-html), last modified

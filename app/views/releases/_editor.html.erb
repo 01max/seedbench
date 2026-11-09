@@ -4,6 +4,7 @@
       <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= t("workbench.tabs.#{key}") %></button>
     <% end %>
   </div>
+  <%= render "content_frame" %>
   <p role="alert" class="work-alert" hidden data-editor-target="error"></p>
   <section class="save-conflict" hidden data-editor-target="conflict" aria-label="<%= t("workbench.editor.conflict_label") %>">
     <h2><%= t("workbench.editor.conflict_title") %></h2><p><%= t("workbench.editor.conflict_help") %></p>
@@ -20,6 +21,8 @@
         <label><%= t("workbench.fields.isbn") %><%= form.text_field :isbn, value: @editor_values.fetch("isbn"), maxlength: 64, placeholder: t("workbench.editor.missing_isbn"), data: { edit_field: "isbn" } %></label>
         <label><%= t("workbench.fields.edition") %><%= form.text_field :edition, value: @editor_values.fetch("edition"), maxlength: 2000, data: { edit_field: "edition" } %></label>
         <label><%= t("workbench.fields.language") %><%= form.text_field :language, value: @editor_values.fetch("language"), maxlength: 120, data: { edit_field: "language" } %></label>
+        <% %w[publisher publication_year].each do |field| %><label><%= t("workbench.fields.#{field}") %><%= form.text_field field, value: @editor_values.fetch(field), maxlength: Releases::Save::LIMITS.fetch(field), data: { edit_field: field } %></label><% end %>
+        <label><%= t("workbench.fields.isbn_kind") %><%= form.select :isbn_kind, %w[unknown digital print not_applicable].map { |key| [t("content.isbn_kinds.#{key}", default: key), key] }, { selected: @editor_values.fetch("isbn_kind").presence || "unknown" }, data: { edit_field: "isbn_kind" } %></label>
         <label><%= t("workbench.fields.format") %><input value="<%= @snapshot.payload&.format&.upcase %>" readonly></label>
       </div>
       <label class="editor-section"><%= t("workbench.fields.presentation") %><%= form.text_area :presentation, value: @editor_values.fetch("presentation"), rows: 7, maxlength: 100000, data: { edit_field: "presentation" } %></label>
@@ -40,6 +43,10 @@
   </section>
   <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence_frame" %></section>
   <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
+    <section class="bbcode-preview" data-preview-url="<%= release_content_preview_path(@release) %>">
+      <h2><%= t("content.preview.title") %></h2><p class="editor-hint"><%= t("content.preview.scope") %></p>
+      <p role="alert" hidden data-preview-error></p><article class="rendered-bbcode" data-preview-output aria-live="polite"></article>
+    </section>
     <article class="local-preview"><h2 data-preview-field="title"><%= @release.title %></h2><p data-preview-field="author"><%= @release.author %></p><h3><%= t("workbench.fields.presentation") %></h3><div class="preserved-text" data-preview-field="presentation"><%= content_body(@snapshot, "presentation") %></div><h3><%= t("workbench.fields.notes") %></h3><div class="preserved-text" data-preview-field="notes"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint"><%= t("workbench.editor.preview_hint") %></p></article>
   </section>
 </section>

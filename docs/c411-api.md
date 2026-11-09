@@ -95,7 +95,8 @@ eligibility, names, description/NFO requirements, the standard editor's limits,
 manual torrent settings, and the distinction between published site rules and
 operator choices.
 
-No numerical cover minimum was found in the reviewed pages; 600 × 900 remains
-the operator's measurable portrait rule. The complete image-host allowlist,
+No numerical cover minimum was found in the reviewed pages; 600 × 900 is
+the operator's portrait quality target, with smaller verified covers permitted.
+The complete image-host allowlist,
 Postimages acceptance in standard preview, and the API's seeding timing remain
 unverified. Do not infer publication behavior from successful draft storage.

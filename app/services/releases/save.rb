@@ -9,6 +9,7 @@ module Releases
       end
     end
     LIMITS = { 'title' => 500, 'author' => 500, 'isbn' => 64, 'edition' => 2000, 'language' => 120,
+      'publisher' => 500, 'publication_year' => 4, 'isbn_kind' => 20,
       'presentation' => 100_000, 'notes' => 100_000, 'bbcode' => 250_000, 'nfo' => 250_000 }.freeze
 
     def self.call(release_id:, expected_revision:, changes:)
@@ -52,7 +53,14 @@ module Releases
     end
 
     def valid_value?(field, value)
-      value.is_a?(String) && value.valid_encoding? && value.length <= LIMITS.fetch(field)
+      value.is_a?(String) && value.valid_encoding? && value.length <= LIMITS.fetch(field) && factual_value?(field, value)
+    end
+
+    def factual_value?(field, value)
+      return value.blank? || %w[digital print not_applicable unknown].include?(value) if field == 'isbn_kind'
+      return value.blank? || value.match?(/\A[1-9]\d{0,3}\z/) if field == 'publication_year'
+
+      true
     end
 
     def persist
@@ -61,8 +69,8 @@ module Releases
 
       @revision = @release.input_revision + 1
       append_facts if @payload
-      append_content
       finish_save
+      append_content
       Ebooks::Findings.call(release: @release, payload: @payload) if @payload
     end
 
@@ -81,11 +89,15 @@ module Releases
       end
     end
 
+    def content_dependencies(kind)
+      %w[bbcode nfo].include?(kind) ? Content::Capture.call(release: @release, kind: kind) : {}
+    end
+
     def append_content
       @changes.slice(*EditorValues::CONTENT).each do |kind, body|
         number = @release.content_revisions.where(kind: kind).maximum(:number).to_i + 1
         @release.content_revisions.create!(payload_revision: @payload, kind: kind, body: body, number: number,
-          input_revision: @revision, origin: 'human')
+          input_revision: @revision, origin: 'human', dependencies: content_dependencies(kind))
       end
     end
   end

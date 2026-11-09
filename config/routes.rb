@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   resource :settings, only: %i[show update]
   resources :uploads, only: :create
   resources :releases, only: %i[index show update] do
+    resource :content_action, only: %i[show create]
+    resource :content_preview, only: :create
     resource :evidence, controller: 'ebook_evidence', only: %i[show create]
     resources :fact_reviews, controller: 'ebook_reviews', only: :create
     resources :cover_candidates, controller: 'ebook_covers', only: :show

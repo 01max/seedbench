@@ -17,6 +17,7 @@ export default class extends Controller {
   disconnect() {
     this.connected = false
     clearTimeout(this.timer)
+    this.previewRequest?.abort()
     window.removeEventListener("beforeunload", this.unloadGuard)
   }
 
@@ -252,6 +253,34 @@ export default class extends Controller {
   preview() {
     const values = this.valuesFromForm()
     this.element.querySelectorAll("[data-preview-field]").forEach(node => { node.textContent = values[node.dataset.previewField] || "" })
+    const panel = this.element.querySelector("#panel-preview")
+    if (!panel || panel.hidden) return
+    this.loadPreview(values.bbcode)
+  }
+
+  async loadPreview(source) {
+    this.previewRequest?.abort()
+    const request = new AbortController()
+    this.previewRequest = request
+    const panel = this.element.querySelector("[data-preview-url]")
+    const error = panel.querySelector("[data-preview-error]")
+    try {
+      const response = await fetch(panel.dataset.previewUrl, {
+        method: "POST", credentials: "same-origin", signal: request.signal,
+        headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content || "" },
+        body: JSON.stringify({ preview: { bbcode: source } })
+      })
+      if (!response.ok) throw new Error()
+      const data = await response.json()
+      if (!this.connected || request !== this.previewRequest || this.valuesFromForm().bbcode !== source) return
+      panel.querySelector("[data-preview-output]").innerHTML = data.html
+      error.textContent = data.errors.join(" ")
+      error.hidden = data.errors.length === 0
+    } catch (failure) {
+      if (failure.name === "AbortError" || request !== this.previewRequest) return
+      error.textContent = this.messagesValue.preview_failed
+      error.hidden = false
+    }
   }
 
   remember() {
