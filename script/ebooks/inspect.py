@@ -5,6 +5,7 @@ import pathlib
 import re
 import sys
 import subprocess
+import struct
 import xml.etree.ElementTree as ET
 import zipfile
 from urllib.parse import unquote, urlsplit
@@ -166,12 +167,57 @@ def pdf(source, work, ocr):
             "metadata": metadata, "samples": samples, "covers": covers}
 
 
+def mobi(source, work):
+    with open(source, "rb") as stream:
+        header = stream.read(78)
+        require(len(header) == 78 and header[60:68] == b"BOOKMOBI", "signature_mismatch")
+        count = struct.unpack_from(">H", header, 76)[0]
+        require(1 < count <= 65535, "corrupt")
+        table = stream.read(count * 8)
+        require(len(table) == count * 8, "corrupt")
+        offsets = [struct.unpack_from(">I", table, i * 8)[0] for i in range(count)]
+        stream.seek(0, 2)
+        size = stream.tell()
+        require(offsets[0] >= 78 + count * 8 and offsets[-1] < size and all(a < b for a, b in zip(offsets, offsets[1:])), "corrupt")
+        stream.seek(offsets[0])
+        record = stream.read(min(offsets[1] - offsets[0], 1024))
+    require(len(record) >= 132 and record[16:20] == b"MOBI", "corrupt")
+    compression, = struct.unpack_from(">H", record, 0)
+    encryption, = struct.unpack_from(">H", record, 12)
+    length, = struct.unpack_from(">I", record, 20)
+    records, = struct.unpack_from(">H", record, 8)
+    require(encryption == 0, "encrypted")
+    require(compression in (1, 2, 17480), "unsupported_compression")
+    require(116 <= length <= offsets[1] - offsets[0] - 16 and 0 < records < count, "corrupt")
+    link = work / "source.mobi"
+    link.symlink_to(source)
+    command(["ebook-meta", str(link), "--to-opf", str(work / "metadata.opf"), "--get-cover", str(work / "cover.jpg")], work)
+    metadata = xml((work / "metadata.opf").read_bytes())
+    observations = [{"field": {"creator": "author", "identifier": "isbn"}.get(local(node.tag), local(node.tag)),
+                     "value": text(node)[:2000], "source": "mobi:metadata:" + local(node.tag)}
+                    for node in metadata.iter() if local(node.tag) in ("title", "creator", "identifier", "publisher", "language", "date") and text(node)]
+    command(["ebook-convert", str(link), str(work / "book.txt")], work)
+    require(0 < (work / "book.txt").stat().st_size <= MAX_ENTRY, "resource_limit")
+    content = (work / "book.txt").read_text(errors="replace")
+    require(bool(content.strip()), "corrupt")
+    covers = [cover((work / "cover.jpg").read_bytes(), "mobi:embedded-cover", work)] if (work / "cover.jpg").exists() else []
+    return {"metadata": observations, "structure": {"palm_records": count, "text_records": records,
+            "text_characters": len(content), "page_count": None, "scope": "PalmDB structure and Calibre text extraction"},
+            "samples": [{"source": "mobi:text:start", "text": content[:SAMPLE]},
+                        {"source": "mobi:text:end", "text": content[-SAMPLE:]}], "covers": covers}
+
+
 def main():
     source, format_name, workspace = sys.argv[1:4]
     work = pathlib.Path(workspace)
     try:
-        require(format_name in ("epub", "pdf"), "unsupported_format")
-        result = epub(source, work) if format_name == "epub" else pdf(source, work, sys.argv[4] == "true")
+        require(format_name in ("epub", "pdf", "mobi"), "unsupported_format")
+        if format_name == "epub":
+            result = epub(source, work)
+        elif format_name == "pdf":
+            result = pdf(source, work, sys.argv[4] == "true")
+        else:
+            result = mobi(source, work)
         result["parser"] = format_name + "-1"
         result["error"] = None
     except subprocess.TimeoutExpired:

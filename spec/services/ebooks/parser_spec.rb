@@ -67,4 +67,29 @@ RSpec.describe Ebooks::Parser do
     expect(payload.sha256).to eq(Digest::SHA256.file(directory.join("scan.pdf")).hexdigest)
   end
 
+
+  context "with MOBI content" do
+    before do
+      system("python3", Rails.root.join("script/ebooks/fixtures.py").to_s, directory.to_s, "mobi", exception: true)
+    end
+
+    it "extracts metadata and text through Calibre after validating PalmDB" do
+      _, payload, report = inspect_fixture(name: "book.mobi")
+      expect(report).to include("error" => nil, "structure" => include("text_records" => be_positive))
+      expect(report.fetch("metadata")).to include(include("field" => "title", "value" => "Synthetic book"))
+      expect(report.fetch("samples").first.fetch("text")).to include("Sample text")
+      expect(payload.sha256).to eq(Digest::SHA256.file(directory.join("book.mobi")).hexdigest)
+    end
+
+    it "rejects encrypted content before invoking conversion" do
+      path = directory.join("book.mobi")
+      bytes = path.binread
+      first_record = bytes.byteslice(78, 4).unpack1("N")
+      bytes[first_record + 12, 2] = [ 1 ].pack("n")
+      path.binwrite(bytes)
+      _, _, report = inspect_fixture(name: "book.mobi")
+      expect(report).to eq("error" => "encrypted")
+    end
+  end
+
 end

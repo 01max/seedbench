@@ -3,6 +3,8 @@ import io
 import pathlib
 import sys
 import zipfile
+import os
+import subprocess
 from PIL import Image
 
 
@@ -41,3 +43,6 @@ if __name__ == "__main__":
     root = pathlib.Path(sys.argv[1])
     epub(root)
     pdf(root)
+    if len(sys.argv) > 2 and sys.argv[2] == "mobi":
+        subprocess.run(["ebook-convert", str(root / "book.epub"), str(root / "book.mobi"), "--mobi-file-type", "old"],
+                       env={**os.environ, "QT_QPA_PLATFORM": "offscreen"}, stdout=subprocess.DEVNULL, check=True)
