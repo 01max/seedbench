@@ -3,6 +3,9 @@ fr:
   messages:
     authentication:
       password_console:
+        new_password: 'Nouveau mot de passe : '
+        confirm_password: 'Confirmez le mot de passe : '
+        password_saved: Mot de passe enregistré. Toutes les sessions précédentes sont révoquées.
         un_terminal_interactif_est_requis_aucun: Un terminal interactif est requis;
           aucun mot de passe ne doit être passé en argument.
         saisie_interrompue_le_mot_de_passe: Saisie interrompue; le mot de passe reste

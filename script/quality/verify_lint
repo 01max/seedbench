@@ -23,7 +23,7 @@ end
 
 additional = [
   [ 'Seedbench/PrivateClassHelpers', [ 'app/services/lint_gate_probe.rb', 'private_class_method :helper' ] ],
-  *[ "{ message: 'Ready' }", "{ message: \"Hello \#{name}\" }", "Providers::Failure.new('network_error', 'Retry')", "render plain: 'Ready'", "super('Retry')", "flash.now[:notice] = 'Saved'", "message = 'Retry'" ].map do |input|
+  *[ "{ message: 'Ready' }", "{ message: \"Hello \#{name}\" }", "Providers::Failure.new('network_error', 'Retry')", "render plain: 'Ready'", "super('Retry')", "flash.now[:notice] = 'Saved'", "message = 'Retry'", "output.puts 'Saved'", "{ prompt: 'Password' }" ].map do |input|
     [ 'Seedbench/LocalizedMessages', [ 'app/services/lint_gate_probe.rb', input ] ]
   end
 ]

@@ -5,7 +5,7 @@ module RuboCop
     module Seedbench
       class LocalizedMessages < Base
         MSG = 'Move messages to config/locales and use I18n.t (or t).'
-        MESSAGE_KEYS = %i[message check_message notice alert subject].freeze
+        MESSAGE_KEYS = %i[message check_message notice alert subject prompt].freeze
 
         def on_pair(node)
           key, value = *node
@@ -14,7 +14,7 @@ module RuboCop
 
         def on_send(node)
           arguments = node.arguments
-          if %i[raise fail].include?(node.method_name)
+          if %i[raise fail puts print warn abort getpass].include?(node.method_name)
             arguments.each { |argument| check(argument) }
           elsif node.method_name == :new && node.receiver&.const_type?
             name = node.receiver.const_name
