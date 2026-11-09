@@ -33,10 +33,18 @@ module Content
       end
 
       def append(release, proposal, inputs, kind, body)
+        validate_size!(kind, body)
         release.content_revisions.create!(kind: kind, body: body, number: release.content_revisions.where(kind: kind).maximum(:number).to_i + 1,
           origin: proposal.kind == 'cover' ? 'human' : 'generated', input_revision: release.input_revision + 1,
           payload_revision: inputs.payload, preparation_revision: inputs.preparation, cover_revision: inputs.cover,
           dependencies: proposal.dependencies.fetch(kind).merge('proposal_id' => proposal.id))
+      end
+
+      def validate_size!(kind, body)
+        return if body.length <= Releases::Save::LIMITS.fetch(kind)
+
+        message = I18n.t('workbench.errors.invalid_value', field: I18n.t("workbench.fields.#{kind}"))
+        raise Releases::Save::InvalidChanges.new(kind => message)
       end
 
       def apply(release, proposal)

@@ -21,6 +21,17 @@ RSpec.describe Content::Accept do
     expect(release.content_revisions.where(kind: 'bbcode').last.body).to eq('New human text')
   end
 
+  it 'rejects oversized generated text while keeping the full editor saveable' do
+    prose = 'A & B. ' * 14_000
+    Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { presentation: prose, notes: prose })
+    candidate = Content::Propose.call(release_id: release.id, expected_revision: release.reload.input_revision, kind: 'bbcode')
+
+    expect { described_class.call(release_id: release.id, proposal_id: candidate.id, expected_revision: release.input_revision) }.to raise_error(Releases::Save::InvalidChanges)
+    expect(release.content_revisions.where(kind: 'bbcode').sole.body).to eq('Human text')
+    values = Releases::EditorValues.call(release: release.reload).merge('author' => 'Corrected author')
+    expect { Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: values) }.not_to raise_error
+  end
+
   it 'rejects a proposal whose edition facts changed' do
     proposal
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { publisher: 'New publisher' })

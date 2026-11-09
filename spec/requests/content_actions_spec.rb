@@ -31,4 +31,18 @@ RSpec.describe 'Content review actions' do
     expect(response).to have_http_status(:unprocessable_content)
     expect(release.content_proposals).to be_empty
   end
+
+  it 'renders a validation error without replacing saved text for an oversized proposal' do
+    prose = 'A & B. ' * 14_000
+    Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { presentation: prose, notes: prose })
+    proposal = Content::Propose.call(release_id: release.id, expected_revision: release.reload.input_revision, kind: 'bbcode')
+    sign_in_operator
+
+    post release_content_action_path(release), params: { content: { kind: 'accept', proposal_id: proposal.id, expected_revision: release.input_revision } }
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include(I18n.t('workbench.errors.invalid_value', field: I18n.t('workbench.fields.bbcode')))
+    expect(release.content_revisions.where(kind: 'bbcode').sole.body).to eq('Human text')
+    expect(release.reload.input_revision).to eq(proposal.input_revision)
+  end
 end
