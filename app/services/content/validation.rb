@@ -39,7 +39,7 @@ module Content
     end
 
     def mismatches(fields)
-      @expected.filter_map do |field, value|
+      @expected.except('presentation', 'notes').filter_map do |field, value|
         issue('fact_mismatch', field) if fields.key?(field) && CGI.unescapeHTML(fields[field]) != value.to_s
       end
     end

@@ -1,6 +1,18 @@
 fr:
+  number:
+    format:
+      separator: ","
+      delimiter: " "
   content:
+    french: "Français"
     unknown: "À renseigner"
+    not_applicable: "Non applicable"
+    bytes: "%{count} octets (%{value} %{unit})"
+    isbn_kinds:
+      unknown: "À vérifier"
+      digital: "ISBN de cette édition numérique"
+      print: "ISBN de l’édition imprimée"
+      not_applicable: "Pas d’ISBN numérique applicable"
     no_notes: "Aucune."
     nfo:
       title: "Titre"
@@ -20,6 +32,7 @@ fr:
       release_name: "Release"
     errors:
       invalid_attribute: "Une balise contient une adresse, un attribut ou un contenu non autorisé."
+      french_required: "Confirmez la présence de français dans la langue retenue."
       unsupported_tag: "Une balise BBCode n’est pas prise en charge par la politique locale."
       unclosed_tag: "Une balise BBCode n’est pas fermée."
       invalid_nesting: "Les balises BBCode sont mal imbriquées."
@@ -33,3 +46,12 @@ fr:
       fact_mismatch: "La valeur %{field} ne correspond pas aux faits retenus."
       nfo_size: "Le NFO dépasse la limite de 3 Mo."
       nfo_field: "Le NFO doit renseigner une seule fois la valeur exacte : %{field}."
+  workbench:
+    fields:
+      publisher: "Éditeur"
+      publication_year: "Année de parution"
+      isbn_kind: "Nature de l’ISBN"
+      cover: "Couverture"
+      digital_isbn: "ISBN numérique"
+      files: "Fichier(s)"
+      size: "Taille"

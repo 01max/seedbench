@@ -9,6 +9,7 @@ module Releases
       end
     end
     LIMITS = { 'title' => 500, 'author' => 500, 'isbn' => 64, 'edition' => 2000, 'language' => 120,
+      'publisher' => 500, 'publication_year' => 4, 'isbn_kind' => 20,
       'presentation' => 100_000, 'notes' => 100_000, 'bbcode' => 250_000, 'nfo' => 250_000 }.freeze
 
     def self.call(release_id:, expected_revision:, changes:)
@@ -52,7 +53,14 @@ module Releases
     end
 
     def valid_value?(field, value)
-      value.is_a?(String) && value.valid_encoding? && value.length <= LIMITS.fetch(field)
+      value.is_a?(String) && value.valid_encoding? && value.length <= LIMITS.fetch(field) && factual_value?(field, value)
+    end
+
+    def factual_value?(field, value)
+      return value.blank? || %w[digital print not_applicable unknown].include?(value) if field == 'isbn_kind'
+      return value.blank? || value.match?(/\A[1-9]\d{0,3}\z/) if field == 'publication_year'
+
+      true
     end
 
     def persist
