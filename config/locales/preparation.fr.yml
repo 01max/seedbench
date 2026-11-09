@@ -1,6 +1,9 @@
 fr:
   preparation:
     errors:
+      invalid_torrent: "Le torrent ne décrit pas exactement un fichier privé avec le nom, la taille et les morceaux attendus."
+      torrent_mismatch: "Les empreintes des morceaux du torrent ne correspondent pas au fichier canonique."
+      torrent_creation: "La création locale du torrent a échoué ou dépassé le délai prévu. Le livre est conservé à son emplacement enregistré."
       published_locked: "Le nom d’un fichier publié, en cours de publication ou déjà confié au client torrent est verrouillé."
       operation_expired: "La préparation a été interrompue. Attendez sa reprise avant de recommencer."
       mapping_changed: "Le montage a changé depuis le début du déplacement. Rétablissez la racine d’origine avant de reprendre."
