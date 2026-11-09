@@ -25,6 +25,7 @@
 #  release_id  (release_id => releases.id)
 #
 class PayloadRevision < ApplicationRecord
+  has_many :payload_moves, foreign_key: [ :release_id, :payload_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :payload_revision, dependent: :restrict_with_exception
   has_many :preparation_revisions, foreign_key: [ :release_id, :payload_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :payload_revision, dependent: :restrict_with_exception
   has_many :evidence_items, foreign_key: [ :release_id, :payload_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :payload_revision, dependent: :restrict_with_exception
   has_many :reviewed_facts, foreign_key: [ :release_id, :payload_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :payload_revision, dependent: :restrict_with_exception

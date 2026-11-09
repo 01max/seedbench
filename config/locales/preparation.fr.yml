@@ -1,4 +1,10 @@
 fr:
   preparation:
     errors:
+      unsafe_path: "Chemin non sûr : utilisez les racines montées, sans lien symbolique ni traversée de dossier."
+      storage_unavailable: "Stockage indisponible. Vérifiez les montages et les droits du compte de service."
+      payload_changed: "L’identité du fichier a changé : taille, empreinte ou emplacement différent. Le fichier est conservé ; corrigez le montage ou réimportez-le."
+      collision: "La destination existe ou est réservée pour une autre préparation. Aucun fichier n’a été remplacé."
+      different_filesystem: "Le déplacement doit rester sur le même système de fichiers. Montez le dossier de transit sous la racine des livres."
+      rename_unavailable: "Ce montage ne permet pas le renommage atomique sans remplacement. Vérifiez les droits et le système de fichiers."
       invalid_name: "Renseignez titre, auteur et langue française. Le nom attendu est Titre.Auteur.FRENCH.[EPUB|PDF|MOBI]-Team, sans chemin ni tag vidéo (NOTAG si la team est inconnue)."
