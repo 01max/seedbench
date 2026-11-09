@@ -18,3 +18,31 @@ fr:
     review:
       invalid_isbn: "L’ISBN n’a pas une forme ou une clé de contrôle valide. Cela ne vérifie pas l’édition."
       invalid_candidate: "Cette proposition n’appartient pas au fichier actuel ou ne peut pas être adoptée."
+    inspection_required: "Une inspection réussie du fichier actuel est nécessaire."
+    unknown_action: "Cette analyse n’est pas disponible pour ce fichier."
+    queued: "Analyse demandée. Actualisez les Sources lorsque l’opération est terminée dans la checklist."
+    lookup_isbn: "ISBN à rechercher"
+    scope: "Les données extraites et les notices sont des propositions. Vérifiez l’édition et les extraits avant d’adopter une valeur. L’OCR analyse uniquement les pages échantillonnées, sans modifier le PDF."
+    source_record: "Ouvrir la notice d’édition"
+    measurements: "Mesures et données de la source"
+    cover_candidate: "Couverture candidate, non sélectionnée"
+    finding_history: "Historique des constats et des validations"
+    resolved: "Résolu par une nouvelle mesure"
+    actions:
+      refresh: "Actualiser les sources"
+      inspect: "Relancer l’inspection"
+      ocr: "Analyser les pages avec OCR"
+      lookup: "Chercher l’édition"
+      adopt: "Adopter cette valeur"
+    checksum:
+      valid: "Clé de contrôle valide · édition à vérifier"
+      invalid: "Identifiant absent ou clé invalide"
+    acknowledgement:
+      yes: "Incertitude acceptée"
+      no: "Acceptation retirée"
+    findings:
+      inspection_failure: "Le fichier ne peut pas être vérifié."
+      sampled_pages: "Des pages échantillonnées n’ont pas de texte extractible : vérifiez le scan et sa complétude."
+      edition_conflict: "Des sources proposent des faits différents. Comparez l’édition et les preuves avant de continuer."
+      edition_medium: "La notice décrit une édition ; elle ne prouve pas que ce fichier est une édition numérique officielle."
+      invalid_reviewed_isbn: "L’ISBN retenu a une clé de contrôle invalide. Corrigez cette valeur avant de continuer."

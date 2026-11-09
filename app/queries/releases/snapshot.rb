@@ -26,7 +26,7 @@ module Releases
 
     def self.current_findings(release)
       payload = release.payload_revisions.order(number: :desc).limit(1).select(:id)
-      latest(release.findings.where(payload_revision_id: payload), :code)
+      latest(release.findings.where(payload_revision_id: payload), :code).where("json_extract(data, '$.resolved') IS NOT 1")
     end
     private_class_method :current_findings
 

@@ -14,6 +14,11 @@ export default class extends Controller {
       tab.setAttribute("aria-selected", String(selected))
       tab.tabIndex = selected ? 0 : -1
     })
+    const frame = this.panelTargets.find(panel => panel.dataset.panel === key)?.querySelector("turbo-frame[data-evidence-url]")
+    if (frame) {
+      if (frame.src) frame.reload()
+      else frame.src = frame.dataset.evidenceUrl
+    }
     this.dispatch("shown", { detail: { key } })
   }
 

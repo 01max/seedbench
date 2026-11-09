@@ -39,6 +39,7 @@ module Ebooks
       fact = append_unchanged(release, evidence, field, value) if release.input_revision == revision
       release.fact_evidence_links.create!(reviewed_fact: fact, evidence_item: evidence)
       Releases::RecordEvent.call(release_id: release.id, name: "fact.reviewed", actor: "operator", data: { fact_id: fact.id, evidence_id: evidence.id })
+      Findings.call(release: release, payload: evidence.payload_revision)
       release
     end
     private_class_method :accept

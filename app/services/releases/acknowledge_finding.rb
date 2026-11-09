@@ -15,12 +15,17 @@ module Releases
     end
 
     def self.validate_current!(release, finding, number)
-      latest = release.findings.where(code: finding.code).maximum(:number)
-      payload_id = release.payload_revisions.order(number: :desc).pick(:id)
-      raise StaleFinding, I18n.t("workbench.errors.stale_finding") unless latest == finding.number && number == finding.number && payload_id == finding.payload_revision_id
+      raise StaleFinding, I18n.t("workbench.errors.stale_finding") unless current?(release, finding, number)
       raise NotUncertain, I18n.t("workbench.errors.mechanical_failure") unless finding.severity == "uncertainty"
     end
     private_class_method :validate_current!
+
+    def self.current?(release, finding, number)
+      latest = release.findings.where(code: finding.code).maximum(:number)
+      payload_id = release.payload_revisions.order(number: :desc).pick(:id)
+      !finding.data["resolved"] && latest == finding.number && number == finding.number && payload_id == finding.payload_revision_id
+    end
+    private_class_method :current?
 
     def self.append(release, finding, acknowledged)
       raise ArgumentError, I18n.t("workbench.errors.invalid_acknowledgement") unless [ true, false ].include?(acknowledged)

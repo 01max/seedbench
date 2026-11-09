@@ -63,6 +63,7 @@ module Releases
       append_facts if @payload
       append_content
       finish_save
+      Ebooks::Findings.call(release: @release, payload: @payload) if @payload
     end
 
     def finish_save

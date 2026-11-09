@@ -108,7 +108,20 @@ export default class extends Controller {
 
   updateRevision(revision) {
     this.revisionInput.value = revision
-    this.element.querySelectorAll('[name="mark[expected_revision]"]').forEach(input => { input.value = revision })
+    this.element.querySelectorAll('[name="mark[expected_revision]"], [data-release-revision]').forEach(input => { input.value = revision })
+  }
+
+  evidenceLoaded(event) {
+    const frame = event.target
+    if (!frame.hasAttribute("data-evidence-revision")) return
+    frame.dispatchEvent(new CustomEvent("evidence:updated", { bubbles: true }))
+    const revision = Number(frame.dataset.evidenceRevision)
+    if (revision <= Number(this.revisionInput.value)) return
+    const values = JSON.parse(frame.dataset.reviewedValues || "null")
+    if (!values) return
+    this.currentServer = { current_revision: revision, values }
+    if (this.dirty || this.saving) this.showConflict(this.currentServer)
+    else this.useServer()
   }
 
   showError(message) {
@@ -166,7 +179,7 @@ export default class extends Controller {
   async beforeSubmit(event) {
     const form = event.target
     if (!(form instanceof HTMLFormElement)) return
-    const reviewRevision = form.querySelector('[name="mark[expected_revision]"]')
+    const reviewRevision = form.querySelector('[name="mark[expected_revision]"], [data-release-revision]')
     if (reviewRevision) reviewRevision.value = this.revisionInput.value
     if (this.bypassedForms.has(form)) {
       this.bypassedForms.delete(form)

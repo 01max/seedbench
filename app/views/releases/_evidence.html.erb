@@ -1,9 +1,16 @@
 <h2><%= t("workbench.evidence.title") %></h2>
 <% if @snapshot.evidence.empty? %><p class="editor-hint"><%= t("workbench.evidence.missing") %></p><% end %>
 <% @snapshot.evidence.each do |item| %>
-  <details class="source-detail"><summary><%= item.source %> · <%= item.kind %></summary><p><%= t("workbench.evidence.captured", key: item.evidence_key, date: l(item.captured_at, format: :short)) %></p><pre><%= JSON.pretty_generate(item.data) %></pre></details>
+  <details class="source-detail"><summary><%= item.source %> · <%= item.kind %></summary><p><%= t("workbench.evidence.captured", key: item.evidence_key, date: l(item.captured_at, format: :short)) %></p><% if item.data["source_url"].to_s.match?(%r{\Ahttps://openlibrary\.org/books/OL\d+M\z}) %><p><%= link_to t("ebooks.source_record"), item.data["source_url"], target: "_blank", rel: "noopener noreferrer" %></p><% end %><%= render "releases/evidence_candidates", item: item %><details><summary><%= t("ebooks.measurements") %></summary><pre><%= JSON.pretty_generate(item.data) %></pre></details></details>
 <% end %>
 <% @snapshot.findings.each do |finding| %><section class="finding-detail"><h3><%= finding.message %></h3><p><%= t("workbench.evidence.finding", severity: t("workbench.evidence.#{finding.severity == 'failure' ? 'failure' : 'uncertainty'}"), number: finding.number) %></p><pre><%= JSON.pretty_generate(finding.data) %></pre></section><% end %>
 <h3><%= t("workbench.evidence.covers") %></h3>
 <% if @snapshot.covers.empty? %><p><%= t("workbench.evidence.no_cover") %></p><% end %>
 <div class="cover-candidates"><% @snapshot.covers.each do |cover| %><article><h4><%= t("workbench.evidence.cover", number: cover.number, source: cover.source_kind) %></h4><p><%= t("workbench.evidence.dimensions", width: cover.width, height: cover.height) %></p><p class="fingerprint"><%= cover.source_locator %></p><pre><%= JSON.pretty_generate(cover.edition_evidence) %></pre></article><% end %></div>
+
+<details class="source-detail"><summary><%= t("ebooks.finding_history") %></summary>
+  <% @release.findings.order(id: :desc).limit(50).includes(:finding_acknowledgements).each do |finding| %>
+    <p><%= finding.message %> · v<%= finding.number %><% if finding.data["resolved"] %> · <%= t("ebooks.resolved") %><% end %></p>
+    <% finding.finding_acknowledgements.each do |ack| %><small><%= l(ack.created_at, format: :short) %> · <%= t("ebooks.acknowledgement.#{ack.acknowledged ? 'yes' : 'no'}") %></small><% end %>
+  <% end %>
+</details>

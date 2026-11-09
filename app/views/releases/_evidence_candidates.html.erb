@@ -1,0 +1,17 @@
+<% Array(item.data["candidates"]).each_with_index do |candidate, index| %>
+  <article class="fact-candidate">
+    <p><strong><%= t("workbench.fields.#{candidate['field']}", default: candidate["field"]) %></strong> : <%= candidate["value"] %></p>
+    <small><%= candidate["source"] %><% if candidate["field"] == "isbn" %> · <%= t("ebooks.checksum.#{candidate['checksum_valid'] ? 'valid' : 'invalid'}") %><% end %></small>
+    <% if Ebooks::ReviewFact::FIELDS.include?(candidate["field"]) && (candidate["field"] != "isbn" || candidate["checksum_valid"]) %>
+      <%= form_with url: release_fact_reviews_path(@release), scope: :review do |form| %>
+        <%= form.hidden_field :evidence_id, value: item.id %><%= form.hidden_field :candidate_index, value: index %>
+        <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+        <%= form.submit t("ebooks.actions.adopt"), class: "work-button quiet" %>
+      <% end %>
+    <% end %>
+  </article>
+<% end %>
+<% Array(item.data["samples"]).each do |sample| %><blockquote class="evidence-sample"><cite><%= sample["source"] %></cite><p><%= sample["text"] %></p></blockquote><% end %>
+<div class="cover-candidates">
+  <% Array(item.data["covers"]).each do |cover| %><article><%= image_tag release_cover_candidate_path(@release, cover.fetch("sha256"), evidence_id: item.id), alt: t("ebooks.cover_candidate"), loading: "lazy", width: cover["width"], height: cover["height"] %><p><%= cover["source"] %> · <%= cover["width"] %> × <%= cover["height"] %></p></article><% end %>
+</div>

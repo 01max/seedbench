@@ -1,0 +1,22 @@
+<%= turbo_frame_tag dom_id(@release, :evidence), data: { evidence_url: release_evidence_path(@release), evidence_revision: @release.input_revision, reviewed_values: Releases::EditorValues.call(release: @release).to_json } do %>
+  <% if @evidence_error %><p role="alert" class="work-alert"><%= @evidence_error %></p><% end %>
+  <% if @evidence_notice %><p role="status" class="work-warning"><%= @evidence_notice %></p><% end %>
+  <div class="inspection-actions">
+    <%= link_to t("ebooks.actions.refresh"), release_evidence_path(@release), class: "work-button quiet" %>
+    <% if @snapshot.payload %>
+      <% ["inspect", ("ocr" if @snapshot.payload.format == "pdf")].compact.each do |kind| %>
+        <%= form_with url: release_evidence_path(@release), scope: :inspection do |form| %>
+          <%= form.hidden_field :kind, value: kind %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+          <%= form.submit t("ebooks.actions.#{kind}"), class: "work-button" %>
+        <% end %>
+      <% end %>
+      <%= form_with url: release_evidence_path(@release), scope: :inspection, class: "edition-lookup" do |form| %>
+        <%= form.hidden_field :kind, value: "lookup" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+        <%= form.label :isbn, t("ebooks.lookup_isbn") %><%= form.text_field :isbn, maxlength: 64, required: true, value: Releases::EditorValues.call(release: @release)["isbn"] %>
+        <%= form.submit t("ebooks.actions.lookup"), class: "work-button" %>
+      <% end %>
+    <% end %>
+  </div>
+  <p class="editor-hint"><%= t("ebooks.scope") %></p>
+  <%= render "releases/evidence" %>
+<% end %>

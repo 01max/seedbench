@@ -18,7 +18,7 @@
       data-editor-messages-value="<%= t("workbench.editor.messages").to_json %>"
       data-editor-previous-url-value="<%= @queue.previous_id ? queue_path(@queue.previous_id, criteria: @queue.criteria) : "" %>"
       data-editor-next-url-value="<%= @queue.next_id ? queue_path(@queue.next_id, criteria: @queue.criteria) : "" %>"
-      data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember keydown@window->editor#shortcut workspace-tabs:shown->editor#preview"<% end %>>
+      data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember keydown@window->editor#shortcut workspace-tabs:shown->editor#preview turbo:frame-load->editor#evidenceLoaded"<% end %>>
   <div class="work-layout">
     <%= render "queue" %>
     <% if @release %>
