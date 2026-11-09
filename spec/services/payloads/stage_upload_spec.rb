@@ -43,4 +43,13 @@ RSpec.describe Payloads::StageUpload do
     staged = described_class.call(upload: upload)
     expect(staged.size).to eq(22)
   end
+
+  it "preserves every byte value across streamed chunk boundaries" do
+    bytes = (0..255).to_a.pack("C*") * ((described_class::CHUNK_BYTES / 256) + 1)
+    staged = described_class.call(upload: ebook_upload(bytes: bytes))
+
+    expect(staged.path.binread).to eq(bytes)
+    expect(staged.size).to eq(bytes.bytesize)
+    expect(staged.sha256).to eq(Digest::SHA256.hexdigest(bytes))
+  end
 end

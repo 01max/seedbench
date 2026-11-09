@@ -73,7 +73,7 @@ without echo. The default bind is loopback, and the app has one operator account
 
 ### Your first review
 
-1. **Add your ebooks.** Choose **Ajouter des ebooks** and select a batch. Review
+1. **Add your ebooks.** Choose **Importer des ebooks** and select a batch. Review
    any individual upload errors; accepted files appear in the queue.
 2. **Review a book.** Fill in its metadata and presentation, edit the full BBCode
    or NFO, and record manual review marks.

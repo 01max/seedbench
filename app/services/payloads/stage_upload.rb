@@ -59,6 +59,7 @@ module Payloads
       @upload.rewind
       File.open(@path, File::WRONLY | File::CREAT | File::EXCL | File::NOFOLLOW, 0o600) do |output|
         @owns_file = true
+        output.binmode
         size = copy_chunks(output, digest)
         output.flush
         output.fsync

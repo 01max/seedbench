@@ -1,0 +1,21 @@
+<% messages = flash.select { |_name, message| message.present? } %>
+<% if messages.any? %>
+  <section class="flash-stack" aria-label="<%= t("workbench.notifications.label") %>">
+    <% messages.each do |name, message| %>
+      <% rejected_files = name == "upload_errors" ? Array(message) : [] %>
+      <% error = name == "alert" || rejected_files.any? %>
+      <div class="flash-message <%= error ? "flash-message--error" : "flash-message--success" %>" role="<%= error ? "alert" : "status" %>" data-controller="notification">
+        <span class="flash-icon" aria-hidden="true"><%= error ? "!" : "✓" %></span>
+        <div class="flash-content">
+          <% if rejected_files.any? %>
+            <p><%= t("workbench.notifications.upload_errors") %></p>
+            <ul><% rejected_files.each do |rejection| %><li><%= rejection %></li><% end %></ul>
+          <% else %>
+            <p><%= message %></p>
+          <% end %>
+        </div>
+        <button type="button" class="flash-dismiss" aria-label="<%= t("workbench.notifications.dismiss") %>" data-action="notification#dismiss"><span aria-hidden="true">×</span></button>
+      </div>
+    <% end %>
+  </section>
+<% end %>

@@ -23,10 +23,7 @@
         </div>
       </nav>
     <% end %>
-    <% flash.each do |name, message| %>
-      <% next if name == "upload_errors" %>
-      <p role="status" class="mx-auto max-w-5xl px-6 py-3"><%= message %></p>
-    <% end %>
+    <%= render "shared/notifications" %>
     <%= yield %>
   </body>
 </html>
