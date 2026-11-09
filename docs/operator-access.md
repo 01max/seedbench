@@ -58,6 +58,14 @@ sessions when the password salt changes, without deleting session rows manually.
 Invalid input preserves the current password, sessions, and lock state.
 Restarting containers alone does not reset the account or its sessions.
 
+The command must reach the confirmation prompt and print **Mot de passe
+enregistré. Toutes les sessions précédentes sont révoquées.** before login can
+use the new password. Exiting during input leaves the account unchanged. If an older
+image exits silently during input on macOS (exit status 157), rebuild with
+`bin/setup` and retry. The password command handles the forwarded terminal
+status signal; Ctrl-C still cancels entry normally. A successful password change
+is available to the running web service immediately, without restarting it.
+
 Implementation references: [Devise](https://github.com/heartcombo/devise),
 [Rails Active Record session store](https://github.com/rails/activerecord-session_store),
 and the [Rails security guide](https://guides.rubyonrails.org/security.html).
