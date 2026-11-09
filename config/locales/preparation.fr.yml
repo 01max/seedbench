@@ -1,0 +1,4 @@
+fr:
+  preparation:
+    errors:
+      invalid_name: "Renseignez titre, auteur et langue française. Le nom attendu est Titre.Auteur.FRENCH.[EPUB|PDF|MOBI]-Team, sans chemin ni tag vidéo (NOTAG si la team est inconnue)."
