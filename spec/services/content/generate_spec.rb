@@ -20,6 +20,18 @@ RSpec.describe Content::Generate do
     expect(release.cover_hostings.count).to eq(1)
   end
 
+  it 'generates and accepts NFO for reviewed facts with surrounding whitespace' do
+    author = "  Test author \t "
+    Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { author: author, publisher: ' Synthetic publisher ' })
+    expect(described_class.call(release: release.reload).issues).to be_empty
+
+    proposal = Content::Propose.call(release_id: release.id, expected_revision: release.input_revision, kind: 'nfo')
+    Content::Accept.call(release_id: release.id, proposal_id: proposal.id, expected_revision: release.input_revision)
+
+    expect(Content::Status.call(release: release.reload).kinds['nfo'][:state]).to eq('ready')
+    expect(release.reviewed_facts.where(field: 'author').order(:number).last.value).to eq(author)
+  end
+
   it 'does not turn a print ISBN into a digital ISBN' do
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { isbn_kind: 'print' })
     result = described_class.call(release: release.reload)

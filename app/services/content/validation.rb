@@ -57,7 +57,7 @@ module Content
       expected = @expected[field]
       return false unless expected_available?(field, expected) && nfo_value?(lines)
 
-      !expected || lines.first == expected.to_s.gsub(/[\r\n]+/, ' ')
+      !expected || lines.first == expected.to_s.gsub(/[\r\n]+/, ' ').strip
     end
 
     def expected_available?(field, expected)
@@ -71,7 +71,7 @@ module Content
     def nfo_lines(field)
       labels = [ I18n.t("content.nfo.#{field}") ] + Array(I18n.t("content.nfo_aliases.#{field}", default: []))
       pattern = /\A(?:#{Regexp.union(labels)}) : (.*)\z/
-      @nfo.lines.filter_map { |line| pattern.match(line.strip)&.captures&.first }
+      @nfo.lines.filter_map { |line| pattern.match(line.strip)&.captures&.first&.strip }
     end
 
     def issue(code, field = nil)

@@ -21,6 +21,11 @@ RSpec.describe Content::Validation do
     expect(errors(nfo_body: '')).to include('nfo_field')
   end
 
+  it 'ignores surrounding NFO whitespace while still rejecting different facts' do
+    expect(errors(nfo_body: nfo.sub('Value author', "\t Value author \t"))).to be_empty
+    expect(errors(nfo_body: nfo.sub('Value author', "Different author \t"))).to include('nfo_field')
+  end
+
   it 'rejects missing, duplicate, or reordered template labels' do
     expect(errors(bbcode: body.sub('[b]Langue :[/b]', '[b]Language :[/b]'))).to include('template')
     expect(errors(bbcode: body + 'Auteur(s) :')).to include('template')
