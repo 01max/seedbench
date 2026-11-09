@@ -28,7 +28,7 @@ module Releases
       def evidence(release)
         recent = release.evidence_items.order(id: :desc).limit(20).pluck(:id)
         payload_id = release.payload_revisions.order(number: :desc).pick(:id)
-        inspection = release.evidence_items.where(kind: "inspection", payload_revision_id: payload_id).order(id: :desc).pick(:id)
+        inspection = release.evidence_items.where(kind: 'inspection', payload_revision_id: payload_id).order(id: :desc).pick(:id)
         release.evidence_items.where(id: recent + [ inspection ]).order(id: :desc).to_a
       end
 
@@ -38,7 +38,7 @@ module Releases
       end
 
       def latest(relation, group)
-        relation.where(id: relation.select("MAX(id)").group(group))
+        relation.where(id: relation.select('MAX(id)').group(group))
       end
     end
   end

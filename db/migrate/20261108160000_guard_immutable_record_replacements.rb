@@ -22,7 +22,7 @@ class GuardImmutableRecordReplacements < ActiveRecord::Migration[8.1]
 
   private
     def replacement_keys(table)
-      natural_keys = connection.indexes(table).select(&:unique).map(&:columns).reject { |columns| columns.include?("id") }
+      natural_keys = connection.indexes(table).select(&:unique).map(&:columns).reject { |columns| columns.include?('id') }
       [ [ connection.primary_key(table) ] ] + natural_keys.sort
     end
 
@@ -31,7 +31,7 @@ class GuardImmutableRecordReplacements < ActiveRecord::Migration[8.1]
     end
 
     def create_guard(table, columns, index)
-      predicate = columns.map { |column| "#{connection.quote_column_name(column)} = NEW.#{connection.quote_column_name(column)}" }.join(" AND ")
+      predicate = columns.map { |column| "#{connection.quote_column_name(column)} = NEW.#{connection.quote_column_name(column)}" }.join(' AND ')
       message = "UNIQUE constraint failed: #{columns.map { |column| "#{table}.#{column}" }.join(', ')}"
       execute <<~SQL.squish
         CREATE TRIGGER #{connection.quote_table_name(trigger_name(table, index))}

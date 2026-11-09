@@ -11,7 +11,7 @@ module Releases
           id = defaults.connection_ids[role]
           release.provider_assignments.create!(role: role, provider_connection_id: id, assigned_at: id ? Time.current : nil)
         end
-        RecordEvent.call(release_id: release.id, name: "release.created", actor: "operator")
+        RecordEvent.call(release_id: release.id, name: 'release.created', actor: 'operator')
         release
       end
     end

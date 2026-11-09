@@ -15,6 +15,6 @@ class EbookReviewsController < ApplicationController
 
   def render_evidence(status: :ok)
     @snapshot = Releases::Snapshot.call(release: @release)
-    render partial: "releases/evidence_frame", status: status
+    render partial: 'releases/evidence_frame', status: status
   end
 end

@@ -5,7 +5,7 @@ module Releases
     def initialize(expected_revision:, actual_revision:)
       @expected_revision = expected_revision
       @actual_revision = actual_revision
-      super("Release inputs changed; reload the current revision before retrying.")
+      super(I18n.t('messages.releases.revision_conflict.release_inputs_changed_reload_the_current'))
     end
   end
 end

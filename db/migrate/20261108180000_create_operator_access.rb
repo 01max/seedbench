@@ -4,7 +4,7 @@ class CreateOperatorAccess < ActiveRecord::Migration[8.1]
       t.string :password_digest, null: false
       t.timestamps
     end
-    add_check_constraint :operators, "id = 1", name: "single_operator"
+    add_check_constraint :operators, 'id = 1', name: 'single_operator'
 
     create_table :login_sessions do |t|
       t.references :operator, null: false, foreign_key: true
@@ -21,6 +21,6 @@ class CreateOperatorAccess < ActiveRecord::Migration[8.1]
       t.timestamps
     end
     add_index :login_throttles, :client_hash, unique: true
-    add_check_constraint :login_throttles, "attempts >= 0", name: "login_attempts_valid"
+    add_check_constraint :login_throttles, 'attempts >= 0', name: 'login_attempts_valid'
   end
 end

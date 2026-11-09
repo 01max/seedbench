@@ -18,24 +18,24 @@ module Releases
       private
 
       def validate_current!(release, finding, number)
-        raise StaleFinding, I18n.t("workbench.errors.stale_finding") unless current?(release, finding, number)
-        raise NotUncertain, I18n.t("workbench.errors.mechanical_failure") unless finding.severity == "uncertainty"
+        raise StaleFinding, I18n.t('workbench.errors.stale_finding') unless current?(release, finding, number)
+        raise NotUncertain, I18n.t('workbench.errors.mechanical_failure') unless finding.severity == 'uncertainty'
       end
 
       def current?(release, finding, number)
         latest = release.findings.where(code: finding.code).maximum(:number)
         payload_id = release.payload_revisions.order(number: :desc).pick(:id)
-        !finding.data["resolved"] && latest == finding.number && number == finding.number && payload_id == finding.payload_revision_id
+        !finding.data['resolved'] && latest == finding.number && number == finding.number && payload_id == finding.payload_revision_id
       end
 
       def append(release, finding, acknowledged)
-        raise ArgumentError, I18n.t("workbench.errors.invalid_acknowledgement") unless [ true, false ].include?(acknowledged)
+        raise ArgumentError, I18n.t('workbench.errors.invalid_acknowledgement') unless [ true, false ].include?(acknowledged)
 
         previous = finding.finding_acknowledgements.order(:id).last
         return previous if (previous&.acknowledged || false) == acknowledged
 
-        acknowledgement = finding.finding_acknowledgements.create!(release: release, acknowledged: acknowledged, actor: "operator")
-        RecordEvent.call(release_id: release.id, name: "finding.acknowledgement_changed", actor: "operator",
+        acknowledgement = finding.finding_acknowledgements.create!(release: release, acknowledged: acknowledged, actor: 'operator')
+        RecordEvent.call(release_id: release.id, name: 'finding.acknowledgement_changed', actor: 'operator',
           data: { finding_id: finding.id, number: finding.number, acknowledged: acknowledged })
         acknowledgement
       end

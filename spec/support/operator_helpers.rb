@@ -1,5 +1,5 @@
 module OperatorHelpers
-  PASSWORD = "Synthetic operator password"
+  PASSWORD = 'Synthetic operator password'
 
   def create_operator
     Operator.create!(id: 1, password: PASSWORD, password_confirmation: PASSWORD)
@@ -13,9 +13,9 @@ module OperatorHelpers
   def sign_in_browser
     create_operator
     visit new_operator_session_path
-    fill_in "Mot de passe", with: PASSWORD
-    click_button "Se connecter"
-    expect(page).to have_button("Se déconnecter")
+    fill_in 'Mot de passe', with: PASSWORD
+    click_button 'Se connecter'
+    expect(page).to have_button('Se déconnecter')
   end
 end
 

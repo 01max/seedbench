@@ -36,12 +36,12 @@ class ProviderConnection < ApplicationRecord
   validate :preserve_recorded_endpoint, on: :update
 
   def configuration_incomplete?
-    endpoint.nil? || credentials.blank? || (role == "ai" && options["model"].blank?)
+    endpoint.nil? || credentials.blank? || (role == 'ai' && options['model'].blank?)
   end
 
   private
 
   def preserve_recorded_endpoint
-    errors.add(:endpoint, "ne peut pas être modifiée une fois configurée") if will_save_change_to_endpoint? && endpoint_in_database
+    errors.add(:endpoint, 'ne peut pas être modifiée une fois configurée') if will_save_change_to_endpoint? && endpoint_in_database
   end
 end

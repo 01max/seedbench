@@ -17,7 +17,7 @@ class ReleaseActionsController < ApplicationController
 
   def render_conflict
     release = Release.find(params.expect(:id))
-    render json: { message: t("workbench.errors.action_conflict"),
+    render json: { message: t('workbench.errors.action_conflict'),
       current_revision: release.input_revision, values: Releases::EditorValues.call(release: release) }, status: :conflict
   end
 end

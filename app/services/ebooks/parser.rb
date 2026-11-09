@@ -1,6 +1,6 @@
-require "digest"
-require "tmpdir"
-require "tempfile"
+require 'digest'
+require 'tmpdir'
+require 'tempfile'
 
 module Ebooks
   class Parser
@@ -17,7 +17,7 @@ module Ebooks
     end
 
     def call
-      Dir.mktmpdir("inspection-", @storage.fetch(:scratch)) do |directory|
+      Dir.mktmpdir('inspection-', @storage.fetch(:scratch)) do |directory|
         @directory = Pathname.new(directory)
         File.open(payload_path, File::RDONLY | File::NOFOLLOW) do |source|
           verify!(source)
@@ -28,9 +28,9 @@ module Ebooks
         end
       end
     rescue UnsafePayload
-      { "error" => "payload_changed" }
+      { 'error' => 'payload_changed' }
     rescue SystemCallError
-      { "error" => "storage_unavailable" }
+      { 'error' => 'storage_unavailable' }
     end
 
     private
@@ -38,7 +38,7 @@ module Ebooks
     def payload_path
       root = @storage.fetch(:payload).realpath
       locator = Pathname.new(@payload.locator)
-      raise UnsafePayload if locator.absolute? || locator.each_filename.include?("..")
+      raise UnsafePayload if locator.absolute? || locator.each_filename.include?('..')
 
       path = root.join(locator)
       raise UnsafePayload unless path.realpath.to_s.start_with?("#{root}/") && !path.symlink?
@@ -59,60 +59,60 @@ module Ebooks
     end
 
     def execute(source)
-      File.open(@directory.join("report"), "w+") do |output|
+      File.open(@directory.join('report'), 'w+') do |output|
         pid = spawn_parser(source, output)
         status = ProcessBudget.call(pid: pid, directory: @directory)
-        return { "error" => status.signaled? ? "resource_limit" : "parser_failed" } unless status.success?
-        return { "error" => "resource_limit" } if output.size > MAX_OUTPUT
+        return { 'error' => status.signaled? ? 'resource_limit' : 'parser_failed' } unless status.success?
+        return { 'error' => 'resource_limit' } if output.size > MAX_OUTPUT
 
         output.rewind
         JSON.parse(output.read)
       rescue ProcessBudget::Exceeded
-        { "error" => "resource_limit" }
+        { 'error' => 'resource_limit' }
       ensure
         stop(pid) if pid
       end
     rescue JSON::ParserError
-      { "error" => "parser_failed" }
+      { 'error' => 'parser_failed' }
     end
 
     def spawn_parser(source, output)
-      environment = { "PATH" => "/usr/bin:/bin", "HOME" => @directory.to_s, "TMPDIR" => @directory.to_s,
-        "LANG" => "C.UTF-8", "QT_QPA_PLATFORM" => "offscreen", "PYTHONNOUSERSITE" => "1" }
-      Process.spawn(environment, "python3", Rails.root.join("script/ebooks/inspect.py").to_s,
-        "/proc/self/fd/3", @payload.format, @directory.to_s, @ocr.to_s, 3 => source,
-        out: output, err: @directory.join("stderr").to_s, chdir: @directory.to_s, unsetenv_others: true,
+      environment = { 'PATH' => '/usr/bin:/bin', 'HOME' => @directory.to_s, 'TMPDIR' => @directory.to_s,
+        'LANG' => 'C.UTF-8', 'QT_QPA_PLATFORM' => 'offscreen', 'PYTHONNOUSERSITE' => '1' }
+      Process.spawn(environment, 'python3', Rails.root.join('script/ebooks/inspect.py').to_s,
+        '/proc/self/fd/3', @payload.format, @directory.to_s, @ocr.to_s, 3 => source,
+        out: output, err: @directory.join('stderr').to_s, chdir: @directory.to_s, unsetenv_others: true,
         pgroup: true, rlimit_as: 1.gigabyte, rlimit_cpu: 60, rlimit_fsize: 32.megabytes, rlimit_nofile: 64)
     end
 
     def stop(pid)
-      Process.kill("KILL", -pid)
+      Process.kill('KILL', -pid)
       Process.wait(pid)
     rescue Errno::ESRCH, Errno::ECHILD
       nil
     end
 
     def retain_covers(report)
-      Array(report["covers"]).each do |candidate|
-        name = candidate.fetch("sha256")
+      Array(report['covers']).each do |candidate|
+        name = candidate.fetch('sha256')
         raise UnsafePayload unless name.match?(/\A[0-9a-f]{64}\z/)
 
         data = @directory.join(name).binread
         raise UnsafePayload unless data.bytesize <= 8.megabytes && Digest::SHA256.hexdigest(data) == name
 
-        candidate.delete("file")
-        candidate["artifact_locator"] = persist_cover(name, data)
+        candidate.delete('file')
+        candidate['artifact_locator'] = persist_cover(name, data)
       end
       report
     end
 
     def persist_cover(name, data)
-      directory = @storage.fetch(:state).join("inspection-covers")
+      directory = @storage.fetch(:state).join('inspection-covers')
       FileUtils.mkdir_p(directory, mode: 0o700)
       raise UnsafePayload if directory.symlink?
 
       path = directory.join(name)
-      Tempfile.create("cover-", directory) do |file|
+      Tempfile.create('cover-', directory) do |file|
         file.binmode.write(data)
         file.flush
         File.link(file.path, path)

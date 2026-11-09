@@ -12,10 +12,10 @@ class ReleasesController < ApplicationController
     release = persist_edits
     respond_to do |format|
       format.json { render json: { revision: release.input_revision } }
-      format.html { redirect_to release_path(release), status: :see_other, notice: t("releases.saved") }
+      format.html { redirect_to release_path(release), status: :see_other, notice: t('releases.saved') }
     end
   rescue Releases::RevisionConflict
-    render_save_error(t("workbench.errors.save_conflict"), :conflict)
+    render_save_error(t('workbench.errors.save_conflict'), :conflict)
   rescue Releases::Save::InvalidChanges => error
     render_save_error(error.message, :unprocessable_content)
   end

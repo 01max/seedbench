@@ -2,15 +2,15 @@ module Ebooks
   class Isbn
     class << self
       def normalize(value)
-        value.to_s.sub(/\A(?:urn:)?isbn:?\s*/i, "").gsub(/[[:space:]-]/, "").upcase
+        value.to_s.sub(/\A(?:urn:)?isbn:?\s*/i, '').gsub(/[[:space:]-]/, '').upcase
       end
 
       def valid?(value)
         isbn = normalize(value)
-        return isbn.start_with?("978", "979") && checksum13(isbn).zero? if isbn.match?(/\A\d{13}\z/)
+        return isbn.start_with?('978', '979') && checksum13(isbn).zero? if isbn.match?(/\A\d{13}\z/)
         return false unless isbn.match?(/\A\d{9}[\dX]\z/)
 
-        isbn.chars.each_with_index.sum { |digit, index| (digit == "X" ? 10 : digit.to_i) * (10 - index) }.modulo(11).zero?
+        isbn.chars.each_with_index.sum { |digit, index| (digit == 'X' ? 10 : digit.to_i) * (10 - index) }.modulo(11).zero?
       end
 
       def canonical(value)

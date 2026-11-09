@@ -4,10 +4,10 @@ module Ebooks
 
     class << self
       def call(report:)
-        metadata = Array(report["metadata"])
-        text_isbns = Array(report["samples"]).flat_map do |sample|
-          sample.fetch("text").scan(ISBN_PATTERN).first(10).map do |value|
-            { "field" => "isbn", "value" => value, "source" => sample.fetch("source") }
+        metadata = Array(report['metadata'])
+        text_isbns = Array(report['samples']).flat_map do |sample|
+          sample.fetch('text').scan(ISBN_PATTERN).first(10).map do |value|
+            { 'field' => 'isbn', 'value' => value, 'source' => sample.fetch('source') }
           end
         end
         (metadata + text_isbns).first(50).uniq.map { |candidate| describe(candidate) }
@@ -16,10 +16,10 @@ module Ebooks
       private
 
       def describe(candidate)
-        return candidate unless candidate.fetch("field") == "isbn"
+        return candidate unless candidate.fetch('field') == 'isbn'
 
-        candidate.merge("checksum_valid" => Isbn.valid?(candidate.fetch("value")),
-          "canonical_isbn" => Isbn.canonical(candidate.fetch("value")), "edition_verified" => false)
+        candidate.merge('checksum_valid' => Isbn.valid?(candidate.fetch('value')),
+          'canonical_isbn' => Isbn.canonical(candidate.fetch('value')), 'edition_verified' => false)
       end
     end
   end

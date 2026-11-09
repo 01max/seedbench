@@ -1,5 +1,5 @@
 Devise.setup do |config|
-  require "devise/orm/active_record"
+  require 'devise/orm/active_record'
 
   # Devise needs identifier metadata for errors; Operator always selects account 1.
   config.authentication_keys = { id: false }

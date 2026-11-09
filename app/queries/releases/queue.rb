@@ -4,12 +4,12 @@ module Releases
     STATES = %w[all review inspection prepared published duplicate].freeze
     Page = Data.define(:records, :selected, :total, :page, :pages, :position, :previous_id, :next_id, :criteria)
 
-    def self.call(q: "", state: "all", page: 1, release_id: nil)
+    def self.call(q: '', state: 'all', page: 1, release_id: nil)
       new(q: q, state: state, page: page, release_id: release_id).call
     end
 
     def initialize(q:, state:, page:, release_id:)
-      @criteria = { q: q.to_s.strip.first(200), state: STATES.include?(state) ? state : "all" }
+      @criteria = { q: q.to_s.strip.first(200), state: STATES.include?(state) ? state : 'all' }
       @scope = filter(search(Release.all)).order(:id)
       @page = [ page.to_i, 1 ].max
       @selected = Release.find(release_id) if release_id.present?
@@ -22,7 +22,7 @@ module Releases
       @selected ||= records.first
       @position ||= records.index(@selected) + 1 + ((@page - 1) * PAGE_SIZE) if records.include?(@selected)
       Page.new(records: records, selected: @selected, total: @total, page: @page, pages: @pages, position: @position,
-        previous_id: neighbor("<", :desc), next_id: neighbor(">", :asc), criteria: @criteria)
+        previous_id: neighbor('<', :desc), next_id: neighbor('>', :asc), criteria: @criteria)
     end
 
     private
@@ -43,20 +43,20 @@ module Releases
 
     def filter(scope)
       case @criteria[:state]
-      when "review" then scope.where.not(publication_state: "published")
-      when "inspection" then scope.where(inspection_state: %w[pending running failed])
-      when "prepared" then scope.where(preparation_state: "prepared")
-      when "published" then scope.where(publication_state: "published")
-      when "duplicate" then scope.where(id: confirmed_duplicate_ids)
+      when 'review' then scope.where.not(publication_state: 'published')
+      when 'inspection' then scope.where(inspection_state: %w[pending running failed])
+      when 'prepared' then scope.where(preparation_state: 'prepared')
+      when 'published' then scope.where(publication_state: 'published')
+      when 'duplicate' then scope.where(id: confirmed_duplicate_ids)
       else scope
       end
     end
 
     def confirmed_duplicate_ids
-      latest_ids = DuplicateCheck.group(:release_id, :input_revision).select("MAX(id)")
+      latest_ids = DuplicateCheck.group(:release_id, :input_revision).select('MAX(id)')
       current_checks = DuplicateCheck.joins(:release).where(id: latest_ids)
-        .where("duplicate_checks.input_revision = releases.input_revision")
-      DuplicateDecision.where(decision: "confirmed", duplicate_check_id: current_checks.select(:id)).select(:release_id)
+        .where('duplicate_checks.input_revision = releases.input_revision')
+      DuplicateDecision.where(decision: 'confirmed', duplicate_check_id: current_checks.select(:id)).select(:release_id)
     end
 
     def neighbor(comparison, order)

@@ -10,9 +10,9 @@ class CreateManualChecks < ActiveRecord::Migration[8.1]
       t.timestamps
     end
     add_index :manual_checks, [ :release_id, :key, :number ], unique: true
-    add_check_constraint :manual_checks, "number > 0 AND input_revision >= 0", name: "manual_check_revisions_valid"
-    add_check_constraint :manual_checks, "key IN ('edition_review', 'text_review') AND actor = 'operator'", name: "manual_check_owner_valid"
-    add_check_constraint :manual_checks, "checked IN (0, 1)", name: "manual_check_boolean_valid"
+    add_check_constraint :manual_checks, 'number > 0 AND input_revision >= 0', name: 'manual_check_revisions_valid'
+    add_check_constraint :manual_checks, "key IN ('edition_review', 'text_review') AND actor = 'operator'", name: 'manual_check_owner_valid'
+    add_check_constraint :manual_checks, 'checked IN (0, 1)', name: 'manual_check_boolean_valid'
     reversible do |direction|
       direction.up { add_history_guards }
     end
