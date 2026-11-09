@@ -12,8 +12,9 @@ The authenticated helper uploaded a synthetic PNG and returned a direct
 image was **512 × 768**. The helper also reported that reduction.
 
 Uploading successfully does not preserve native dimensions or establish cover
-adequacy. The hosted result would fail the operator's 600 × 900 portrait-cover
-preference. Verify returned image properties after every upload; source
+adequacy. The hosted result falls below the operator's 600 × 900 portrait-cover
+quality target and can still be used as a smaller cover. Verify returned image
+properties after every upload; source
 properties cannot satisfy a hosted-image check. No larger re-upload was made,
 and no selected ebook cover was hosted. The synthetic URL and image hashes
 remain in the private evidence inventory.

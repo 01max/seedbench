@@ -16,4 +16,12 @@ RSpec.describe Providers::C411::EbookContent do
     expect(described_class.safe_url?('https://user:secret@example.invalid/image')).to be(false)
     expect(described_class.safe_url?('https://images.invalid/cover.png')).to be(true)
   end
+
+  it 'keeps portrait orientation and valid dimensions without imposing a size minimum' do
+    dimensions = Struct.new(:width, :height)
+
+    expect(described_class.portrait_cover?(dimensions.new(1, 2))).to be(true)
+    expect(described_class.portrait_cover?(dimensions.new(0, 900))).to be(false)
+    expect(described_class.portrait_cover?(dimensions.new(900, 600))).to be(false)
+  end
 end

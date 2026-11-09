@@ -45,6 +45,9 @@ Other image references remain placeholders, so arbitrary pasted image URLs do
 not cause background image requests. Preview never hosts a cover or contacts
 C411. It can read the already-hosted selected image when displayed.
 
+600 × 900 pixels is a cover quality target. Smaller selected, verified portraits
+remain usable for assembly, cover-only proposals and preview.
+
 The local C411 policy checks the exact description skeleton, unique label order,
 size, balanced tags, safe attributes, factual consistency, and selected cover URL.
 NFO checks require readable, nonduplicated title, author, format, language, file

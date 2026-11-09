@@ -18,4 +18,14 @@ RSpec.describe Content::CoverPatch do
     expect { described_class.call(release_id: release.id, expected_revision: release.input_revision) }.to raise_error(described_class::Unavailable)
     expect(release.content_proposals).to be_empty
   end
+
+  it 'offers a cover-only patch for a smaller verified portrait' do
+    body = Content::Generate.call(release: release).bodies['bbcode']
+    Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: body })
+    hosting = add_hosted_content_cover(release, width: 300, height: 450)
+
+    proposal = described_class.call(release_id: release.id, expected_revision: release.reload.input_revision)
+
+    expect(proposal.bodies['bbcode']).to eq(body.sub('https://images.invalid/synthetic.png', hosting.direct_url))
+  end
 end

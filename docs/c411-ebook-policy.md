@@ -96,15 +96,17 @@ silently substituted for BBCode.
 
 The reviewed ebook, description, upload, creation, and publication pages require
 a representative image but do not specify a numeric cover-resolution minimum.
-The existing operator quality rule supplies the measurable portrait threshold:
-**at least 600 × 900 native pixels at the exact hosted URL**. Enlarged thumbnails
-and upscaled low-detail images do not qualify. Edition correspondence, visible
+The operator quality target is **600 × 900 native pixels at the exact hosted
+URL**, rather than a minimum requirement. A smaller verified portrait is usable
+when it is the available cover; a small image is preferable to no image. Prefer
+native detail over enlarged thumbnails. Edition correspondence, visible
 sharpness, compression artifacts, and watermarks require review. Other aspect
 ratios need documented comparable-detail review; no automatic acceptance
 threshold is asserted for them.
 
 Check both source and hosted dimensions. The synthetic Postimages check served
-512 × 768 from a 600 × 900 source, so it fails the operator's portrait threshold.
+512 × 768 from a 600 × 900 source. It falls below the quality target but remains
+usable as a smaller cover.
 That observation does not establish whether C411 accepts the host.
 
 The [HTML presentation policy](https://c411.org/wiki/prez-html), last modified

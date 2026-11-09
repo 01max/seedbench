@@ -16,4 +16,15 @@ RSpec.describe 'Local content preview' do
     expect(release.content_revisions).to be_empty
     expect(WorkflowOperation.count).to eq(0)
   end
+
+  it 'previews a selected verified cover below the target dimensions' do
+    record = reviewed_content_release
+    hosting = add_hosted_content_cover(record, width: 300, height: 450)
+    sign_in_operator
+
+    post release_content_preview_path(record), params: { preview: { bbcode: "[img]#{hosting.direct_url}[/img]" } }, as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(Nokogiri::HTML5.fragment(response.parsed_body['html']).at_css('img')['src']).to eq(hosting.direct_url)
+  end
 end

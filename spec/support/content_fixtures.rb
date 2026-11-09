@@ -1,4 +1,14 @@
 module ContentFixtures
+  def add_hosted_content_cover(release, width:, height:, hosted_width: width, hosted_height: height)
+    cover = release.cover_revisions.create!(payload_revision: release.payload_revisions.sole,
+      number: release.cover_revisions.maximum(:number).to_i + 1, source_kind: 'embedded',
+      source_locator: 'covers/small.png', width: width, height: height)
+    assignment = release.provider_assignments.find_by!(role: 'image_host')
+    release.cover_hostings.create!(cover_revision: cover, provider_connection_id: assignment.provider_connection_id,
+      direct_url: "https://images.invalid/cover-#{cover.id}.png", media_type: 'image/png',
+      width: hosted_width, height: hosted_height, verified_at: Time.current)
+  end
+
   def reviewed_content_release
     release = build_release_graph
     payload = release.payload_revisions.sole

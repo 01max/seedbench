@@ -2,8 +2,8 @@ module Providers
   class C411
     class EbookContent
       VERSION = 'c411-ebook-2026-11-09-v1'.freeze
-      MIN_COVER_WIDTH = 600
-      MIN_COVER_HEIGHT = 900
+      TARGET_COVER_WIDTH = 600
+      TARGET_COVER_HEIGHT = 900
       MAX_DESCRIPTION = 15_000
       TAGS = %w[b i u s url img color size quote code list youtube spoiler center left right font hr h1 h2 h3 h4 h5 table *].freeze
       FIELDS = %w[cover title author publisher publication_year digital_isbn language presentation files size notes].freeze
@@ -27,7 +27,7 @@ module Providers
         end
 
         def portrait_cover?(cover)
-          cover && cover.width >= MIN_COVER_WIDTH && cover.height >= MIN_COVER_HEIGHT && cover.height >= cover.width
+          cover && cover.width.positive? && cover.height >= cover.width
         end
 
         def safe_url?(value)

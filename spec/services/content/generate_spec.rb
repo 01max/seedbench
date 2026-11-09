@@ -20,6 +20,17 @@ RSpec.describe Content::Generate do
     expect(release.cover_hostings.count).to eq(1)
   end
 
+  [ [ 300, 450, 300, 450 ], [ 600, 900, 512, 768 ] ].each do |width, height, hosted_width, hosted_height|
+    it "uses a verified #{hosted_width} × #{hosted_height} hosted cover from a #{width} × #{height} source" do
+      hosting = add_hosted_content_cover(release, width: width, height: height, hosted_width: hosted_width, hosted_height: hosted_height)
+
+      result = described_class.call(release: release)
+
+      expect(result.bodies['bbcode']).to include("[img]#{hosting.direct_url}[/img]")
+      expect(result.issues).to be_empty
+    end
+  end
+
   it 'generates and accepts NFO for reviewed facts with surrounding whitespace' do
     author = "  Test author \t "
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { author: author, publisher: ' Synthetic publisher ' })
