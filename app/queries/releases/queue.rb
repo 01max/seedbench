@@ -48,9 +48,16 @@ module Releases
       when "inspection" then scope.where(inspection_state: %w[pending running failed])
       when "prepared" then scope.where(preparation_state: "prepared")
       when "published" then scope.where(publication_state: "published")
-      when "duplicate" then scope.where(id: DuplicateDecision.where(decision: "confirmed").select(:release_id))
+      when "duplicate" then scope.where(id: confirmed_duplicate_ids)
       else scope
       end
+    end
+
+    def confirmed_duplicate_ids
+      latest_ids = DuplicateCheck.group(:release_id, :input_revision).select("MAX(id)")
+      current_checks = DuplicateCheck.joins(:release).where(id: latest_ids)
+        .where("duplicate_checks.input_revision = releases.input_revision")
+      DuplicateDecision.where(decision: "confirmed", duplicate_check_id: current_checks.select(:id)).select(:release_id)
     end
 
     def neighbor(comparison, order)
