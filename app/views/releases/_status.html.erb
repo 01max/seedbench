@@ -1,6 +1,9 @@
 <%= turbo_frame_tag dom_id(@release, :status), data: { controller: "checklist", status_poll_target: "frame" } do %>
   <div class="status-content" data-status-sequence="<%= @snapshot.events.first&.sequence || 0 %>" data-active-operations="<%= @workflow_active || false %>">
-  <% if @check_error %><p role="alert" class="work-alert"><%= @check_error %></p><% end %>
+  <% if @check_error %>
+    <p role="alert" class="work-alert"><%= @check_error %></p>
+    <%= link_to t("releases.reload_saved"), release_path(@release), class: "work-button", data: { turbo_frame: "_top" } %>
+  <% end %>
   <% @checklist.each do |item| %>
     <div class="check-row" data-check-key="<%= item.key %>" data-check-state="<%= item.state %>" data-uncertain="<%= item.finding.present? %>">
       <div><span class="check-name"><span class="check-symbol" aria-hidden="true"><%= (item.finding && !item.checked) ? "!" : {"done" => "✓", "blocked" => "!", "pending" => "○", "optional" => "—"}.fetch(item.state) %></span><span><%= item.label %></span></span><small><%= item.owner %></small></div>

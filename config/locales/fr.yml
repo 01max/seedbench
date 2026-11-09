@@ -18,6 +18,7 @@ fr:
           eb: "Eio"
   releases:
     saved: "Texte enregistré."
+    reload_saved: "Recharger le texte enregistré"
   time:
     formats:
       short: "%d/%m %H:%M"

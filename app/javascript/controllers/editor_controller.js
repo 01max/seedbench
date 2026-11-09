@@ -166,6 +166,8 @@ export default class extends Controller {
   async beforeSubmit(event) {
     const form = event.target
     if (!(form instanceof HTMLFormElement)) return
+    const reviewRevision = form.querySelector('[name="mark[expected_revision]"]')
+    if (reviewRevision) reviewRevision.value = this.revisionInput.value
     if (this.bypassedForms.has(form)) {
       this.bypassedForms.delete(form)
       return
