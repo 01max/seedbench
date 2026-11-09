@@ -1,0 +1,16 @@
+fr:
+  ebooks:
+    errors:
+      payload_changed: "Le fichier est inaccessible ou son empreinte a changé. Vérifiez le stockage et réimportez le fichier d’origine."
+      resource_limit: "Inspection interrompue : limite de temps, mémoire ou taille dépassée. Vérifiez le fichier avant de réessayer."
+      parser_failed: "Le lecteur n’a pas pu terminer l’inspection. Réessayez ou vérifiez le fichier avec un lecteur indépendant."
+      signature_mismatch: "Le contenu du fichier ne correspond pas au format annoncé. Réimportez le fichier avec son format réel."
+      invalid_epub: "La structure EPUB est invalide. Vérifiez le conteneur, le manifeste et l’ordre de lecture."
+      missing_resource: "L’EPUB référence une ressource absente. Réimportez une copie complète."
+      unsafe_reference: "Le livre contient un chemin externe ou dangereux. L’inspection a été arrêtée."
+      unsafe_xml: "Le livre contient des déclarations XML non prises en charge pour une analyse sûre."
+      encrypted: "Le contenu est chiffré ou protégé. Il ne peut pas être vérifié."
+      corrupt: "Le fichier est corrompu ou incomplet. Vérifiez une copie lisible avant de le réimporter."
+      unsupported_format: "Ce format n’est pas encore pris en charge par l’inspecteur."
+      unsupported_compression: "L’EPUB utilise une compression non prise en charge."
+      unsupported_cover: "Une couverture intégrée ne peut pas être analysée en sécurité."

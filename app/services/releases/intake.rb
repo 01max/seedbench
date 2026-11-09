@@ -34,6 +34,7 @@ module Releases
           size_bytes: staged.size, sha256: staged.sha256, locator: staged.locator)
         RecordEvent.call(release_id: release.id, name: "payload.staged", actor: "operator",
           data: { format: staged.format, size_bytes: staged.size, sha256: staged.sha256 })
+        Ebooks::Request.call(release: release, automatic: true)
         release
       end
     end

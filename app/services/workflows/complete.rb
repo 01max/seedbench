@@ -25,6 +25,7 @@ module Workflows
     def self.reject_stale(operation)
       operation.update!(state: "stale", phase: operation.effect == "local" ? "discarded" : operation.phase, error_code: "input_changed", finished_at: Time.current, lease_expires_at: nil)
       Releases::RecordEvent.call(release_id: operation.release_id, name: "operation.stale", data: { operation_id: operation.id })
+      Definitions.fetch(operation.kind).stale&.call(operation: operation)
       operation
     end
     private_class_method :reject_stale

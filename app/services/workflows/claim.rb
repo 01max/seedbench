@@ -25,6 +25,7 @@ module Workflows
       operation.update!(state: "stale", phase: "discarded", error_code: "input_changed", finished_at: Time.current)
       operation.dispatch_intent.update!(state: "dispatched", dispatch_token: nil, claimed_until: nil, dispatched_at: Time.current)
       Releases::RecordEvent.call(release_id: operation.release_id, name: "operation.stale", data: { operation_id: operation.id })
+      Definitions.fetch(operation.kind).stale&.call(operation: operation)
       nil
     end
     private_class_method :reject_stale
