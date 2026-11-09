@@ -23,10 +23,23 @@ compose() {
     docker compose --env-file config/compose.defaults.env -p "$project" -f compose.yaml -f compose.smoke.yaml "$@"
   fi
 }
+cleanup_bind_folders() {
+  compose stop
+  compose run --rm --no-deps -T --entrypoint ruby web -rfileutils -e '
+    abort "Use only disposable runtime fixtures" unless ENV["SEEDBENCH_RUNTIME_VERIFICATION"] == "1"
+    %w[SEEDBENCH_STATE_ROOT SEEDBENCH_SCRATCH_ROOT SEEDBENCH_PAYLOAD_ROOT].each do |key|
+      root = ENV.fetch(key)
+      Dir.children(root).each { |name| FileUtils.remove_entry(File.join(root, name)) }
+    end
+  '
+}
 cleanup() {
   status=$?
   trap - EXIT INT TERM
   if [ "$status" -ne 0 ]; then compose logs --no-color --tail 40; fi
+  if [ "$binds" = true ]; then
+    cleanup_bind_folders || status=1
+  fi
   compose down --volumes --remove-orphans
   rm -rf "$temporary"
   exit "$status"

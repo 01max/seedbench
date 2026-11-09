@@ -1,0 +1,46 @@
+<% content_for :toolbar do %>
+  <details class="upload-menu">
+    <summary class="work-button"><%= t("workbench.uploads.add") %></summary>
+    <%= form_with url: uploads_path, multipart: true, class: "upload-form" do |form| %>
+      <%= form.label :files, t("workbench.uploads.files") %>
+      <%= form.file_field :files, multiple: true, accept: ".epub,.pdf,.mobi", required: true %>
+      <p><%= t("workbench.uploads.limits", count: Releases::Intake::MAX_FILES, size: Payloads::StageUpload::MAX_BYTES / 1.megabyte) %></p>
+      <%= form.submit t("workbench.uploads.submit"), class: "work-button primary" %>
+    <% end %>
+  </details>
+<% end %>
+<main id="workbench" aria-label="<%= t("workbench.title") %>"
+      <% if @release %>data-controller="editor" data-editor-release-id-value="<%= @release.id %>"
+      data-editor-messages-value="<%= t("workbench.editor.messages").to_json %>"
+      data-editor-previous-url-value="<%= @queue.previous_id ? queue_path(@queue.previous_id, criteria: @queue.criteria) : "" %>"
+      data-editor-next-url-value="<%= @queue.next_id ? queue_path(@queue.next_id, criteria: @queue.criteria) : "" %>"
+      data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember keydown@window->editor#shortcut workspace-tabs:shown->editor#preview"<% end %>>
+  <% Array(flash[:upload_errors]).each do |error| %><p role="alert" class="work-alert"><%= error %></p><% end %>
+  <div class="work-layout">
+    <%= render "queue" %>
+    <% if @release %>
+      <section class="work-main" aria-label="<%= t("workbench.selected_release") %>" data-release-id="<%= @release.id %>">
+        <header class="release-heading">
+          <div><h1><%= @release.title.presence || t("workbench.untitled") %></h1><p><%= @release.author.presence || t("workbench.unknown_author") %> <span><%= @snapshot.payload&.format&.upcase || t("workbench.no_file") %></span> <span><%= number_to_human_size(@snapshot.payload&.size_bytes || 0) %></span> <span>#<%= @release.id %></span></p></div>
+          <span class="save-status" role="status" id="save-status" data-editor-target="status"><%= t("workbench.editor.messages.saved") %></span>
+        </header>
+        <div class="release-workspace">
+          <%= render "editor" %>
+          <%= render "checklist" %>
+        </div>
+        <footer class="work-footer">
+          <span><%= t("workbench.actions.shortcuts") %></span>
+          <div class="work-actions">
+            <% %w[prepare draft publish].each do |kind| %>
+              <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: kind) %>" disabled title="<%= t("workbench.actions.unavailable") %>"><%= t("workbench.actions.#{kind}") %></button>
+            <% end %>
+            <button class="work-button" type="submit" form="release-editor"><%= t("workbench.actions.save") %></button>
+            <button class="work-button primary" type="button" data-action="editor#next" <%= "disabled" unless @queue.next_id %>><%= t("workbench.actions.save_next") %></button>
+          </div>
+        </footer>
+      </section>
+    <% else %>
+      <section class="work-empty"><h1><%= t("application.name") %></h1><p><%= t("workbench.empty_intro") %></p><p><%= t("workbench.empty_help") %></p></section>
+    <% end %>
+  </div>
+</main>

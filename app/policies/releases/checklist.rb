@@ -1,0 +1,93 @@
+module Releases
+  class Checklist
+    Item = Data.define(:key, :label, :required, :owner, :state, :note, :checked, :finding)
+
+    def self.call(release:, snapshot: Snapshot.call(release: release))
+      new(release, snapshot).call
+    end
+
+    def initialize(release, snapshot)
+      @release, @snapshot = release, snapshot
+      @marks = release.manual_checks.where(id: release.manual_checks.select("MAX(id)").group(:key)).index_by(&:key)
+    end
+
+    def call
+      core_steps + warnings + content_steps + optional_steps + outcomes
+    end
+
+    private
+
+    def item(key, label = I18n.t("workbench.checklist.#{key}.label"), state:, note:, owner: :auto, required: true, checked: false, finding: nil)
+      Item.new(key: key, label: label, state: state, note: note, owner: owner, required: required, checked: checked, finding: finding)
+    end
+
+    def core_steps
+      [ inspection, manual("edition_review"), cover, manual("text_review"), preparation, duplicates ]
+    end
+
+    def manual(key)
+      checked = @marks[key]&.checked || false
+      item(key, state: checked ? "done" : "pending", checked: checked, owner: :operator, note: I18n.t("workbench.checklist.manual_note"))
+    end
+
+    def inspection
+      failed = @snapshot.findings.any? { |finding| finding.severity == "failure" }
+      state = failed || @release.inspection_state == "failed" ? "blocked" : "pending"
+      state = "done" if !failed && @release.inspection_state == "succeeded"
+      item("inspection", state: state, note: I18n.t("workbench.checklist.inspection.#{failed ? 'failed' : 'pending'}"))
+    end
+
+    def cover
+      selected = @snapshot.covers.first
+      hosted = selected && selected.cover_hostings.exists?
+      item("cover", state: hosted ? "done" : "pending", owner: :mixed,
+        note: I18n.t("workbench.checklist.cover.#{selected ? 'selected' : 'missing'}"))
+    end
+
+    def preparation
+      prepared = @snapshot.preparation
+      payload = @snapshot.payload
+      done = @release.preparation_state == "prepared" && preparation_matches_payload?(prepared, payload)
+      item("preparation", state: done ? "done" : "pending", note: I18n.t("workbench.checklist.preparation.#{done ? 'done' : 'pending'}"))
+    end
+
+    def preparation_matches_payload?(prepared, payload)
+      return false unless prepared && payload
+
+      prepared.payload_revision_id == payload.id && prepared.payload_sha256 == payload.sha256 && prepared.payload_size_bytes == payload.size_bytes
+    end
+
+    def duplicates
+      check = @release.duplicate_checks.where(input_revision: @release.input_revision).order(:id).last
+      blocked = check && check.duplicate_decisions.exists?(decision: %w[confirmed likely])
+      state = blocked ? "blocked" : "pending"
+      state = "done" if check && check.candidates.empty? && !blocked
+      item("duplicates", state: state, owner: :c411, note: I18n.t("workbench.checklist.duplicates.#{blocked ? 'blocked' : 'pending'}"))
+    end
+
+    def content_steps
+      present = %w[bbcode nfo].all? { |kind| @snapshot.contents[kind]&.body.present? }
+      [ item("content", state: "pending", note: I18n.t("workbench.checklist.content.#{present ? 'present' : 'missing'}")) ]
+    end
+
+    def optional_steps
+      draft = @snapshot.snapshots["draft"]
+      ai = @release.ai_runs.order(:id).last
+      [ item("draft", required: false, owner: :c411, state: draft && !draft.remote_deleted ? "done" : "optional", note: I18n.t("workbench.checklist.draft.note")),
+        item("ai", required: false, state: ai&.status == "succeeded" ? "done" : "optional", note: I18n.t("workbench.checklist.ai.note")) ]
+    end
+
+    def outcomes
+      [ item("publication", owner: :c411, state: @release.publication_state == "published" ? "done" : "pending", note: I18n.t("workbench.checklist.publication.note")),
+        item("seeding", state: @release.seeding_state == "succeeded" ? "done" : "pending", note: I18n.t("workbench.checklist.seeding.note")) ]
+    end
+
+    def warnings
+      @snapshot.findings.select { |finding| finding.severity == "uncertainty" }.map do |finding|
+        acknowledged = finding.finding_acknowledgements.max_by(&:id)&.acknowledged || false
+        item("finding_#{finding.id}", finding.message, state: acknowledged ? "done" : "pending", owner: :operator,
+          checked: acknowledged, finding: finding, note: I18n.t("workbench.checklist.warning_note", number: finding.number))
+      end
+    end
+  end
+end

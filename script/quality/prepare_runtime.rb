@@ -1,6 +1,8 @@
 require "digest"
 require "net/http"
 require_relative "runtime_access"
+require_relative "runtime_workbench"
+require_relative "runtime_uploads"
 
 abort "Runtime must be unprivileged" if Process.uid.zero?
 abort "Image contains operator material" if %w[/app/.env /app/.git /app/private /app/tmp/ebooks].any? { |path| File.exist?(path) }
@@ -26,7 +28,7 @@ abort "Rename changed file identity" unless destination.stat.ino == inode
 release = Releases::Create.call(title: "Synthetic runtime book", author: "Test author")
 PayloadRevision.create!(release: release, number: 1, original_filename: "synthetic.epub", format: "epub",
   size_bytes: destination.size, sha256: Digest::SHA256.file(destination).hexdigest, locator: destination.basename.to_s)
-ContentRevision.create!(release: release, kind: "bbcode", number: 1, body: "Preserved human content", origin: "human", input_revision: 0)
+RuntimeWorkbench.prepare(release)
 Rails.application.config.x.storage.fetch(:scratch).join("runtime-release-id").write(release.id.to_s)
 begin
   ApplicationRecord.connection.execute("UPDATE release_events SET name = 'changed'")
@@ -35,4 +37,5 @@ rescue ActiveRecord::StatementInvalid => error
   raise unless error.message.include?("append-only")
 end
 RuntimeAccess.prepare
+RuntimeUploads.verify
 puts "Application image, assets, SQL history guards, domain state and same-file rename verified."

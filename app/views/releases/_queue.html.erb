@@ -1,0 +1,29 @@
+<aside class="work-queue" aria-label="<%= t("workbench.queue.title") %>">
+  <header class="queue-heading"><h2><%= t("workbench.queue.title") %></h2><span><%= t("workbench.queue.total", count: @queue.total) %></span></header>
+  <%= form_with url: root_path, method: :get, class: "queue-search" do |form| %>
+    <%= form.search_field :q, value: @queue.criteria[:q], placeholder: t("workbench.queue.search_placeholder"), aria: { label: t("workbench.queue.search_label") } %>
+    <%= form.select :state, Releases::Queue::STATES.map { |value| [t("workbench.queue.states.#{value}"), value] }, { selected: @queue.criteria[:state] }, aria: { label: t("workbench.queue.filter_label") } %>
+    <%= form.submit t("workbench.queue.filter"), class: "work-button" %>
+  <% end %>
+  <div class="queue-columns" aria-hidden="true"><span><%= t("workbench.queue.book") %></span><span><%= t("workbench.queue.format") %></span><span><%= t("workbench.queue.state") %></span></div>
+  <div class="queue-records" aria-label="<%= t("workbench.queue.records_label") %>">
+    <% @queue.records.each do |record| %>
+      <%= link_to queue_path(record.id, criteria: @queue.criteria), class: "queue-row", aria: { current: record.id == @release&.id ? "page" : nil }, title: "#{record.title} — #{record.author}" do %>
+        <span class="queue-title"><%= record.title.presence || t("workbench.untitled") %></span><span class="queue-format"><%= record.payload_revisions.max_by(&:number)&.format&.upcase || "—" %></span><span class="queue-state"><%= release_label(record) %></span>
+      <% end %>
+    <% end %>
+    <% if @queue.records.empty? %><p class="queue-empty"><%= t("workbench.queue.empty") %></p><% end %>
+  </div>
+  <footer class="queue-footer">
+    <span><%= @queue.position || t("workbench.queue.outside_filter") %> / <%= @queue.total %></span>
+    <div><% if @queue.previous_id %><%= link_to t("workbench.queue.previous"), queue_path(@queue.previous_id, criteria: @queue.criteria), class: "work-button quiet", rel: "prev" %><% end %>
+      <% if @queue.next_id %><%= link_to t("workbench.queue.next"), queue_path(@queue.next_id, criteria: @queue.criteria), class: "work-button quiet", rel: "next" %><% end %></div>
+  </footer>
+  <% if @queue.pages > 1 %>
+    <nav class="queue-pagination" aria-label="<%= t("workbench.queue.pages_label") %>">
+      <% if @queue.page > 1 %><%= link_to t("workbench.queue.previous_page"), root_path(**@queue.criteria, page: @queue.page - 1) %><% end %>
+      <span><%= @queue.page %> / <%= @queue.pages %></span>
+      <% if @queue.page < @queue.pages %><%= link_to t("workbench.queue.next_page"), root_path(**@queue.criteria, page: @queue.page + 1) %><% end %>
+    </nav>
+  <% end %>
+</aside>

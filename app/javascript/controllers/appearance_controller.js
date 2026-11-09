@@ -4,7 +4,7 @@ export default class extends Controller {
   static targets = ["toggle"]
 
   connect() {
-    this.apply(localStorage.getItem("seedbench.appearance") || "light")
+    this.apply(localStorage.getItem("seedbench.appearance") || "dark")
   }
 
   toggleTargetConnected() {

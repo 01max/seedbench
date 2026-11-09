@@ -10,11 +10,17 @@ module Releases
         raise RevisionConflict.new(expected_revision: expected_revision, actual_revision: release.input_revision) unless release.input_revision == expected_revision
         return release if changes.all? { |field, value| release.public_send(field) == value }
 
-        release.update!(changes.merge("input_revision" => release.input_revision + 1))
+        release.update!(revision_attributes(release, changes))
         RecordEvent.call(release_id: release.id, name: "release.revised", actor: "operator", data: { fields: changes.keys.sort })
         release
       end
     end
+
+    def self.revision_attributes(release, changes)
+      changes.merge("input_revision" => release.input_revision + 1,
+        "search_text" => SearchText.call(title: changes.fetch("title", release.title), author: changes.fetch("author", release.author)))
+    end
+    private_class_method :revision_attributes
 
     def self.validate_changes!(changes)
       raise InvalidChanges, "Only title and author text can be revised here." unless

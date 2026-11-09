@@ -76,7 +76,7 @@ module RuntimeWorkflows
     before = interrupted.result
     Workflows::Complete.call(operation_id: interrupted.id, attempt_token: old_token, result: {}, apply: SyntheticWorkflow::Apply)
     abort "Old attempt changed accepted result" unless interrupted.reload.result == before
-    abort "Human work changed" unless record.title == "New human title" && record.content_revisions.sole.body == "Preserved human content"
+    abort "Human work changed" unless record.title == "New human title" && record.content_revisions.where(kind: "bbcode").sole.body == "Preserved human content"
     puts "Dispatch-gap recovery, duplicate delivery, stale-result fencing and killed-worker recovery verified."
   end
 end

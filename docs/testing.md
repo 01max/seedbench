@@ -37,10 +37,29 @@ must fail. A clean source sample must pass. The probes do not edit source files.
 
 Capybara uses Debian Chromium and its matching packaged ChromeDriver via an
 explicit executable path, so Selenium does not download a driver during tests.
-The system example loads appearance controls into a Turbo Frame, checks that
+The appearance example loads controls into a Turbo Frame, checks that
 the document was retained, changes the theme through Stimulus, and verifies the
 local preference after a reload. Browser screenshots and reports remain in
-disposable `/tmp/browser-artifacts` storage.
+disposable `/tmp/browser-artifacts` storage. Each scenario closes its browser
+process, isolating browser state and avoiding Chromium refusing the driver’s
+`about:blank` reset after earlier scenarios. Application navigation and reload
+assertions still run in the real browser within each scenario.
+
+Workbench browser checks cover the dark/light desktop palette and density,
+320/390/736-pixel layouts, long metadata, keyboard focus and shortcuts, and an
+85-release queue. Editing checks hold real save/status responses to exercise
+typing during a save, Save and next, and older status arrival. Failed filtering,
+navigation, concurrent edits, and reload recovery must preserve entered text.
+Undo regressions cover returning to saved text before and during an in-flight
+save. Two-client checks require loading unseen prose before reviewing its newer
+revision. Duplicate filters follow the latest check for the current inputs.
+Request checks reject forged automatic checks and verify that local work makes
+no provider calls. All book names and content in these checks are synthetic.
+
+Workbench copy is kept in `config/locales/workbench.fr.yml`. Request checks use
+an alternate translated catalog to verify runtime labels, both Stimulus message
+payloads, validation errors, and manual-review controls independently of display
+labels. Machine state and review-owner codes remain independent of translations.
 
 Chromium's `--no-sandbox` flag applies only to this unprivileged, synthetic,
 network-isolated quality container. It avoids a privileged browser sandbox setup;
@@ -109,10 +128,22 @@ same databases, and recovered with a new attempt token after the synthetic lease
 is expired. Its old token cannot replace the accepted result. Finally web is
 recreated and all retained domain state and payload hashes are checked.
 
+Each runtime layout also saves full presentation, BBCode, and multiline NFO,
+records a reversible review mark and uncertainty acknowledgement, and verifies
+them after worker and web replacement. The authenticated editor is reopened and
+parsed as HTML5 to check its actual textarea values and checked state.
+It also submits two synthetic 80 MiB files through real Puma multipart HTTP,
+with valid authentication and CSRF, while retaining the production 256 MiB
+`/tmp` limit. Request buffering must use the configured scratch volume, and
+both staged files must retain their original sizes and SHA-256 hashes.
+
 This runs with default named volumes, alternate named-volume roots and UID/GID
 65534, and existing synthetic bind folders/container roots containing spaces.
 Cleanup removes only generated project volumes and temporary folders. Synthetic
-handler definitions are installed only by the verification worker's explicit
+bind contents are removed as the application UID after services stop, before
+the host removes its generated parent folders. This preserves private staging
+permissions even when the CI runner and application have different UIDs.
+Synthetic handler definitions are installed only by the verification worker's explicit
 fixture command. The production code-owned definition map does not pretend to
 implement inspection, publication or other later feature handlers.
 

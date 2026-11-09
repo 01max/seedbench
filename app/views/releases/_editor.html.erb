@@ -1,0 +1,45 @@
+<section class="editor-area" aria-label="<%= t("workbench.editor.label") %>" data-controller="workspace-tabs">
+  <div class="editor-tabs" role="tablist" aria-label="<%= t("workbench.editor.sections_label") %>">
+    <% %w[review bbcode nfo files history evidence preview].each_with_index do |key, index| %>
+      <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= t("workbench.tabs.#{key}") %></button>
+    <% end %>
+  </div>
+  <p role="alert" class="work-alert" hidden data-editor-target="error"></p>
+  <section class="save-conflict" hidden data-editor-target="conflict" aria-label="<%= t("workbench.editor.conflict_label") %>">
+    <h2><%= t("workbench.editor.conflict_title") %></h2><p><%= t("workbench.editor.conflict_help") %></p>
+    <details><summary><%= t("workbench.editor.view_saved") %></summary><pre data-editor-target="serverValues"></pre></details>
+    <div><button type="button" class="work-button" data-action="editor#useServer"><%= t("workbench.editor.load_saved") %></button><button type="button" class="work-button" data-action="editor#keepMine"><%= t("workbench.editor.keep_mine") %></button></div>
+  </section>
+  <%= form_with scope: :edit, url: release_path(@release), method: :patch, id: "release-editor", data: { editor_target: "form" } do |form| %>
+    <%= form.hidden_field :expected_revision, value: @release.input_revision %>
+    <section id="panel-review" role="tabpanel" aria-labelledby="tab-review" data-workspace-tabs-target="panel" data-panel="review">
+      <p class="work-warning"><%= t("workbench.editor.inspection", state: workflow_label(@release.inspection_state)) %></p>
+      <div class="editor-fields">
+        <label><%= t("workbench.fields.title") %><%= form.text_field :title, value: @editor_values.fetch("title"), maxlength: 500, data: { edit_field: "title" } %></label>
+        <label><%= t("workbench.fields.author") %><%= form.text_field :author, value: @editor_values.fetch("author"), maxlength: 500, data: { edit_field: "author" } %></label>
+        <label><%= t("workbench.fields.isbn") %><%= form.text_field :isbn, value: @editor_values.fetch("isbn"), maxlength: 64, placeholder: t("workbench.editor.missing_isbn"), data: { edit_field: "isbn" } %></label>
+        <label><%= t("workbench.fields.edition") %><%= form.text_field :edition, value: @editor_values.fetch("edition"), maxlength: 2000, data: { edit_field: "edition" } %></label>
+        <label><%= t("workbench.fields.language") %><%= form.text_field :language, value: @editor_values.fetch("language"), maxlength: 120, data: { edit_field: "language" } %></label>
+        <label><%= t("workbench.fields.format") %><input value="<%= @snapshot.payload&.format&.upcase %>" readonly></label>
+      </div>
+      <label class="editor-section"><%= t("workbench.fields.presentation") %><%= form.text_area :presentation, value: @editor_values.fetch("presentation"), rows: 7, maxlength: 100000, data: { edit_field: "presentation" } %></label>
+      <div class="cover-summary"><span class="cover-placeholder" aria-hidden="true"><%= @release.title.to_s.first.presence || "?" %></span><div><h2><%= t("workbench.editor.cover") %></h2><p><%= t("workbench.editor.#{@snapshot.covers.any? ? 'cover_selected' : 'cover_missing'}") %></p></div><button type="button" class="work-button" data-panel="evidence" data-action="workspace-tabs#show"><%= t("workbench.editor.examine") %></button></div>
+      <details class="editor-notes"><summary><%= t("workbench.fields.notes") %></summary><%= form.text_area :notes, value: @editor_values.fetch("notes"), aria: { label: t("workbench.fields.notes") }, rows: 3, maxlength: 100000, data: { edit_field: "notes" } %></details>
+    </section>
+    <% %w[bbcode nfo].each do |key| %>
+      <section id="panel-<%= key %>" role="tabpanel" aria-labelledby="tab-<%= key %>" hidden data-workspace-tabs-target="panel" data-panel="<%= key %>">
+        <label><%= t("workbench.fields.#{key}") %><%= form.text_area key, value: @editor_values.fetch(key), class: "code-editor", rows: 20, spellcheck: false, maxlength: 250000, data: { edit_field: key } %></label>
+        <p class="editor-hint"><%= t("workbench.editor.preserved") %></p>
+      </section>
+    <% end %>
+  <% end %>
+  <section id="panel-files" role="tabpanel" aria-labelledby="tab-files" hidden data-workspace-tabs-target="panel" data-panel="files"><%= render "files" %></section>
+  <section id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden data-workspace-tabs-target="panel" data-panel="history">
+    <h2><%= t("workbench.editor.history") %></h2>
+    <ol class="release-history"><% @snapshot.events.each do |event| %><li><time datetime="<%= event.occurred_at.iso8601 %>"><%= l(event.occurred_at, format: :short) %></time><span><%= event_label(event.name) %><small><%= t("workbench.editor.history_actor", actor: t("workbench.editor.#{event.actor == 'operator' ? 'operator' : 'automatic'}"), revision: event.input_revision) %></small></span></li><% end %></ol>
+  </section>
+  <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence" %></section>
+  <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
+    <article class="local-preview"><h2 data-preview-field="title"><%= @release.title %></h2><p data-preview-field="author"><%= @release.author %></p><h3><%= t("workbench.fields.presentation") %></h3><div class="preserved-text" data-preview-field="presentation"><%= content_body(@snapshot, "presentation") %></div><h3><%= t("workbench.fields.notes") %></h3><div class="preserved-text" data-preview-field="notes"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint"><%= t("workbench.editor.preview_hint") %></p></article>
+  </section>
+</section>

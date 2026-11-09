@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="<%= I18n.locale %>">
   <head>
     <title><%= content_for(:title) || t("application.name") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="turbo-cache-control" content="no-cache">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
@@ -11,13 +12,21 @@
   </head>
   <body data-controller="appearance">
     <% if current_operator %>
-      <nav aria-label="Navigation principale" class="flex items-center gap-6 border-b px-6 py-3">
-        <%= link_to "Seedbench", root_path, class: "font-bold" %>
-        <%= link_to "Réglages", settings_path, class: "underline" %>
-        <%= button_to "Se déconnecter", destroy_operator_session_path, method: :delete, class: "underline" %>
+      <nav aria-label="<%= t("workbench.navigation.label") %>" class="app-nav">
+        <%= link_to root_path, class: "app-brand" do %><span class="brand-mark" aria-hidden="true"><%= t("workbench.brand_mark") %></span> <%= t("application.name") %><% end %>
+        <span class="nav-context"><%= t("workbench.navigation.context") %></span>
+        <div class="app-nav-actions">
+          <%= yield :toolbar %>
+          <%= turbo_frame_tag "appearance" do %><%= link_to t("workbench.navigation.appearance"), appearance_path %><% end %>
+          <%= link_to t("workbench.navigation.settings"), settings_path %>
+          <%= button_to t("workbench.navigation.sign_out"), destroy_operator_session_path, method: :delete %>
+        </div>
       </nav>
     <% end %>
-    <% flash.each do |_name, message| %><p role="status" class="mx-auto max-w-5xl px-6 py-3"><%= message %></p><% end %>
+    <% flash.each do |name, message| %>
+      <% next if name == "upload_errors" %>
+      <p role="status" class="mx-auto max-w-5xl px-6 py-3"><%= message %></p>
+    <% end %>
     <%= yield %>
   </body>
 </html>

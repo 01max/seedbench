@@ -12,12 +12,14 @@
 #  preparation_state :string           default("unprepared"), not null
 #  proposed_name     :string
 #  publication_state :string           default("unpublished"), not null
+#  search_text       :text             default(""), not null
 #  seeding_state     :string           default("not_started"), not null
 #  title             :string
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #
 class Release < ApplicationRecord
+  has_many :manual_checks, dependent: :restrict_with_exception
   has_many :workflow_operations, dependent: :restrict_with_exception
   has_many :dispatch_intents, dependent: :restrict_with_exception
   has_many :payload_revisions, dependent: :restrict_with_exception
