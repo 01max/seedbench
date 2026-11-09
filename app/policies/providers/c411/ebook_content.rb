@@ -8,7 +8,7 @@ module Providers
       TAGS = %w[b i u s url img color size quote code list youtube spoiler center left right font hr h1 h2 h3 h4 h5 table *].freeze
       FIELDS = %w[cover title author publisher publication_year digital_isbn language presentation files size notes].freeze
       LABELS = [ 'Auteur(s) :', 'Éditeur :', 'Parution :', 'ISBN numérique :', 'Langue :', 'Présentation :', 'Fichier(s) :', 'Taille :', 'Notes supplémentaire :' ].freeze
-      TEMPLATE = Rails.root.join('config/c411/ebook.bbcode.txt').read.freeze
+      TEMPLATE = Rails.root.join('config/c411/templates/ebook.bbcode.txt').read.freeze
       PATTERN = Regexp.new("\\A#{Regexp.escape(TEMPLATE).gsub(/%\\\{(\w+)\\\}/) { "(?<#{$1}>.*?)" }}\\z", Regexp::MULTILINE)
 
       class << self
