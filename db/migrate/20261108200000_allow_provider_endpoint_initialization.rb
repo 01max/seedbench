@@ -1,6 +1,6 @@
 class AllowProviderEndpointInitialization < ActiveRecord::Migration[8.1]
   def up
-    execute "DROP TRIGGER provider_identity_no_update"
+    execute 'DROP TRIGGER provider_identity_no_update'
     execute <<~SQL.squish
       CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key ON provider_connections
       BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;
@@ -13,8 +13,8 @@ class AllowProviderEndpointInitialization < ActiveRecord::Migration[8.1]
   end
 
   def down
-    execute "DROP TRIGGER provider_endpoint_no_update"
-    execute "DROP TRIGGER provider_identity_no_update"
+    execute 'DROP TRIGGER provider_endpoint_no_update'
+    execute 'DROP TRIGGER provider_identity_no_update'
     execute <<~SQL.squish
       CREATE TRIGGER provider_identity_no_update BEFORE UPDATE OF role, provider, identity_key, endpoint ON provider_connections
       BEGIN SELECT RAISE(ABORT, 'Provider identity is immutable'); END;

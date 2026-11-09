@@ -38,7 +38,7 @@
     <h2><%= t("workbench.editor.history") %></h2>
     <ol class="release-history"><% @snapshot.events.each do |event| %><li><time datetime="<%= event.occurred_at.iso8601 %>"><%= l(event.occurred_at, format: :short) %></time><span><%= event_label(event.name) %><small><%= t("workbench.editor.history_actor", actor: t("workbench.editor.#{event.actor == 'operator' ? 'operator' : 'automatic'}"), revision: event.input_revision) %></small></span></li><% end %></ol>
   </section>
-  <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence" %></section>
+  <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence_frame" %></section>
   <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
     <article class="local-preview"><h2 data-preview-field="title"><%= @release.title %></h2><p data-preview-field="author"><%= @release.author %></p><h3><%= t("workbench.fields.presentation") %></h3><div class="preserved-text" data-preview-field="presentation"><%= content_body(@snapshot, "presentation") %></div><h3><%= t("workbench.fields.notes") %></h3><div class="preserved-text" data-preview-field="notes"><%= content_body(@snapshot, "notes") %></div><p class="editor-hint"><%= t("workbench.editor.preview_hint") %></p></article>
   </section>

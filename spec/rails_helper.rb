@@ -1,14 +1,14 @@
-require "spec_helper"
+require 'spec_helper'
 
-ENV["RAILS_ENV"] ||= "test"
-abort "Use the disposable quality container" unless
-  ENV["RAILS_ENV"] == "test" && ENV["SEEDBENCH_QUALITY"] == "1"
+ENV['RAILS_ENV'] ||= 'test'
+abort 'Use the disposable quality container' unless
+  ENV['RAILS_ENV'] == 'test' && ENV['SEEDBENCH_QUALITY'] == '1'
 
-require_relative "../config/environment"
-require "rspec/rails"
+require_relative '../config/environment'
+require 'rspec/rails'
 
 ActiveRecord::Migration.maintain_test_schema!
-Rails.root.glob("spec/support/**/*.rb").each { |file| require file }
+Rails.root.glob('spec/support/**/*.rb').each { |file| require file }
 
 RSpec.configure do |config|
   config.use_transactional_fixtures = true

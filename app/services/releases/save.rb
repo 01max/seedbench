@@ -5,11 +5,11 @@ module Releases
 
       def initialize(errors)
         @errors = errors
-        super(errors.values.join(" "))
+        super(errors.values.join(' '))
       end
     end
-    LIMITS = { "title" => 500, "author" => 500, "isbn" => 64, "edition" => 2000, "language" => 120,
-      "presentation" => 100_000, "notes" => 100_000, "bbcode" => 250_000, "nfo" => 250_000 }.freeze
+    LIMITS = { 'title' => 500, 'author' => 500, 'isbn' => 64, 'edition' => 2000, 'language' => 120,
+      'presentation' => 100_000, 'notes' => 100_000, 'bbcode' => 250_000, 'nfo' => 250_000 }.freeze
 
     def self.call(release_id:, expected_revision:, changes:)
       new(release_id, expected_revision, changes).call
@@ -35,13 +35,13 @@ module Releases
     private
 
     def validate_changes(changes)
-      raise InvalidChanges.new(base: I18n.t("workbench.errors.invalid_fields")) unless valid_fields?(changes)
+      raise InvalidChanges.new(base: I18n.t('workbench.errors.invalid_fields')) unless valid_fields?(changes)
 
       values = changes.stringify_keys
       errors = values.filter_map do |field, value|
-        [ field, I18n.t("workbench.errors.invalid_value", field: I18n.t("workbench.fields.#{field}")) ] unless valid_value?(field, value)
+        [ field, I18n.t('workbench.errors.invalid_value', field: I18n.t("workbench.fields.#{field}")) ] unless valid_value?(field, value)
       end.to_h
-      errors["title"] = I18n.t("workbench.errors.title_required") if values.key?("title") && values["title"].blank?
+      errors['title'] = I18n.t('workbench.errors.title_required') if values.key?('title') && values['title'].blank?
       raise InvalidChanges.new(errors) if errors.any?
 
       values
@@ -57,26 +57,27 @@ module Releases
 
     def persist
       @payload = @release.payload_revisions.order(number: :desc).first
-      raise InvalidChanges.new(edition: I18n.t("workbench.errors.payload_required")) if !@payload && (@changes.keys & EditorValues::FACTS).any?
+      raise InvalidChanges.new(edition: I18n.t('workbench.errors.payload_required')) if !@payload && (@changes.keys & EditorValues::FACTS).any?
 
       @revision = @release.input_revision + 1
       append_facts if @payload
       append_content
       finish_save
+      Ebooks::Findings.call(release: @release, payload: @payload) if @payload
     end
 
     def finish_save
       metadata = @changes.slice(*EditorValues::METADATA)
-      search = SearchText.call(title: metadata.fetch("title", @release.title), author: metadata.fetch("author", @release.author))
-      @release.update!(metadata.merge("input_revision" => @revision, "search_text" => search))
-      RecordEvent.call(release_id: @release.id, name: "release.revised", actor: "operator", data: { fields: @changes.keys.sort })
+      search = SearchText.call(title: metadata.fetch('title', @release.title), author: metadata.fetch('author', @release.author))
+      @release.update!(metadata.merge('input_revision' => @revision, 'search_text' => search))
+      RecordEvent.call(release_id: @release.id, name: 'release.revised', actor: 'operator', data: { fields: @changes.keys.sort })
     end
 
     def append_facts
       @changes.slice(*EditorValues::METADATA, *EditorValues::FACTS).each do |field, value|
         number = @release.reviewed_facts.where(field: field).maximum(:number).to_i + 1
         @release.reviewed_facts.create!(payload_revision: @payload, field: field, value: value, number: number,
-          actor: "operator", reviewed_at: Time.current)
+          actor: 'operator', reviewed_at: Time.current)
       end
     end
 
@@ -84,7 +85,7 @@ module Releases
       @changes.slice(*EditorValues::CONTENT).each do |kind, body|
         number = @release.content_revisions.where(kind: kind).maximum(:number).to_i + 1
         @release.content_revisions.create!(payload_revision: @payload, kind: kind, body: body, number: number,
-          input_revision: @revision, origin: "human")
+          input_revision: @revision, origin: 'human')
       end
     end
   end

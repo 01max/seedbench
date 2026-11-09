@@ -1,6 +1,10 @@
 inherit_gem:
   rubocop-rails-omakase: rubocop.yml
 
+require:
+  - ./config/rubocop/private_class_helpers.rb
+  - ./config/rubocop/localized_messages.rb
+
 plugins:
   - rubocop-rails
   - rubocop-performance
@@ -10,6 +14,10 @@ AllCops:
   TargetRubyVersion: 4.0
   NewCops: enable
   SuggestExtensions: false
+  Exclude:
+    - private/**/*
+    - tmp/**/*
+    - vendor/**/*
 
 Lint:
   Enabled: true
@@ -21,6 +29,31 @@ Performance:
   Enabled: true
 RSpec:
   Enabled: true
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+  Include:
+    - '**/*.rb'
+    - '**/*.rake'
+    - Gemfile
+    - Rakefile
+    - config.ru
+    - bin/rubocop
+    - script/quality/verify_lint
+    - script/quality/verify_coverage
+
+Style/AccessModifierDeclarations:
+  EnforcedStyle: group
+
+Rails/I18nLocaleTexts:
+  Enabled: true
+
+Seedbench/PrivateClassHelpers:
+  Enabled: true
+
+Seedbench/LocalizedMessages:
+  Enabled: true
+  Include: [app/**/*.rb, lib/**/*.rb]
 
 Metrics/MethodLength:
   Enabled: true

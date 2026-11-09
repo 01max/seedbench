@@ -9,7 +9,7 @@ class UseDeviseAccountLocking < ActiveRecord::Migration[8.1]
       table.datetime :window_started_at, null: false
       table.timestamps
       table.index :client_hash, unique: true
-      table.check_constraint "attempts >= 0", name: "login_attempts_valid"
+      table.check_constraint 'attempts >= 0', name: 'login_attempts_valid'
     end
   end
 end

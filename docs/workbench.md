@@ -19,10 +19,19 @@ in addition to space for the accepted files on the payload volume. Temporary
 buffers are removed after the request completes.
 
 Uploads are streamed into private staging below the configured payload root.
-Original bytes are retained. File extensions admit uploads; signature, structure,
-encryption, and edition inspection are not implemented yet. A successful upload
-therefore leaves inspection pending. Uploading makes no provider request and
-does not prepare a torrent.
+Original bytes are retained. File extensions admit uploads, then the worker
+checks the actual format and structure. The checklist progresses from pending
+to running, then succeeded or failed. Uploading makes no provider request and
+does not prepare a torrent. Accepted uploads can still fail inspection.
+
+Open **Sources** for source-linked metadata candidates, text samples, measured
+counts, and embedded cover candidates. **Actualiser les sources** refreshes this
+panel; **Relancer l’inspection** queues a fresh pass. **Analyser les pages avec
+OCR** is available for PDFs. **Chercher l’édition** performs an explicit Open
+Library ISBN lookup. **Adopter cette valeur** saves a chosen candidate with its
+evidence link; it never silently replaces another field or your release text.
+ISBN checksum validity alone does not establish edition authenticity. See
+[inspection limits and evidence](ebook-inspection.md).
 
 The queue pages through 40 releases at a time and searches actual titles and
 authors without case or accent distinctions. State filters and previous/next
@@ -64,7 +73,8 @@ Missing inspection, cover, or validated content stays visibly incomplete. Draft
 linkage and automatic AI are optional; publication and seeding retain independent
 outcomes.
 
-Only the status frame refreshes during background work. Automatic reads are
+The status frame refreshes during background work. Sources refresh on opening
+the tab or through their explicit refresh link, without replacing editor fields. Automatic reads are
 limited to 30 per visit, at least 1.5 seconds apart with the default configuration;
 completion, uncertainty, failure, or leaving the page stops them. Manual refresh
 starts another bounded cycle. Status responses never replace editor fields, and

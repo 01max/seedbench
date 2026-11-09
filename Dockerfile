@@ -11,7 +11,7 @@ ENV BUNDLE_DEPLOYMENT=1 BUNDLE_PATH=/usr/local/bundle \
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates libyaml-0-2 libsqlite3-0 sqlite3 calibre fonts-dejavu-core \
-       mktorrent poppler-utils tesseract-ocr tesseract-ocr-fra \
+       mktorrent poppler-utils tesseract-ocr tesseract-ocr-fra python3-pil \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 1000 rails \
     && useradd --uid 1000 --gid 1000 --create-home rails \

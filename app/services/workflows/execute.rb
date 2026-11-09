@@ -2,7 +2,7 @@ module Workflows
   class Execute
     def self.call(operation_id:)
       operation = WorkflowOperation.find(operation_id)
-      return operation unless operation.state == "pending"
+      return operation unless operation.state == 'pending'
 
       definition = Definitions.fetch(operation.kind)
       token = Claim.call(operation_id: operation.id)

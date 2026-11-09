@@ -3,7 +3,7 @@ module Settings
     def self.call(**attributes)
       ProviderConnection.create!(ConnectionConfig.call(**attributes).merge(credentials_version: 1))
     rescue ActiveRecord::RecordNotUnique
-      raise ConnectionConfig::Invalid, "Cette identité existe déjà pour ce rôle; utilisez sa rotation de secret."
+      raise ConnectionConfig::Invalid, I18n.t('messages.settings.create_connection.cette_identite_existe_deja_pour_ce')
     end
   end
 end

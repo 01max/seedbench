@@ -12,6 +12,6 @@ class ReleaseConnectionsController < ApplicationController
     values = params.expect(assignment: %i[role connection_id expected_revision])
     Settings::AssignConnection.call(release_id: params[:release_id], role: values[:role], connection_id: values[:connection_id],
       expected_revision: Integer(values[:expected_revision].to_s, exception: false))
-    redirect_to release_connections_path(params[:release_id]), notice: t("settings.connection_assigned"), status: :see_other
+    redirect_to release_connections_path(params[:release_id]), notice: t('settings.connection_assigned'), status: :see_other
   end
 end

@@ -1,0 +1,131 @@
+---
+fr:
+  messages:
+    authentication:
+      password_console:
+        new_password: 'Nouveau mot de passe : '
+        confirm_password: 'Confirmez le mot de passe : '
+        password_saved: Mot de passe enregistré. Toutes les sessions précédentes sont révoquées.
+        un_terminal_interactif_est_requis_aucun: Un terminal interactif est requis;
+          aucun mot de passe ne doit être passé en argument.
+        saisie_interrompue_le_mot_de_passe: Saisie interrompue; le mot de passe reste
+          inchangé.
+        utilisez_au_moins_12_caracteres_au: Utilisez au moins 12 caractères, au plus
+          72 octets, avec une confirmation identique.
+    providers:
+      c411:
+        la_liste_de_brouillons_na_pas: La liste de brouillons n’a pas pu être vérifiée.
+        lecture_des_brouillons_autorisee_publication_et: Lecture des brouillons autorisée.
+          Publication et téléchargement non testés.
+      catalog:
+        role_de_fournisseur_inconnu: Rôle de fournisseur inconnu.
+      deluge:
+        authentification_et_connexion_au_demon_verifiees: Authentification et connexion
+          au démon vérifiées. Fichiers, recheck et seeding non testés.
+        mot_de_passe_deluge_refuse: Mot de passe Deluge refusé.
+        le_demon_deluge_enregistre_est_absent: Le démon Deluge enregistré est absent;
+          vérifiez son identifiant.
+        le_demon_deluge_nest_pas_connecte: Le démon Deluge n’est pas connecté.
+        deluge_a_refuse_la_requete_verifiez: Deluge a refusé la requête; vérifiez
+          les droits et le démon.
+      http:
+        reponse_http_illisible_du_fournisseur: Réponse HTTP illisible du fournisseur.
+        connexion_impossible_ou_delai_depasse_verifiez: Connexion impossible ou délai
+          dépassé; vérifiez l’adresse, le réseau et TLS.
+        reponse_json_illisible_du_fournisseur: Réponse JSON illisible du fournisseur.
+        redirection_du_catalogue_refusee: Redirection du catalogue refusée.
+        acces_refuse_ou_service_indisponible_http: Accès refusé ou service indisponible
+          (HTTP %{status}); vérifiez les droits et le filtrage réseau.
+        reponse_du_fournisseur_trop_volumineuse: Réponse du fournisseur trop volumineuse.
+      openai:
+        le_modele_demande_na_pas_pu: Le modèle demandé n’a pas pu être vérifié.
+        acces_au_modele_verifie_generation_et: Accès au modèle vérifié. Génération
+          et sorties structurées non testées.
+      postimages:
+        la_page_postimages_na_pas_pu: La page Postimages n’a pas pu être reconnue.
+        site_accessible_cle_et_envoi_non: Site accessible. Clé et envoi non testés;
+          aucune image envoyée.
+    releases:
+      event_metadata:
+        event_metadata_must_contain_only_bounded: Event metadata must contain only
+          bounded, non-secret JSON values.
+        event_metadata_must_be_valid_json: Event metadata must be valid JSON.
+      record_event:
+        invalid_event_name_or_actor: Invalid event name or actor.
+      revise:
+        only_title_and_author_text_can: Only title and author text can be revised
+          here.
+      revision_conflict:
+        release_inputs_changed_reload_the_current: Release inputs changed; reload
+          the current revision before retrying.
+      transition:
+        the_requested_workflow_state_transition_is: The requested workflow state transition
+          is not allowed.
+    settings:
+      assign_connection:
+        connexion_introuvable_pour_ce_role: Connexion introuvable pour ce rôle.
+        ce_role_possede_deja_une_identite: Ce rôle possède déjà une identité enregistrée;
+          elle reste inchangée.
+      complete_connection:
+        confirmez_que_la_configuration_appartient_a: Confirmez que la configuration
+          appartient à la même identité.
+        la_connexion_a_change_rechargez_les: La connexion a changé; rechargez les
+          réglages.
+        ladresse_deja_enregistree_reste_inchangee: L’adresse déjà enregistrée reste
+          inchangée.
+      configure_connection:
+        aucune_option_modifiable_pour_ce_role: Aucune option modifiable pour ce rôle.
+        completez_dabord_la_configuration_de_cette: Complétez d’abord la configuration
+          de cette connexion.
+        la_connexion_a_change_rechargez_les: La connexion a changé; rechargez les
+          réglages.
+      connection_config:
+        role_libelle_ou_identite_de_connexion: Rôle, libellé ou identité de connexion
+          invalide.
+        adresse_de_connexion_invalide_utilisez_http: Adresse de connexion invalide;
+          utilisez HTTP(S) sans secret ni paramètres dans l’URL.
+        ce_fournisseur_utilise_son_adresse_officielle: Ce fournisseur utilise son
+          adresse officielle.
+        adresse_de_connexion_invalide: Adresse de connexion invalide.
+        identifiants_invalides: Identifiants invalides.
+        renseignez_uniquement_le_secret_requis_par: Renseignez uniquement le secret
+          requis par ce fournisseur.
+        la_cle_postimages_doit_contenir_32: La clé Postimages doit contenir 32 caractères
+          hexadécimaux.
+        options_de_connexion_invalides: Options de connexion invalides.
+      create_connection:
+        cette_identite_existe_deja_pour_ce: Cette identité existe déjà pour ce rôle;
+          utilisez sa rotation de secret.
+      rotate_credentials:
+        confirmez_que_le_secret_appartient_a: Confirmez que le secret appartient à
+          la même identité.
+        completez_dabord_la_configuration_de_cette: Complétez d’abord la configuration
+          de cette connexion.
+        la_connexion_a_change_rechargez_les: La connexion a changé; rechargez les
+          réglages.
+      set_defaults:
+        reglages_par_defaut_invalides: Réglages par défaut invalides.
+        les_reglages_ont_change_rechargez_la: Les réglages ont changé; rechargez la
+          page.
+        connexion_introuvable_pour_ce_role: Connexion introuvable pour ce rôle.
+      test_connection:
+        la_connexion_a_change_pendant_le: La connexion a changé pendant le test; relancez
+          le test.
+        configuration_incomplete_pour_cette_connexion: Configuration incomplète pour
+          cette connexion.
+    workflows:
+      definitions:
+        this_operation_kind_is_not_implemented: This operation kind is not implemented.
+      record_outcome:
+        invalid_operation_phase: Invalid operation phase.
+        local_operations_have_no_external_outcome: Local operations have no external
+          outcome journal.
+        a_recorded_external_identity_cannot_be: A recorded external identity cannot
+          be replaced.
+      recover_dispatches:
+        recovery_limit_must_be_between_1: Recovery limit must be between 1 and 1000.
+      start:
+        reconcile_the_existing_non_local_operation: Reconcile the existing non-local
+          operation before starting another.
+        the_request_key_already_belongs_to: The request key already belongs to different
+          inputs.

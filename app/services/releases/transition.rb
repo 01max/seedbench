@@ -5,7 +5,7 @@ module Releases
 
       def initialize(dimension:, from:, to:)
         @dimension, @from, @to = dimension, from, to
-        super("The requested workflow state transition is not allowed.")
+        super(I18n.t('messages.releases.transition.the_requested_workflow_state_transition_is'))
       end
     end
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
-require "fileutils"
-require "json"
-require "open3"
-require "tmpdir"
+require 'fileutils'
+require 'json'
+require 'open3'
+require 'tmpdir'
 
-abort "Use the disposable quality container" unless ENV["SEEDBENCH_QUALITY"] == "1"
+abort 'Use the disposable quality container' unless ENV['SEEDBENCH_QUALITY'] == '1'
 
-Dir.mktmpdir("seedbench-coverage-") do |temporary|
-  source = File.join(temporary, "source")
-  FileUtils.cp_r("/app/.", source)
+Dir.mktmpdir('seedbench-coverage-') do |temporary|
+  source = File.join(temporary, 'source')
+  FileUtils.cp_r('/app/.', source)
   assertion = <<~RUBY
     require "rails_helper"
     RSpec.describe "Unloaded coverage source" do
@@ -17,20 +17,20 @@ Dir.mktmpdir("seedbench-coverage-") do |temporary|
       end
     end
   RUBY
-  File.write(File.join(source, "spec/coverage_probe_spec.rb"), assertion)
+  File.write(File.join(source, 'spec/coverage_probe_spec.rb'), assertion)
 
   %w[app/services lib].each do |directory|
-    probe = File.join(source, directory, "unloaded_coverage_probe.rb")
+    probe = File.join(source, directory, 'unloaded_coverage_probe.rb')
     FileUtils.mkdir_p(File.dirname(probe))
-    lines = Array.new(240) { "    value += 1" }.join("\n")
+    lines = Array.new(240) { '    value += 1' }.join("\n")
     File.write(probe, "class UnloadedCoverageProbe\n  def self.call\n    value = 0\n#{lines}\n    value\n  end\nend\n")
-    report = File.join(temporary, directory.tr("/", "-"))
-    environment = { "COVERAGE_DIR" => report, "BUNDLE_GEMFILE" => File.join(source, "Gemfile") }
-    output, status = Open3.capture2e(environment, "bundle", "exec", "rspec", chdir: source)
+    report = File.join(temporary, directory.tr('/', '-'))
+    environment = { 'COVERAGE_DIR' => report, 'BUNDLE_GEMFILE' => File.join(source, 'Gemfile') }
+    output, status = Open3.capture2e(environment, 'bundle', 'exec', 'rspec', chdir: source)
     abort output unless !status.success? && output.match?(/\d+ examples?, 0 failures/)
 
-    result = JSON.parse(File.read(File.join(report, ".resultset.json")))
-    coverage = result.values.first.fetch("coverage").fetch(probe).fetch("lines").compact
+    result = JSON.parse(File.read(File.join(report, '.resultset.json')))
+    coverage = result.values.first.fetch('coverage').fetch(probe).fetch('lines').compact
     abort "Unloaded #{directory} source was omitted from coverage" unless coverage.size > 200 && coverage.all?(&:zero?)
     puts "Unloaded #{directory} probe counted as uncovered; passing specs failed the 90% gate."
     File.delete(probe)

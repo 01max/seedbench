@@ -1,8 +1,8 @@
 module Releases
   class RecordEvent
-    def self.call(release_id:, name:, actor: "system", data: {})
+    def self.call(release_id:, name:, actor: 'system', data: {})
       EventMetadata.validate!(data)
-      raise EventMetadata::Unsafe, "Invalid event name or actor." unless
+      raise EventMetadata::Unsafe, I18n.t('messages.releases.record_event.invalid_event_name_or_actor') unless
         name.is_a?(String) && name.match?(/\A[a-z][a-z0-9_.]{0,79}\z/) && %w[system operator].include?(actor)
 
       release = Release.find(release_id)

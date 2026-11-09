@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
 
   def protect_browser_session
     request.session_options[:secure] = request.ssl?
-    response.headers["Cache-Control"] = "no-store, private"
+    response.headers['Cache-Control'] = 'no-store, private'
   end
 
   def after_sign_out_path_for(_scope)

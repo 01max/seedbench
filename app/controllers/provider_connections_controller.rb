@@ -5,14 +5,14 @@ class ProviderConnectionsController < ApplicationController
 
   def create
     Settings::CreateConnection.call(**connection_params)
-    redirect_to settings_path, notice: t("settings.connection_created"), status: :see_other
+    redirect_to settings_path, notice: t('settings.connection_created'), status: :see_other
   end
 
   def rotate
     values = params.expect(rotation: [ :expected_version, :confirm_identity, credentials: %i[api_key password] ])
     Settings::RotateCredentials.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
-      confirm_identity: values[:confirm_identity] == "1", credentials: values.fetch(:credentials, {}).to_h)
-    redirect_to settings_path, notice: t("settings.secret_rotated"), status: :see_other
+      confirm_identity: values[:confirm_identity] == '1', credentials: values.fetch(:credentials, {}).to_h)
+    redirect_to settings_path, notice: t('settings.secret_rotated'), status: :see_other
   end
 
   def check
@@ -23,14 +23,14 @@ class ProviderConnectionsController < ApplicationController
   def configure
     values = params.expect(configuration: [ :expected_version, options: [ :model ] ])
     Settings::ConfigureConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false), options: values.fetch(:options, {}).to_h)
-    redirect_to settings_path, notice: t("settings.options_updated"), status: :see_other
+    redirect_to settings_path, notice: t('settings.options_updated'), status: :see_other
   end
 
   def complete
     values = params.expect(completion: [ :expected_version, :confirm_identity, :endpoint, credentials: %i[api_key password], options: [ :model ] ]).to_h.symbolize_keys
     Settings::CompleteConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
-      confirm_identity: values[:confirm_identity] == "1", endpoint: values[:endpoint], credentials: values.fetch(:credentials, {}), options: values.fetch(:options, {}))
-    redirect_to settings_path, notice: t("settings.connection_completed"), status: :see_other
+      confirm_identity: values[:confirm_identity] == '1', endpoint: values[:endpoint], credentials: values.fetch(:credentials, {}), options: values.fetch(:options, {}))
+    redirect_to settings_path, notice: t('settings.connection_completed'), status: :see_other
   end
 
   private

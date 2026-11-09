@@ -28,6 +28,8 @@
 !script/operator_password.rb
 !script/quality/
 !script/quality/**
+!script/ebooks/
+!script/ebooks/*.py
 !script/tooling/
 !script/tooling/verify.py
 **/*.key

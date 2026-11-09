@@ -32,7 +32,8 @@ light themes, compact desktop review, and narrower screens.
 
 > [!NOTE]
 > **Development preview.** Batch upload and persistent local review are available.
-> Automated inspection, content assembly, torrent preparation, cover hosting, AI
+> Background ebook inspection and source-linked fact review are also available.
+> Content assembly, torrent preparation, cover hosting, AI
 > assistance, C411 drafts/publication, and seeding are still being built.
 > Prepare, Draft, and Publish are currently disabled.
 
@@ -42,14 +43,16 @@ light themes, compact desktop review, and narrower screens.
 | :--- | :--- |
 | **Bring a batch** | Upload EPUB, PDF, or MOBI files: up to 50 per batch and 100 MiB per file. Each accepted file becomes its own release; individual errors leave the accepted files available. |
 | **Find the next book** | Search titles and authors without worrying about accents or capitalization. Filter by state and navigate queues larger than a single page. |
+| **Inspect without rewriting** | Background EPUB/PDF/MOBI inspection checks structure and extracts metadata, page or document counts, text samples, and cover candidates. Optional PDF OCR leaves the original untouched. |
+| **Compare edition evidence** | Look up an ISBN in Open Library, compare source-linked candidates, and explicitly adopt reviewed facts. Checksum validity and digital-edition authenticity remain separate. |
 | **Review in one place** | Edit metadata, presentation, notes, and complete BBCode/NFO. Open files, source evidence, history, and an escaped local prose preview when needed. |
 | **Keep your edits** | Autosave while you work or use Save and next. Failed saves keep your text and selected book; concurrent edits require an explicit choice. |
 | **Follow the checks** | Keep manual review marks with reversible history. Automatic checks reflect recorded observations, and uncertainty acknowledgements stay tied to their findings. |
 | **Choose your workspace** | Use dark or light mode, switch tabs from the keyboard, and review on desktop or narrower screens. |
 | **Configure connections** | Store encrypted C411, Deluge, OpenAI, and Postimages credentials. Run explicit connection checks that report exactly what they verified. |
 
-Uploads currently check the file extension and retain the original bytes;
-byte-level inspection remains pending. Saving or navigating never prepares a
+Uploads retain the original bytes and queue bounded background inspection.
+See [ebook inspection](docs/ebook-inspection.md) for sampling and resource limits. Saving or navigating never prepares a
 torrent or writes to a provider. See the [workbench guide](docs/workbench.md)
 for current behavior and limits.
 
@@ -75,8 +78,9 @@ without echo. The default bind is loopback, and the app has one operator account
 
 1. **Add your ebooks.** Choose **Importer des ebooks** and select a batch. Review
    any individual upload errors; accepted files appear in the queue.
-2. **Review a book.** Fill in its metadata and presentation, edit the full BBCode
-   or NFO, and record manual review marks.
+2. **Review the evidence.** Wait for inspection, then open **Sources** to compare
+   extracted metadata and samples. Adopt verified values, look up an ISBN, or run
+   optional PDF OCR. Fill in presentation, BBCode/NFO, and manual review marks.
 3. **Save and move on.** Use **Enregistrer et suivant** to save pending edits
    before selecting the next book. A failed save keeps you on the current one.
 

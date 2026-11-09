@@ -1,17 +1,17 @@
-ENV["DISABLE_BOOTSNAP"] = "1"
-require "simplecov"
+ENV['DISABLE_BOOTSNAP'] = '1'
+require 'simplecov'
 
 SimpleCov.start do
-  coverage_dir ENV.fetch("COVERAGE_DIR", "/tmp/coverage")
-  track_files "{app,lib}/**/*.rb"
+  coverage_dir ENV.fetch('COVERAGE_DIR', '/tmp/coverage')
+  track_files '{app,lib}/**/*.rb'
   add_filter do |source|
     !source.filename.start_with?("#{SimpleCov.root}/app/", "#{SimpleCov.root}/lib/")
   end
-  add_group "Services", "app/services"
+  add_group 'Services', 'app/services'
   minimum_coverage line: 90
 end
 
-require "webmock/rspec"
+require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
