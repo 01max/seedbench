@@ -8,7 +8,7 @@ module Ebooks
       raise InvalidIsbn, I18n.t("ebooks.review.invalid_isbn") unless Isbn.valid?(isbn)
 
       isbn = Isbn.normalize(isbn)
-      data = Providers::Http.json(Providers::Http.call(endpoint: ENDPOINT, path: "/isbn/#{isbn}.json"))
+      data = Providers::Http.json(Providers::Http.call(endpoint: ENDPOINT, path: "/isbn/#{isbn}.json", redirects: 2))
       build(data, isbn)
     rescue Providers::Failure => error
       { "lookup_error" => error.code, "queried_isbn" => isbn, "metadata" => [] }
@@ -20,15 +20,33 @@ module Ebooks
       validate_record!(data)
 
       source = "#{ENDPOINT}#{data.fetch('key')}"
-      metadata = [ { "field" => "title", "value" => data.fetch("title").first(500), "source" => source } ]
-      metadata += identifiers(data, source)
       format = data["physical_format"].to_s.first(120)
       { "source_url" => source, "queried_isbn" => isbn, "record_format" => format,
         "edition_medium" => medium(format), "digital_edition_verified" => false,
+        "isbn_matches_query" => isbn_match?(data, source, isbn),
         "publishers" => Array(data["publishers"]).grep(String).first(5).map { |value| value.first(500) },
-        "publish_date" => data["publish_date"].to_s.first(120), "metadata" => metadata }
+        "publish_date" => data["publish_date"].to_s.first(120), "metadata" => metadata(data, source) }
     end
     private_class_method :build
+
+    def self.metadata(data, source)
+      candidates = [ { "field" => "title", "value" => data.fetch("title").first(500), "source" => source } ]
+      candidates += identifiers(data, source)
+      edition = edition_description(data)
+      candidates << { "field" => "edition", "value" => edition, "source" => source } if edition.present?
+      candidates
+    end
+    private_class_method :metadata
+
+    def self.edition_description(data)
+      (Array(data["publishers"]) + [ data["publish_date"], data["physical_format"] ]).grep(String).first(7).map(&:strip).reject(&:empty?).join(" · ").first(2000)
+    end
+    private_class_method :edition_description
+
+    def self.isbn_match?(data, source, isbn)
+      identifiers(data, source).any? { |candidate| Isbn.canonical(candidate["value"]) == Isbn.canonical(isbn) }
+    end
+    private_class_method :isbn_match?
 
     def self.validate_record!(data)
       raise InvalidRecord unless data.is_a?(Hash) && data["key"].is_a?(String) && data["key"].match?(%r{\A/books/OL\d+M\z}) && data["title"].is_a?(String)

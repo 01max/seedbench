@@ -113,11 +113,12 @@ export default class extends Controller {
 
   evidenceLoaded(event) {
     const frame = event.target
-    if (!frame.hasAttribute("data-evidence-revision")) return
+    const metadata = frame.querySelector("[data-evidence-revision]")
+    if (!metadata) return
     frame.dispatchEvent(new CustomEvent("evidence:updated", { bubbles: true }))
-    const revision = Number(frame.dataset.evidenceRevision)
+    const revision = Number(metadata.dataset.evidenceRevision)
     if (revision <= Number(this.revisionInput.value)) return
-    const values = JSON.parse(frame.dataset.reviewedValues || "null")
+    const values = JSON.parse(metadata.dataset.reviewedValues || "null")
     if (!values) return
     this.currentServer = { current_revision: revision, values }
     if (this.dirty || this.saving) this.showConflict(this.currentServer)

@@ -3,6 +3,7 @@ ARGV.replace([ "verify" ])
 require_relative "runtime_workflows"
 require_relative "runtime_access"
 require_relative "runtime_workbench"
+require_relative "runtime_ebooks"
 
 record = RuntimeWorkflows.release
 payload = record.payload_revisions.sole
@@ -11,4 +12,5 @@ abort "Payload changed across recreation" unless Digest::SHA256.file(path).hexdi
 abort "Provider assignment state changed" unless record.provider_assignments.count == 4 && record.provider_assignments.pluck(:provider_connection_id).all?(&:nil?)
 RuntimeWorkbench.verify(record)
 RuntimeAccess.verify
+RuntimeEbooks.verify
 puts "Release revisions, human content, history, provider assignments, payload and workflow state survived recreation."

@@ -1,6 +1,7 @@
 fr:
   ebooks:
     errors:
+      storage_unavailable: "Le fichier, les outils ou le stockage d’analyse sont inaccessibles. Vérifiez les volumes et les permissions puis réessayez."
       payload_changed: "Le fichier est inaccessible ou son empreinte a changé. Vérifiez le stockage et réimportez le fichier d’origine."
       resource_limit: "Inspection interrompue : limite de temps, mémoire ou taille dépassée. Vérifiez le fichier avant de réessayer."
       parser_failed: "Le lecteur n’a pas pu terminer l’inspection. Réessayez ou vérifiez le fichier avec un lecteur indépendant."
@@ -21,9 +22,23 @@ fr:
     inspection_required: "Une inspection réussie du fichier actuel est nécessaire."
     unknown_action: "Cette analyse n’est pas disponible pour ce fichier."
     queued: "Analyse demandée. Actualisez les Sources lorsque l’opération est terminée dans la checklist."
+    lookup_failed: "Notice indisponible (%{code}). Vérifiez l’ISBN ou réessayez ; aucune édition n’a été vérifiée."
+    isbn_mismatch: "La notice retournée ne confirme pas l’ISBN demandé. Comparez ses identifiants avant d’adopter une valeur."
     lookup_isbn: "ISBN à rechercher"
     scope: "Les données extraites et les notices sont des propositions. Vérifiez l’édition et les extraits avant d’adopter une valeur. L’OCR analyse uniquement les pages échantillonnées, sans modifier le PDF."
     source_record: "Ouvrir la notice d’édition"
+    kinds:
+      inspection: "Analyse du fichier"
+      edition_record: "Notice d’édition"
+      metadata: "Métadonnées"
+    counts:
+      page_count: "Pages du PDF"
+      spine_documents: "Documents dans l’ordre de lecture EPUB"
+      manifest_items: "Ressources du manifeste EPUB"
+      page_markers: "Marquages de page EPUB (pas un nombre de pages)"
+      palm_records: "Enregistrements MOBI"
+      text_characters: "Caractères extraits du MOBI"
+      sampled_pages: "Pages échantillonnées"
     measurements: "Mesures et données de la source"
     cover_candidate: "Couverture candidate, non sélectionnée"
     finding_history: "Historique des constats et des validations"
@@ -38,8 +53,8 @@ fr:
       valid: "Clé de contrôle valide · édition à vérifier"
       invalid: "Identifiant absent ou clé invalide"
     acknowledgement:
-      yes: "Incertitude acceptée"
-      no: "Acceptation retirée"
+      "yes": "Incertitude acceptée"
+      "no": "Acceptation retirée"
     findings:
       inspection_failure: "Le fichier ne peut pas être vérifié."
       sampled_pages: "Des pages échantillonnées n’ont pas de texte extractible : vérifiez le scan et sa complétude."

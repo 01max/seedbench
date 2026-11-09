@@ -280,6 +280,8 @@ fr:
       accepted: "Acceptation observée"
       other: "Étape enregistrée"
     events:
+      fact:
+        reviewed: "Valeur adoptée avec sa source"
       release:
         created: "Release créée"
         revised: "Texte enregistré"

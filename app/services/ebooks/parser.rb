@@ -1,7 +1,6 @@
 require "digest"
-require "English"
-require "timeout"
 require "tmpdir"
+require "tempfile"
 
 module Ebooks
   class Parser
@@ -24,11 +23,14 @@ module Ebooks
           verify!(source)
           report = execute(source)
           verify!(source)
+          verify_location!(source)
           retain_covers(report)
         end
       end
-    rescue UnsafePayload, SystemCallError
+    rescue UnsafePayload
       { "error" => "payload_changed" }
+    rescue SystemCallError
+      { "error" => "storage_unavailable" }
     end
 
     private
@@ -51,16 +53,21 @@ module Ebooks
       source.rewind
     end
 
+    def verify_location!(source)
+      current = payload_path.stat
+      raise UnsafePayload unless [ current.dev, current.ino ] == [ source.stat.dev, source.stat.ino ]
+    end
+
     def execute(source)
       File.open(@directory.join("report"), "w+") do |output|
         pid = spawn_parser(source, output)
-        Timeout.timeout(90) { Process.wait(pid) }
-        return { "error" => "parser_failed" } unless $CHILD_STATUS.success?
+        status = ProcessBudget.call(pid: pid, directory: @directory)
+        return { "error" => status.signaled? ? "resource_limit" : "parser_failed" } unless status.success?
         return { "error" => "resource_limit" } if output.size > MAX_OUTPUT
 
         output.rewind
         JSON.parse(output.read)
-      rescue Timeout::Error
+      rescue ProcessBudget::Exceeded
         { "error" => "resource_limit" }
       ensure
         stop(pid) if pid
@@ -105,7 +112,11 @@ module Ebooks
       raise UnsafePayload if directory.symlink?
 
       path = directory.join(name)
-      File.open(path, File::WRONLY | File::CREAT | File::EXCL | File::NOFOLLOW, 0o600) { |file| file.binmode.write(data) }
+      Tempfile.create("cover-", directory) do |file|
+        file.binmode.write(data)
+        file.flush
+        File.link(file.path, path)
+      end
       "inspection-covers/#{name}"
     rescue Errno::EEXIST
       raise UnsafePayload unless !path.symlink? && Digest::SHA256.file(path).hexdigest == name

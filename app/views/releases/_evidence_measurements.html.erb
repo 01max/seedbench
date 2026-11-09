@@ -1,0 +1,11 @@
+<% if item.data["structure"].is_a?(Hash) %>
+  <dl class="inspection-measures">
+    <% %w[page_count spine_documents manifest_items page_markers palm_records text_characters sampled_pages].each do |key| %>
+      <% value = item.data["structure"][key] %>
+      <% unless value.nil? %><dt><%= t("ebooks.counts.#{key}") %></dt><dd><%= value.is_a?(Array) ? value.join(", ") : number_with_delimiter(value) %></dd><% end %>
+    <% end %>
+  </dl>
+<% end %>
+<% if item.kind == "edition_record" && item.data["source_url"] %>
+  <p><%= [Array(item.data["publishers"]).join(", "), item.data["publish_date"], item.data["record_format"]].compact_blank.join(" · ") %></p>
+<% end %>

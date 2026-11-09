@@ -1,7 +1,9 @@
 """Read-only ebook measurements. No network, credentials, or workflow decisions."""
 import hashlib
+import html.entities
 import json
 import pathlib
+import posixpath
 import re
 import sys
 import subprocess
@@ -27,7 +29,7 @@ def require(condition, code):
 
 def xml(data):
     require(len(data) <= 2 * 1024 * 1024, "resource_limit")
-    require(not re.search(br"<!\s*(ENTITY|DOCTYPE)", data, re.I), "unsafe_xml")
+    require(b"\x00" not in data and not re.search(br"<!\s*(ENTITY|DOCTYPE)", data, re.I), "unsafe_xml")
     return ET.fromstring(data)
 
 
@@ -42,8 +44,10 @@ def text(node):
 def reference(base, href):
     uri = urlsplit(href)
     require(not uri.scheme and not uri.netloc and not uri.query, "unsafe_reference")
-    path = pathlib.PurePosixPath(base).parent / unquote(uri.path)
-    require(not path.is_absolute() and ".." not in path.parts and "\\" not in str(path), "unsafe_reference")
+    raw = unquote(uri.path)
+    require(not raw.startswith("/") and "\\" not in raw and "\x00" not in raw, "unsafe_reference")
+    path = pathlib.PurePosixPath(posixpath.normpath(posixpath.join(posixpath.dirname(base), raw)))
+    require(not path.is_absolute() and ".." not in path.parts, "unsafe_reference")
     return str(path)
 
 
@@ -55,13 +59,34 @@ def cover(data, source, work):
         require(image.format in ("JPEG", "PNG", "WEBP") and image.width * image.height <= 40_000_000, "unsupported_cover")
         width, height, media = image.width, image.height, Image.MIME[image.format]
         image.verify()
+    with Image.open(io.BytesIO(data)) as image:
+        image.load()
     name = hashlib.sha256(data).hexdigest()
     (work / name).write_bytes(data)
     return {"file": name, "sha256": name, "width": width, "height": height,
             "media_type": media, "source": source, "size_bytes": len(data)}
 
 
+def metadata_values(metadata, origin):
+    observations = []
+    for node in metadata:
+        name = local(node.tag)
+        if name not in ("title", "creator", "identifier", "publisher", "language", "date", "source") or not text(node):
+            continue
+        field = "author" if name == "creator" else name
+        value = text(node)[:2000]
+        if name == "identifier":
+            compact = re.sub(r"[\s-]", "", value)
+            scheme = node.attrib.get("{http://www.idpf.org/2007/opf}scheme", "")
+            if scheme.lower() == "isbn" or value.lower().startswith(("urn:isbn:", "isbn:")) or re.fullmatch(r"(?:[0-9]{13}|[0-9]{9}[0-9Xx])", compact):
+                field = "isbn"
+        observations.append({"field": field, "value": value, "source": origin + "#" + node.attrib.get("id", name)})
+    return observations
+
+
 def epub(source, work):
+    with open(source, "rb") as stream:
+        require(stream.read(4) == b"PK\x03\x04", "signature_mismatch")
     with zipfile.ZipFile(source) as archive:
         entries = archive.infolist()
         names = [entry.filename for entry in entries]
@@ -93,9 +118,7 @@ def epub(source, work):
             allowed = {"http://www.idpf.org/2008/embedding", "http://ns.adobe.com/pdf/enc#RC"}
             require(all(node.attrib.get("Algorithm") in allowed for node in encryption.iter() if local(node.tag) == "EncryptionMethod"), "encrypted")
         metadata = next(node for node in package if local(node.tag) == "metadata")
-        observations = [{"field": {"creator": "author", "identifier": "isbn"}.get(local(node.tag), local(node.tag)),
-                         "value": text(node)[:2000], "source": package_path + "#" + node.attrib.get("id", local(node.tag))}
-                        for node in metadata if local(node.tag) in ("title", "creator", "identifier", "publisher", "language", "date", "source") and text(node)]
+        observations = metadata_values(metadata, package_path)
         manifest = {node.attrib["id"]: node for node in package.iter() if local(node.tag) == "item"}
         require(bool(manifest), "invalid_epub")
         for item in manifest.values():
@@ -107,7 +130,9 @@ def epub(source, work):
             path = reference(package_path, item.attrib["href"])
             # XHTML DOCTYPE declarations without an internal subset are common; never resolve them.
             raw = archive.read(path)
-            require(not re.search(br"<!\s*ENTITY|<!DOCTYPE[^>]*\[", raw, re.I), "unsafe_xml")
+            require(b"\x00" not in raw and not re.search(br"<!\s*ENTITY|<!DOCTYPE[^>]*\[", raw, re.I), "unsafe_xml")
+            raw = re.sub(br"&([A-Za-z][A-Za-z0-9]+);", lambda match: ("&#" + str(html.entities.name2codepoint[match[1].decode()]) + ";").encode()
+                         if match[1].decode() in html.entities.name2codepoint else match[0], raw)
             document = ET.fromstring(raw)
             markers += sum("pagebreak" in node.attrib.get("{http://www.idpf.org/2007/ops}type", "").split() for node in document.iter())
             if index < 2 or index == len(spine) - 1:
@@ -119,7 +144,7 @@ def epub(source, work):
                 require(len(covers) < 5, "resource_limit")
                 path = reference(package_path, item.attrib["href"])
                 covers.append(cover(archive.read(path), path, work))
-        return {"structure": {"archive_entries": len(entries), "spine_documents": len(spine), "page_markers": markers,
+        return {"structure": {"archive_entries": len(entries), "spine_documents": len(spine), "manifest_items": len(manifest), "page_markers": markers,
                                "page_count": None, "scope": "all archive members and spine documents"},
                 "metadata": observations, "samples": samples, "covers": covers}
 
@@ -127,8 +152,10 @@ def epub(source, work):
 def command(arguments, work):
     with (work / "tool-output").open("wb") as output, (work / "tool-errors").open("wb") as errors:
         completed = subprocess.run(arguments, stdout=output, stderr=errors, pass_fds=(3,), timeout=40, check=False)
-    require(completed.returncode == 0, "tool_failed")
-    require((work / "tool-output").stat().st_size <= 256 * 1024, "resource_limit")
+    require((work / "tool-output").stat().st_size <= 256 * 1024 and (work / "tool-errors").stat().st_size <= 256 * 1024, "resource_limit")
+    if completed.returncode:
+        require("password" not in (work / "tool-errors").read_text(errors="replace").lower(), "encrypted")
+        raise Invalid("tool_failed")
     return (work / "tool-output").read_text(errors="replace")
 
 
@@ -193,9 +220,8 @@ def mobi(source, work):
     link.symlink_to(source)
     command(["ebook-meta", str(link), "--to-opf", str(work / "metadata.opf"), "--get-cover", str(work / "cover.jpg")], work)
     metadata = xml((work / "metadata.opf").read_bytes())
-    observations = [{"field": {"creator": "author", "identifier": "isbn"}.get(local(node.tag), local(node.tag)),
-                     "value": text(node)[:2000], "source": "mobi:metadata:" + local(node.tag)}
-                    for node in metadata.iter() if local(node.tag) in ("title", "creator", "identifier", "publisher", "language", "date") and text(node)]
+    metadata_node = next(node for node in metadata if local(node.tag) == "metadata")
+    observations = metadata_values(metadata_node, "mobi:metadata")
     command(["ebook-convert", str(link), str(work / "book.txt")], work)
     require(0 < (work / "book.txt").stat().st_size <= MAX_ENTRY, "resource_limit")
     content = (work / "book.txt").read_text(errors="replace")
@@ -220,15 +246,14 @@ def main():
             result = mobi(source, work)
         result["parser"] = format_name + "-1"
         result["error"] = None
-    except subprocess.TimeoutExpired:
+    except (subprocess.TimeoutExpired, MemoryError):
         result = {"error": "resource_limit"}
     except Invalid as error:
         result = {"error": str(error)}
     except (KeyError, ValueError, StopIteration, ET.ParseError, zipfile.BadZipFile, OSError):
         result = {"error": "corrupt"}
     output = json.dumps(result, ensure_ascii=True)
-    require(len(output) <= 256 * 1024, "resource_limit")
-    print(output)
+    print(output if len(output) <= 256 * 1024 else json.dumps({"error": "resource_limit"}))
 
 
 if __name__ == "__main__":

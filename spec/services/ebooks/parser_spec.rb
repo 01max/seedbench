@@ -14,7 +14,10 @@ RSpec.describe Ebooks::Parser do
     system("python3", Rails.root.join("script/ebooks/fixtures.py").to_s, directory.to_s, exception: true)
   end
 
-  after { FileUtils.remove_entry(directory) }
+  after do
+    FileUtils.remove_entry(directory)
+    FileUtils.rm_rf(Rails.application.config.x.storage.fetch(:payload).join("staging"))
+  end
 
   it "measures an EPUB without changing its bytes or reviewing metadata" do
     release, payload, report = inspect_fixture
@@ -46,7 +49,7 @@ RSpec.describe Ebooks::Parser do
   end
 
   it "reports a corrupt archive truthfully" do
-    directory.join("bad.epub").binwrite("not a zip")
+    directory.join("bad.epub").binwrite("PK\x03\x04broken zip")
     _, _, report = inspect_fixture(name: "bad.epub")
     expect(report).to eq("error" => "corrupt")
   end
@@ -90,5 +93,55 @@ RSpec.describe Ebooks::Parser do
       _, _, report = inspect_fixture(name: "book.mobi")
       expect(report).to eq("error" => "encrypted")
     end
+  end
+
+  context "with hostile or mislabeled files" do
+    before do
+      system("python3", Rails.root.join("script/ebooks/adversarial.py").to_s, directory.to_s, exception: true)
+    end
+
+    { "bomb.epub" => "resource_limit", "encrypted.epub" => "encrypted", "entity.epub" => "unsafe_xml", "utf16.epub" => "unsafe_xml",
+      "missing.epub" => "missing_resource", "escape.epub" => "unsafe_reference", "disguised.pdf" => "signature_mismatch",
+      "broken.mobi" => "corrupt", "encrypted.pdf" => "encrypted", "crc.epub" => "corrupt" }.each do |filename, error|
+      it "reports #{filename} without changing its hash" do
+        _, payload, report = inspect_fixture(name: filename)
+        expect(report).to eq("error" => error)
+        expect(payload.sha256).to eq(Digest::SHA256.file(directory.join(filename)).hexdigest)
+      end
+    end
+
+    it "accepts an internal parent reference that stays inside the archive" do
+      _, _, report = inspect_fixture(name: "nested.epub")
+      expect(report.fetch("error")).to be_nil
+    end
+  end
+
+  it "rejects payload locators outside the configured root" do
+    _, payload, = inspect_fixture
+    payload.locator = directory.join("book.epub").to_s
+    expect(described_class.call(payload: payload)).to eq("error" => "payload_changed")
+  end
+
+  it "discards a late result and requests a fresh inspection after a human edit" do
+    release, _, report = inspect_fixture
+    operation = release.workflow_operations.sole
+    token = Workflows::Claim.call(operation_id: operation.id)
+    Releases::Save.call(release_id: release.id, expected_revision: 0, changes: { presentation: "New human prose" })
+    Workflows::Complete.call(operation_id: operation.id, attempt_token: token, result: report, apply: Ebooks::Record)
+    expect(operation.reload.state).to eq("stale")
+    expect(release.evidence_items).to be_empty
+    expect(release.workflow_operations.order(:id).last).to have_attributes(input_revision: 1, state: "pending")
+    expect(release.content_revisions.sole.body).to eq("New human prose")
+  end
+
+  it "keeps OCR and standard retries distinct after an input change" do
+    release, = inspect_fixture(name: "book.pdf")
+    ordinary = release.workflow_operations.sole
+    ocr = Ebooks::Request.call(release: release, ocr: true)
+    Releases::Save.call(release_id: release.id, expected_revision: 0, changes: { notes: "New note" })
+    [ ordinary, ocr ].each { |operation| Workflows::Execute.call(operation_id: operation.id) }
+    pending = release.workflow_operations.where(state: "pending", input_revision: 1)
+    expect(pending.map { |operation| operation.parameters.fetch("ocr") }).to contain_exactly(true, false)
+    expect(pending.pluck(:request_key).uniq.size).to eq(2)
   end
 end

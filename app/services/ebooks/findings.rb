@@ -37,9 +37,14 @@ module Ebooks
       values = {}
       isbn = @release.reviewed_facts.where(field: "isbn", payload_revision_id: @payload.id).order(:number).last&.value
       values["invalid_reviewed_isbn"] = [ "failure", { "isbn" => isbn } ] if isbn.present? && !Isbn.valid?(isbn)
-      records = @evidence.where(kind: "edition_record").order(:id).map { |item| item.data.slice("source_url", "edition_medium", "record_format") }.uniq
+      records = edition_records
       values["edition_medium"] = [ "uncertainty", { "records" => records } ] if records.any?
       values
+    end
+
+    def edition_records
+      @evidence.where(kind: "edition_record").where("json_extract(data, '$.source_url') IS NOT NULL").order(:id)
+        .map { |item| item.data.slice("source_url", "edition_medium", "record_format", "publishers", "publish_date") }.uniq
     end
 
     def revise(code, observation)

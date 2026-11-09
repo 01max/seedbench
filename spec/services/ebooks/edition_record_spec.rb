@@ -24,4 +24,15 @@ RSpec.describe Ebooks::EditionRecord do
     stub_request(:get, "https://openlibrary.org/isbn/#{isbn}.json").to_return(body: { key: "https://untrusted.invalid", title: "Bad" }.to_json)
     expect(described_class.call(isbn: isbn)).to include("lookup_error" => "invalid_record")
   end
+
+  it "follows the catalogue's ISBN redirect within the same origin" do
+    stub_request(:get, "https://openlibrary.org/isbn/#{isbn}.json").to_return(status: 302, headers: { "Location" => "/books/OL123M.json" })
+    stub_request(:get, "https://openlibrary.org/books/OL123M.json").to_return(body: record.to_json)
+    expect(described_class.call(isbn: isbn)).to include("isbn_matches_query" => true)
+  end
+
+  it "refuses a redirect to another host" do
+    stub_request(:get, "https://openlibrary.org/isbn/#{isbn}.json").to_return(status: 302, headers: { "Location" => "https://untrusted.invalid/" })
+    expect(described_class.call(isbn: isbn)).to include("lookup_error" => "invalid_redirect")
+  end
 end

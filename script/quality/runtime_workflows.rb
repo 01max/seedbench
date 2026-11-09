@@ -29,7 +29,7 @@ module RuntimeWorkflows
   def self.verify_gap
     pending = operation("interrupted-dispatch")
     abort "Application intent was not committed" unless pending.state == "pending" && pending.dispatch_intent.state == "pending"
-    abort "Queue write happened before the interruption" if SolidQueue::Job.exists?(class_name: "WorkflowOperationJob")
+    abort "Queue write happened before the interruption" if SolidQueue::Job.where(class_name: "WorkflowOperationJob").exists?([ "json_extract(arguments, '$.arguments[0]') = ?", pending.id ])
     puts "Process stopped after app commit and before queue write; committed intent retained."
   end
 

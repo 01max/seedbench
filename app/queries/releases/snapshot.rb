@@ -20,9 +20,17 @@ module Releases
         events: release.release_events.order(sequence: :desc).limit(50).to_a,
         snapshots: latest(release.remote_snapshots, :kind).index_by(&:kind),
         operations: release.workflow_operations.order(id: :desc).limit(20).to_a,
-        evidence: release.evidence_items.order(id: :desc).limit(20).to_a }
+        evidence: evidence(release) }
     end
     private_class_method :observations
+
+    def self.evidence(release)
+      recent = release.evidence_items.order(id: :desc).limit(20).pluck(:id)
+      payload_id = release.payload_revisions.order(number: :desc).pick(:id)
+      inspection = release.evidence_items.where(kind: "inspection", payload_revision_id: payload_id).order(id: :desc).pick(:id)
+      release.evidence_items.where(id: recent + [ inspection ]).order(id: :desc).to_a
+    end
+    private_class_method :evidence
 
     def self.current_findings(release)
       payload = release.payload_revisions.order(number: :desc).limit(1).select(:id)

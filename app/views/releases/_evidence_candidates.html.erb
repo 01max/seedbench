@@ -6,7 +6,7 @@
       <%= form_with url: release_fact_reviews_path(@release), scope: :review do |form| %>
         <%= form.hidden_field :evidence_id, value: item.id %><%= form.hidden_field :candidate_index, value: index %>
         <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
-        <%= form.submit t("ebooks.actions.adopt"), class: "work-button quiet" %>
+        <%= form.submit t("ebooks.actions.adopt"), class: "work-button" %>
       <% end %>
     <% end %>
   </article>

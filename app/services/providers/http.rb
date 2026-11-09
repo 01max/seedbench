@@ -8,13 +8,13 @@ module Providers
     Response = Data.define(:body, :cookies)
     MAX_BYTES = 1_048_576
 
-    def self.call(endpoint:, path:, headers: {}, body: nil)
+    def self.call(endpoint:, path:, headers: {}, body: nil, redirects: 0)
       uri = URI.parse(endpoint + path)
       request = body ? Net::HTTP::Post.new(uri) : Net::HTTP::Get.new(uri)
       request["User-Agent"] = "Seedbench/1.0"
       headers.each { |key, value| request[key] = value }
       request.body = JSON.generate(body) if body
-      Timeout.timeout(10) { execute(uri, request) }
+      Timeout.timeout(10) { execute(uri, request, redirects) }
     rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Zlib::Error
       raise Failure.new("invalid_response", "Réponse HTTP illisible du fournisseur."), cause: nil
     rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError
@@ -27,15 +27,41 @@ module Providers
       raise Failure.new("invalid_response", "Réponse JSON illisible du fournisseur."), cause: nil
     end
 
-    def self.execute(uri, request)
+    def self.execute(uri, request, redirects)
       http = Net::HTTP.new(uri.host, uri.port, nil)
       http.use_ssl = uri.scheme == "https"
       http.open_timeout = 3
       http.read_timeout = http.write_timeout = 5
       http.max_retries = 0
-      http.start { |client| client.request(request) { |response| return read(response) } }
+      http.start do |client|
+        client.request(request) { |response| return resolve_response(uri, request, response, redirects) }
+      end
     end
     private_class_method :execute
+
+    def self.resolve_response(uri, request, response, redirects)
+      return redirect(uri, request, response, redirects) if response.is_a?(Net::HTTPRedirection) && redirects.positive?
+
+      read(response)
+    end
+    private_class_method :resolve_response
+
+    def self.redirect(uri, request, response, remaining)
+      target = URI.join(uri, response["location"].to_s)
+      raise Failure.new("invalid_redirect", "Redirection du catalogue refusée.") unless request.is_a?(Net::HTTP::Get) && same_origin?(target, uri)
+
+      redirected = Net::HTTP::Get.new(target)
+      request.each_header { |key, value| redirected[key] = value }
+      execute(target, redirected, remaining - 1)
+    rescue URI::InvalidURIError
+      raise Failure.new("invalid_redirect", "Redirection du catalogue refusée."), cause: nil
+    end
+    private_class_method :redirect
+
+    def self.same_origin?(target, original)
+      [ target.scheme, target.host, target.port ] == [ original.scheme, original.host, original.port ]
+    end
+    private_class_method :same_origin?
 
     def self.read(response)
       raise Failure.new("http_#{response.code}", "Accès refusé ou service indisponible (HTTP #{response.code}); vérifiez les droits et le filtrage réseau.") unless response.is_a?(Net::HTTPSuccess)

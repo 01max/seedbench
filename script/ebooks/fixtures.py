@@ -28,6 +28,11 @@ def pdf(root):
     canvas.drawString(60, 700, "Synthetic PDF text for inspection.")
     canvas.showPage()
     canvas.save()
+    from reportlab.lib.pdfencrypt import StandardEncryption
+    canvas = Canvas(str(root / "encrypted.pdf"), encrypt=StandardEncryption("synthetic-secret"))
+    canvas.drawString(60, 700, "Encrypted synthetic text")
+    canvas.showPage()
+    canvas.save()
     image = Image.new("RGB", (1600, 2000), "white")
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(image)
