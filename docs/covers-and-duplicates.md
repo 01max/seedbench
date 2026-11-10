@@ -80,6 +80,13 @@ known candidates, other checks, or establish permission to publish. It cannot
 replace a truncated search or unavailable account access. A fresh failed search
 requires a fresh manual note.
 
-The Publish operation boundary always performs a fresh search before proceeding.
+Publish starts with a fresh search before proceeding.
 New candidates, changed evidence or a search failure stop it for review. The
 current preview tests this boundary without enabling publication.
+
+After a failed Publish search receives its manual review, a newly approved
+continuation can finish that same check without starting another search. Its
+immutable operation parameters record `manual_search_check_id`, the current
+reviewed check ID. The boundary rechecks account access, current inputs and
+candidate decisions. A newer search invalidates that continuation; an ordinary
+Publish request performs a fresh search and a new failure needs a new note.

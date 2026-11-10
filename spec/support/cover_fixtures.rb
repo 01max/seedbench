@@ -12,9 +12,9 @@ module CoverFixtures
     ApplicationRecord.establish_connection(configuration)
   end
 
-  def cover_write_operation(release, kind: 'draft_write')
+  def cover_write_operation(release, kind: 'draft_write', parameters: {})
     release.reload.workflow_operations.create!(kind: kind, request_key: SecureRandom.uuid, effect: 'remote', input_revision: release.input_revision,
-      state: 'running', attempt_token: SecureRandom.uuid, lease_expires_at: 5.minutes.from_now, attempts: 1)
+      state: 'running', attempt_token: SecureRandom.uuid, lease_expires_at: 5.minutes.from_now, attempts: 1, parameters: parameters)
   end
 
   def configure_cover_host(release)

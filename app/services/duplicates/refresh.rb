@@ -13,6 +13,8 @@ module Duplicates
     def call
       @parameters = @operation.release.with_lock { parameters }
       connection = ProviderConnection.find(@parameters.fetch('connection_id'))
+      return resume_manual(connection) if @operation.parameters['manual_search_check_id']
+
       result = Providers::C411::Search.call(connection: connection, queries: @parameters.fetch('queries'))
       check = @operation.release.with_lock { persist(result) }
       raise Failure.new(:review_required) unless Assessment.new(@operation.release).ready?
@@ -21,6 +23,33 @@ module Duplicates
     end
 
     private
+
+    def resume_manual(connection)
+      @operation.release.with_lock { manual_check! }
+      access = Providers::C411.check(connection: connection)
+      raise Failure.new(:publication_unavailable) unless access.status == 'passed'
+
+      @operation.release.with_lock do
+        raise Failure.new(:stale_review) unless parameters == @parameters
+
+        manual_check!
+      end
+    rescue Providers::Failure
+      raise Failure.new(:publication_unavailable), cause: nil
+    end
+
+    def manual_check!
+      assessment = Assessment.new(@operation.release)
+      check = assessment.check
+      valid = check && check.id == @operation.parameters['manual_search_check_id'] && assessment.manual_exception? && assessment.ready?
+      raise Failure.new(:stale_review) unless valid && publish_search?(check)
+
+      check
+    end
+
+    def publish_search?(check)
+      @operation.release.workflow_operations.exists?(id: check.query['search_operation_id'], kind: 'publish', effect: 'remote')
+    end
 
     def parameters
       @operation.reload
