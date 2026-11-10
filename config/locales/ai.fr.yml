@@ -1,0 +1,8 @@
+fr:
+  ai:
+    sources:
+      reviewed: Faits relus par l’opérateur
+    errors:
+      inspection_required: Une inspection réussie du fichier actuel est nécessaire pour préparer les preuves.
+      scope_required: Sélectionnez une à huit preuves et décrivez le périmètre ciblé avec 20 à 500 caractères.
+      pack_too_large: Le dossier dépasse la limite de 32 Kio. Réduisez la sélection ciblée.

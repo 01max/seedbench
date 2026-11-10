@@ -84,6 +84,23 @@ def metadata_values(metadata, origin):
     return observations
 
 
+def xhtml(raw):
+    require(b"\x00" not in raw and not re.search(br"<!\s*ENTITY|<!DOCTYPE[^>]*\[", raw, re.I), "unsafe_xml")
+    raw = re.sub(br"&([A-Za-z][A-Za-z0-9]+);", lambda match: ("&#" + str(html.entities.name2codepoint[match[1].decode()]) + ";").encode()
+                 if match[1].decode() in html.entities.name2codepoint else match[0], raw)
+    return ET.fromstring(raw)
+
+
+def contents(archive, manifest, package_path):
+    selected = [item for item in manifest.values() if "nav" in item.attrib.get("properties", "").split()
+                or item.attrib.get("media-type") == "application/x-dtbncx+xml"][:2]
+    result = []
+    for item in selected:
+        path = reference(package_path, item.attrib["href"])
+        result.append({"source": path, "text": text(xhtml(archive.read(path)))[:SAMPLE]})
+    return result
+
+
 def epub(source, work):
     with open(source, "rb") as stream:
         require(stream.read(4) == b"PK\x03\x04", "signature_mismatch")
@@ -128,12 +145,7 @@ def epub(source, work):
         samples, markers = [], 0
         for index, item in enumerate(spine):
             path = reference(package_path, item.attrib["href"])
-            # XHTML DOCTYPE declarations without an internal subset are common; never resolve them.
-            raw = archive.read(path)
-            require(b"\x00" not in raw and not re.search(br"<!\s*ENTITY|<!DOCTYPE[^>]*\[", raw, re.I), "unsafe_xml")
-            raw = re.sub(br"&([A-Za-z][A-Za-z0-9]+);", lambda match: ("&#" + str(html.entities.name2codepoint[match[1].decode()]) + ";").encode()
-                         if match[1].decode() in html.entities.name2codepoint else match[0], raw)
-            document = ET.fromstring(raw)
+            document = xhtml(archive.read(path))
             markers += sum("pagebreak" in node.attrib.get("{http://www.idpf.org/2007/ops}type", "").split() for node in document.iter())
             if index < 2 or index == len(spine) - 1:
                 samples.append({"source": path, "text": text(document)[:SAMPLE]})
@@ -146,7 +158,7 @@ def epub(source, work):
                 covers.append(cover(archive.read(path), path, work))
         return {"structure": {"archive_entries": len(entries), "spine_documents": len(spine), "manifest_items": len(manifest), "page_markers": markers,
                                "page_count": None, "scope": "all archive members and spine documents"},
-                "metadata": observations, "samples": samples, "covers": covers}
+                "metadata": observations, "samples": samples, "contents": contents(archive, manifest, package_path), "covers": covers}
 
 
 def command(arguments, work):
