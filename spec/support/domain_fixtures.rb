@@ -10,7 +10,16 @@ module DomainFixtures
     release.reload.update!(preparation_state: 'prepared', proposed_name: names.release)
   end
 
-  def build_release_graph
+  def synthetic_cover_evidence(release)
+    { 'sha256' => 'c' * 64, 'edition_match' => true, 'quality_reviewed' => true, 'reviewed_facts' => Covers::Policy.facts(release) }
+  end
+
+  def synthetic_cover_proof(cover)
+    { 'source_sha256' => cover.edition_evidence['sha256'], 'policy' => Covers::Policy::VERSION,
+      'edition_fingerprint' => Covers::Policy.fingerprint(cover), 'mean_pixel_difference' => 0.0, 'hosted_sha256' => 'd' * 64 }
+  end
+
+  def build_release_graph(include_cover: true)
     release = Release.create!(title: 'Synthetic book', author: 'Test author')
     payload = PayloadRevision.create!(release: release, number: 1, original_filename: 'fixture.epub',
       format: 'epub', size_bytes: 42, sha256: 'a' * 64, locator: 'staging/fixture.epub')
@@ -28,17 +37,19 @@ module DomainFixtures
       severity: 'uncertainty', message: 'Synthetic uncertainty', input_revision: 0)
     FindingAcknowledgement.create!(release: release, finding: finding, acknowledged: true, actor: 'operator')
     cover = CoverRevision.create!(release: release, payload_revision: payload, number: 1,
-      source_kind: 'embedded', source_locator: 'covers/synthetic.png', width: 600, height: 900)
+      source_kind: 'embedded', source_locator: 'covers/synthetic.png', width: 600, height: 900, edition_evidence: synthetic_cover_evidence(release)) if include_cover
     connections = { 'publishing' => 'c411', 'torrent_client' => 'deluge', 'ai' => 'openai', 'image_host' => 'postimages' }.to_h do |role, provider|
       connection = ProviderConnection.create!(role: role, provider: provider, identity_key: "synthetic-#{role}", label: "Synthetic #{provider}")
       ProviderAssignment.create!(release: release, role: role, provider_connection: connection, assigned_at: Time.current)
       [ role, connection ]
     end
     CoverHosting.create!(release: release, cover_revision: cover, provider_connection: connections.fetch('image_host'),
-      direct_url: 'https://images.invalid/synthetic.png', media_type: 'image/png', width: 600, height: 900, verified_at: Time.current)
+      direct_url: 'https://images.invalid/synthetic.png', media_type: 'image/png', width: 600, height: 900, verified_at: Time.current, verification: synthetic_cover_proof(cover)) if cover
     ContentRevision.create!(release: release, payload_revision: payload, preparation_revision: preparation,
-      cover_revision: cover, kind: 'bbcode', number: 1, body: 'Human text', origin: 'human', input_revision: 0)
-    check = DuplicateCheck.create!(release: release, input_revision: 0, searched_at: Time.current)
+      cover_revision_id: cover&.id, kind: 'bbcode', number: 1, body: 'Human text', origin: 'human', input_revision: 0)
+    check = DuplicateCheck.create!(release: release, input_revision: 0, searched_at: Time.current,
+      query: { 'status' => 'complete', 'fingerprint' => Duplicates::Inputs.fingerprint(Duplicates::Inputs.call(release: release)),
+        'connection_id' => connections.fetch('publishing').id, 'connection_version' => 0 })
     DuplicateDecision.create!(release: release, duplicate_check: check, candidate_key: 'synthetic-candidate',
       decision: 'false_positive', reason: 'Different edition', actor: 'operator', reviewed_at: Time.current)
     RemoteSnapshot.create!(release: release, provider_connection: connections.fetch('publishing'), kind: 'draft',

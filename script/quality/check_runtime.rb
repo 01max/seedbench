@@ -6,6 +6,7 @@ require_relative 'runtime_workbench'
 require_relative 'runtime_content'
 require_relative 'runtime_ebooks'
 require_relative 'runtime_preparation'
+require_relative 'runtime_reviews'
 
 record = RuntimeWorkflows.release
 payload = record.payload_revisions.sole
@@ -17,4 +18,5 @@ RuntimeContent.verify(record)
 RuntimeAccess.verify
 RuntimeEbooks.verify
 RuntimePreparation.verify
+RuntimeReviews.verify
 puts 'Release revisions, human content, history, provider assignments, payload and workflow state survived recreation.'

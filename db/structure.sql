@@ -100,7 +100,7 @@ FOREIGN KEY ("release_id", "payload_revision_id")
 CREATE INDEX "index_cover_revisions_on_release_id" ON "cover_revisions" ("release_id");
 CREATE UNIQUE INDEX "index_cover_revisions_on_release_id_and_id" ON "cover_revisions" ("release_id", "id");
 CREATE UNIQUE INDEX "index_cover_revisions_on_release_id_and_number" ON "cover_revisions" ("release_id", "number");
-CREATE TABLE IF NOT EXISTS "cover_hostings" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "cover_revision_id" bigint NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'image_host' NOT NULL, "direct_url" varchar NOT NULL, "media_type" varchar NOT NULL, "width" integer NOT NULL, "height" integer NOT NULL, "verified_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_d3056cdfd1"
+CREATE TABLE IF NOT EXISTS "cover_hostings" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "cover_revision_id" bigint NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'image_host' NOT NULL, "direct_url" varchar NOT NULL, "media_type" varchar NOT NULL, "width" integer NOT NULL, "height" integer NOT NULL, "verified_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, verification json NOT NULL DEFAULT '{}' CHECK (json_valid(verification) AND json_type(verification) = 'object'), CONSTRAINT "fk_rails_d3056cdfd1"
 FOREIGN KEY ("release_id", "cover_revision_id")
   REFERENCES "cover_revisions" ("release_id", "id")
 , CONSTRAINT "fk_rails_e45eb057f8"
@@ -286,7 +286,28 @@ CREATE UNIQUE INDEX "active_payload_destination" ON "payload_moves" ("destinatio
 CREATE TRIGGER payload_moves_no_input BEFORE UPDATE OF release_id, payload_revision_id, workflow_operation_id, source_locator, destination_locator, source_device, source_inode, root_device, root_inode ON payload_moves BEGIN SELECT RAISE(ABORT, 'Move identity is immutable'); END;
 CREATE TRIGGER payload_moves_no_delete BEFORE DELETE ON payload_moves BEGIN SELECT RAISE(ABORT, 'Move journal is retained'); END;
 CREATE TRIGGER payload_moves_no_replace BEFORE INSERT ON payload_moves WHEN EXISTS (SELECT 1 FROM payload_moves WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id OR (destination_locator = NEW.destination_locator AND state IN ('reserved', 'moved') AND NEW.state IN ('reserved', 'moved'))) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: payload_moves.destination_locator'); END;
+CREATE TABLE IF NOT EXISTS "cover_uploads" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "workflow_operation_id" bigint NOT NULL, "cover_revision_id" bigint NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'image_host' NOT NULL, "source_sha256" varchar NOT NULL, "state" varchar DEFAULT 'pending' NOT NULL, "page_url" varchar, "direct_url" varchar, "failure_code" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_85bc6eb213"
+FOREIGN KEY ("provider_role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT "fk_rails_fbada9d486"
+FOREIGN KEY ("release_id", "workflow_operation_id")
+  REFERENCES "workflow_operations" ("release_id", "id")
+, CONSTRAINT "fk_rails_dd088ba0a8"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_9215a49e28"
+FOREIGN KEY ("release_id", "cover_revision_id")
+  REFERENCES "cover_revisions" ("release_id", "id")
+, CONSTRAINT cover_upload_role CHECK (provider_role = 'image_host'), CONSTRAINT cover_upload_state CHECK (state IN ('pending', 'uploaded', 'verified', 'failed', 'outcome_unknown')), CONSTRAINT cover_upload_source CHECK (length(source_sha256) = 64 AND source_sha256 NOT GLOB '*[^0-9a-f]*'));
+CREATE INDEX "index_cover_uploads_on_release_id" ON "cover_uploads" ("release_id");
+CREATE UNIQUE INDEX "index_cover_uploads_on_workflow_operation_id" ON "cover_uploads" ("workflow_operation_id");
+CREATE UNIQUE INDEX "one_uncertain_cover_upload" ON "cover_uploads" ("release_id", "cover_revision_id", "provider_connection_id") WHERE state IN ('pending', 'outcome_unknown');
+CREATE TRIGGER cover_uploads_identity BEFORE UPDATE OF release_id, workflow_operation_id, cover_revision_id, provider_connection_id, provider_role, source_sha256 ON cover_uploads BEGIN SELECT RAISE(ABORT, 'Upload identity is immutable'); END;
+CREATE TRIGGER cover_uploads_receipt BEFORE UPDATE OF page_url, direct_url ON cover_uploads WHEN (OLD.page_url IS NOT NULL AND NEW.page_url IS NOT OLD.page_url) OR (OLD.direct_url IS NOT NULL AND NEW.direct_url IS NOT OLD.direct_url) BEGIN SELECT RAISE(ABORT, 'Upload receipt is immutable'); END;
+CREATE TRIGGER cover_uploads_no_delete BEFORE DELETE ON cover_uploads BEGIN SELECT RAISE(ABORT, 'Upload history is retained'); END;
+CREATE TRIGGER cover_uploads_no_replace BEFORE INSERT ON cover_uploads WHEN EXISTS (SELECT 1 FROM cover_uploads WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id OR (release_id = NEW.release_id AND cover_revision_id = NEW.cover_revision_id AND provider_connection_id = NEW.provider_connection_id AND state IN ('pending', 'outcome_unknown') AND NEW.state IN ('pending', 'outcome_unknown'))) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_uploads.workflow_operation_id'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261110120000'),
 ('20261110100000'),
 ('20261109150000'),
 ('20261109100000'),

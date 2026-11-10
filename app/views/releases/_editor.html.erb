@@ -1,6 +1,6 @@
 <section class="editor-area" aria-label="<%= t("workbench.editor.label") %>" data-controller="workspace-tabs">
   <div class="editor-tabs" role="tablist" aria-label="<%= t("workbench.editor.sections_label") %>">
-    <% %w[review bbcode nfo files history evidence preview].each_with_index do |key, index| %>
+    <% %w[review bbcode nfo files history evidence covers duplicates preview].each_with_index do |key, index| %>
       <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= t("workbench.tabs.#{key}") %></button>
     <% end %>
   </div>
@@ -28,7 +28,7 @@
       <label class="editor-section"><%= t("preparation.name") %><%= form.text_field :proposed_name, value: @editor_values.fetch("proposed_name"), maxlength: 230, data: { edit_field: "proposed_name" }, readonly: !%w[unpublished failed].include?(@release.publication_state) || @release.seeding_state != "not_started" %></label>
       <p class="editor-hint"><%= t("preparation.name_help") %> <button type="submit" class="work-button quiet" formaction="<%= action_release_path(@release, kind: "suggest_name") %>"><%= t("preparation.suggest") %></button></p>
       <label class="editor-section"><%= t("workbench.fields.presentation") %><%= form.text_area :presentation, value: @editor_values.fetch("presentation"), rows: 7, maxlength: 100000, data: { edit_field: "presentation" } %></label>
-      <div class="cover-summary"><span class="cover-placeholder" aria-hidden="true"><%= @release.title.to_s.first.presence || "?" %></span><div><h2><%= t("workbench.editor.cover") %></h2><p><%= t("workbench.editor.#{@snapshot.covers.any? ? 'cover_selected' : 'cover_missing'}") %></p></div><button type="button" class="work-button" data-panel="evidence" data-action="workspace-tabs#show"><%= t("workbench.editor.examine") %></button></div>
+      <div class="cover-summary"><span class="cover-placeholder" aria-hidden="true"><%= @release.title.to_s.first.presence || "?" %></span><div><h2><%= t("workbench.editor.cover") %></h2><p><%= t("workbench.editor.#{@snapshot.covers.any? ? 'cover_selected' : 'cover_missing'}") %></p></div><button type="button" class="work-button" data-panel="covers" data-action="workspace-tabs#show"><%= t("workbench.editor.examine") %></button></div>
       <details class="editor-notes"><summary><%= t("workbench.fields.notes") %></summary><%= form.text_area :notes, value: @editor_values.fetch("notes"), aria: { label: t("workbench.fields.notes") }, rows: 3, maxlength: 100000, data: { edit_field: "notes" } %></details>
     </section>
     <% %w[bbcode nfo].each do |key| %>
@@ -44,6 +44,8 @@
     <ol class="release-history"><% @snapshot.events.each do |event| %><li><time datetime="<%= event.occurred_at.iso8601 %>"><%= l(event.occurred_at, format: :short) %></time><span><%= event_label(event.name) %><small><%= t("workbench.editor.history_actor", actor: t("workbench.editor.#{event.actor == 'operator' ? 'operator' : 'automatic'}"), revision: event.input_revision) %></small></span></li><% end %></ol>
   </section>
   <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence_frame" %></section>
+  <section id="panel-covers" role="tabpanel" aria-labelledby="tab-covers" hidden data-workspace-tabs-target="panel" data-panel="covers"><%= render "covers_frame" %></section>
+  <section id="panel-duplicates" role="tabpanel" aria-labelledby="tab-duplicates" hidden data-workspace-tabs-target="panel" data-panel="duplicates"><%= render "duplicates_frame" %></section>
   <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
     <section class="bbcode-preview" data-preview-url="<%= release_content_preview_path(@release) %>">
       <h2><%= t("content.preview.title") %></h2><p class="editor-hint"><%= t("content.preview.scope") %></p>

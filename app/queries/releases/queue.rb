@@ -53,10 +53,8 @@ module Releases
     end
 
     def confirmed_duplicate_ids
-      latest_ids = DuplicateCheck.group(:release_id, :input_revision).select('MAX(id)')
-      current_checks = DuplicateCheck.joins(:release).where(id: latest_ids)
-        .where('duplicate_checks.input_revision = releases.input_revision')
-      DuplicateDecision.where(decision: 'confirmed', duplicate_check_id: current_checks.select(:id)).select(:release_id)
+      possible = DuplicateDecision.where(decision: 'confirmed').select(:release_id)
+      Release.where(id: possible).select { |release| Duplicates::Assessment.new(release).confirmed? }.map(&:id)
     end
 
     def neighbor(comparison, order)

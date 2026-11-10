@@ -6,7 +6,7 @@ not establish a working publication or seeding integration.
 
 ## Authentication and read access
 
-Use HTTPS with `Authorization: Bearer <key>` and a descriptive application
+For the JSON account/draft API, use HTTPS with `Authorization: Bearer <key>` and a descriptive application
 User-Agent. Reject redirects rather than forwarding credentials elsewhere.
 
 | Request | Observed outcome |
@@ -100,3 +100,30 @@ the operator's portrait quality target, with smaller verified covers permitted.
 The complete image-host allowlist,
 Postimages acceptance in standard preview, and the API's seeding timing remain
 unverified. Do not infer publication behavior from successful draft storage.
+
+## Ebook duplicate search
+
+Verified read-only on 2026-11-10 with explicit authorization to send the existing
+key in an HTTPS query to C411. `GET /api?t=caps` returns public Torznab
+capabilities; this does not verify authenticated search. The capabilities expose
+`search` and `book-search` with `q`; the integration guide maps ebooks to Torznab
+category `7020`, separately from the JSON upload category IDs above.
+
+`GET /api?t=search&q=<query>&cat=7020&limit=100&offset=0` returned HTTP 401 with
+Bearer authentication. Adding `apikey=<key>` returned HTTP 200 and an RSS feed.
+The search client therefore sends that credential server-side in the query,
+rejects redirects, disables implicit retries and proxy environment use, bounds
+response size/time, and sanitizes failures. URLs with query credentials can be
+retained by the remote service's infrastructure; they are never persisted or
+returned to the browser by the application.
+
+Observed items expose title, description, GUID, comments, link, enclosure,
+pubDate, size, and Torznab attributes including infohash, category, size, seeders,
+peers, grabs and volume factors. The application retains only bounded title and
+plain description evidence, detected format labels, size and infohash. It builds
+a clean `/torrents/<infohash>` detail URL instead of saving raw links or enclosure
+URLs. It does not infer a confirmed edition from a similar title.
+
+The live check was one bounded title search returning three items. Multi-query
+searches, pagination, truncation, malformed responses and review gates are
+covered by isolated HTTP tests. No publication request was sent.

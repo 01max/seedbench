@@ -1,0 +1,56 @@
+fr:
+  duplicates:
+    title: Doublons C411
+    scope: La recherche consulte C411 sans créer de brouillon ni publier. Comparez le livre, son édition et son format ; un titre similaire ne suffit pas à confirmer un doublon.
+    search: Rechercher sur C411
+    refresh: Actualiser les résultats
+    queued: Recherche demandée. Actualisez les résultats après son exécution.
+    running: Recherche en cours…
+    stale: Les données du livre ou la connexion ont changé. Relancez la recherche et revoyez les candidats.
+    inputs: Données et recherches effectuées
+    no_candidates: Aucun candidat renvoyé. Une recherche incomplète ou indisponible reste à résoudre.
+    open: Ouvrir la fiche C411
+    format_unknown: Format non indiqué
+    evidence_warning: Ces informations proviennent de la fiche C411. Vérifiez l’ISBN, l’édition et le format sur la fiche ; aucune équivalence n’est déduite automatiquement.
+    not_searched: Aucune recherche effectuée.
+    status:
+      complete: Recherche terminée
+      incomplete: Résultats limités ou partiellement illisibles — contrôle requis
+      unavailable: Recherche indisponible — contrôle requis
+    reviewed: Décision enregistrée dans l’historique.
+    confirmed_tag: Doublon C411 déjà existant
+    decision: Décision pour ce candidat
+    reason: Motif (20 caractères minimum pour écarter un faux positif)
+    record: Enregistrer la décision
+    decisions:
+      likely: Correspondance possible — revue requise
+      confirmed: Doublon confirmé — publication bloquée
+      false_positive: Faux positif — motif obligatoire
+    gate:
+      done: Recherche et candidats revus pour les données actuelles.
+      pending: La recherche doit être terminée ou faire l’objet d’un contrôle manuel documenté.
+      blocked: "Publication bloquée : examinez chaque correspondance possible ou confirmée."
+    manual_title: Recherche manuelle exceptionnelle
+    manual_scope: Si seule la recherche est indisponible, vérifiez les variantes du titre, l’auteur, l’ISBN, l’édition et le format sur C411. Décrivez les recherches et leurs résultats. Les candidats déjà connus restent à examiner. L’accès C411 sera vérifié avant l’enregistrement.
+    manual_note: Recherches manuelles effectuées et résultats
+    manual_submit: Enregistrer le contrôle manuel
+    manual_recorded: Contrôle manuel enregistré pour cette recherche et ces données.
+    errors:
+      transaction_open: La recherche avant publication doit se faire hors transaction locale.
+      explicit_publish_required: La vérification finale est réservée à une opération Publier active et approuvée.
+      review_required: De nouveaux candidats ou un échec de recherche nécessitent une revue avant publication.
+      invalid_decision: Choisissez un candidat connu et une décision autorisée.
+      stale_review: Les résultats ont changé. Actualisez et revoyez les candidats.
+      reason_required: Documentez le motif avec 20 à 2 000 caractères.
+      publication_unavailable: L’accès au compte C411 est aussi indisponible. Le contrôle manuel ne peut pas remplacer cette panne.
+      invalid_response: La réponse de recherche C411 est illisible. Aucun résultat clair n’est déduit.
+      connection_required: Affectez une connexion C411 configurée à ce livre avant la recherche.
+      connection_changed: La connexion C411 a changé. Relancez la recherche.
+      title_required: Renseignez le titre du livre avant la recherche.
+  workbench:
+    tabs:
+      duplicates: Doublons
+    events:
+      duplicates:
+        searched: Recherche de doublons effectuée
+        reviewed: Décision de doublon enregistrée

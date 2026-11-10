@@ -40,13 +40,15 @@ queue, full-text editor, and review checklist together; narrow screens stack
 them without horizontal page scrolling. The toolbar opens upload, Settings,
 appearance controls, and logout. Dark and light preferences persist locally.
 
-Review, BBCode, NFO, files, history, sources, and preview have separate tabs.
+Review, BBCode, NFO, files, history, sources, covers, duplicates and preview have separate tabs.
 Presentation, notes, complete BBCode/NFO, and reviewed title, author, ISBN,
 edition, and language are editable. Source evidence and stored cover provenance
 are shown on demand. Preview renders current, including unsaved, BBCode safely.
 Content generation creates proposals for explicit acceptance; dependency changes
 flag text for review without replacing it. See the [content guide](ebook-content.md)
 for metadata confirmation, NFO validation and targeted cover-URL proposals.
+
+Use **Couverture** to compare and retain an image without uploading it. **Doublons** queues read-only C411 searches and records candidate reviews. See [covers and duplicate review](covers-and-duplicates.md) for image quality, known-match blocking and the manual-search exception.
 
 Changes autosave after a short pause. Save acts immediately. Save and next,
 previous/next links, filtering, and form actions flush pending edits before

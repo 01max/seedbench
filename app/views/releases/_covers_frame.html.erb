@@ -1,0 +1,43 @@
+<% workspace = @cover_workspace || Covers::Workspace.call(release: @release) %>
+<%= turbo_frame_tag dom_id(@release, :covers), data: { evidence_url: release_cover_review_path(@release) } do %>
+  <div data-evidence-revision="<%= @release.input_revision %>" data-reviewed-values="<%= workspace.values.to_json %>">
+    <h2><%= t("covers.title") %></h2>
+    <% if @cover_error %><p class="work-alert" role="alert"><%= @cover_error %></p><% end %>
+    <% if @cover_notice %><p class="work-warning" role="status"><%= @cover_notice %></p><% end %>
+    <p class="editor-hint"><%= t("covers.scope") %></p>
+    <%= link_to t("covers.refresh"), release_cover_review_path(@release), class: "work-button quiet" %>
+    <% if (selected = workspace.selected) %>
+      <section class="selected-cover"><div><h3><%= t("covers.current", number: selected.number) %></h3>
+      <% if selected.edition_evidence["sha256"] %><%= image_tag release_selected_cover_path(@release, cover_id: selected.id), alt: t("covers.current", number: selected.number), class: "selected-cover-image" %><% end %></div>
+      <div><p><%= t("covers.dimensions", width: selected.width, height: selected.height) %></p><p class="editor-hint"><%= t("covers.target") %></p>
+      <details><summary><%= t("covers.provenance") %></summary><pre><%= JSON.pretty_generate(selected.edition_evidence.except("grid")) %></pre></details></div></section>
+    <% else %><p><%= t("covers.none") %></p><% end %>
+    <% if @release.payload_revisions.exists? %>
+      <%= form_with url: release_cover_review_path(@release), scope: :cover, class: "edition-lookup" do |form| %>
+        <%= form.hidden_field :kind, value: "lookup" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+        <%= form.label :isbn, t("covers.isbn") %><%= form.text_field :isbn, value: workspace.values["isbn"], required: true, maxlength: 64 %><%= form.submit t("covers.lookup"), class: "work-button" %>
+      <% end %>
+    <% end %>
+    <details class="source-detail"><summary><%= t("covers.compare_values") %></summary><dl class="release-facts"><% %w[title author isbn isbn_kind edition publisher publication_year language].each do |field| %><dt><%= t("workbench.fields.#{field}") %></dt><dd><%= workspace.values[field] %></dd><% end %></dl></details>
+    <%= form_with url: release_cover_review_path(@release), scope: :cover, multipart: true, class: "cover-selection" do |form| %>
+      <%= form.hidden_field :kind, value: "select" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+      <fieldset><legend><%= t("covers.source") %></legend>
+        <% workspace.candidates.each_with_index do |candidate, index| %>
+          <article class="cover-option"><label><%= form.radio_button :source, candidate[:source], id: "cover-source-#{index}" %> <%= t("covers.#{candidate[:kind]}") %> · <%= candidate[:evidence].source %></label>
+            <% if candidate[:kind] == "embedded" %><p><%= t("covers.dimensions", width: candidate[:width], height: candidate[:height]) %></p><%= link_to t("covers.compare"), release_cover_candidate_path(@release, candidate[:sha256], evidence_id: candidate[:evidence].id), target: "_blank", rel: "noopener noreferrer" %>
+            <% else %><p><%= t("covers.medium.#{candidate[:evidence].data['edition_medium']}", default: t("covers.medium.unspecified")) %> · <%= candidate[:evidence].data["record_format"] %></p><p class="editor-hint"><%= t("covers.edition_warning") %></p><p><%= candidate[:evidence].data["publishers"]&.join(" · ") %> · <%= candidate[:evidence].data["publish_date"] %> · <%= candidate[:evidence].data["queried_isbn"] %></p><%= link_to t("covers.compare"), candidate[:url], target: "_blank", rel: "noopener noreferrer" %><% end %>
+          </article>
+        <% end %>
+        <div class="cover-option"><label><%= form.radio_button :source, "manual" %> <%= t("covers.manual") %></label><%= form.label :image, t("covers.image") %><%= form.file_field :image, accept: "image/png,image/jpeg,image/webp" %></div>
+        <div class="cover-option"><label><%= form.radio_button :source, "url" %> <%= t("covers.url") %></label><%= form.label :image_url, t("covers.image_url") %><%= form.url_field :image_url, placeholder: "https://…", maxlength: 2000 %></div>
+      </fieldset>
+      <%= form.fields_for :review do |review| %>
+        <label class="cover-review"><%= review.check_box :edition_match %> <%= t("covers.edition_match") %></label>
+        <label class="cover-review"><%= review.check_box :quality_reviewed %> <%= t("covers.quality_reviewed") %></label>
+        <label class="cover-review"><%= review.check_box :comparable_detail %> <%= t("covers.comparable_detail") %></label>
+        <%= review.label :note, t("covers.note") %><%= review.text_area :note, rows: 2, maxlength: 2000 %>
+      <% end %>
+      <%= form.submit t("covers.select"), class: "work-button primary" %>
+    <% end %>
+  </div>
+<% end %>

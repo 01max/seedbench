@@ -1,0 +1,49 @@
+<% workspace = @duplicate_workspace || Duplicates::Workspace.call(release: @release) %>
+<%= turbo_frame_tag dom_id(@release, :duplicates), data: { evidence_url: release_duplicate_review_path(@release) } do %>
+  <div data-evidence-revision="<%= @release.input_revision %>" data-reviewed-values="<%= workspace.values.to_json %>">
+    <h2><%= t("duplicates.title") %></h2>
+    <% if @duplicate_error %><p class="work-alert" role="alert"><%= @duplicate_error %></p><% end %>
+    <% if @duplicate_notice %><p class="work-warning" role="status"><%= @duplicate_notice %></p><% end %>
+    <p class="editor-hint"><%= t("duplicates.scope") %></p>
+    <div class="inspection-actions"><%= form_with url: release_duplicate_review_path(@release), scope: :duplicate do |form| %>
+      <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+      <%= form.submit t("duplicates.search"), class: "work-button" %>
+    <% end %><%= link_to t("duplicates.refresh"), release_duplicate_review_path(@release), class: "work-button quiet" %></div>
+    <% if workspace.operation && %w[pending running].include?(workspace.operation.state) %><p role="status"><%= t("duplicates.running") %></p><% end %>
+    <% if (check = workspace.check) %>
+      <p class="work-warning"><%= t("duplicates.status.#{check.query['status'] || 'unavailable'}") %> · <%= l(check.searched_at, format: :short) %></p>
+      <% unless workspace.current %><p class="work-alert"><%= t("duplicates.stale") %></p><% end %>
+      <details><summary><%= t("duplicates.inputs") %></summary><pre><%= JSON.pretty_generate(check.query.slice("inputs", "queries", "failure_code")) %></pre></details>
+      <% if check.candidates.empty? %><p><%= t("duplicates.no_candidates") %></p><% end %>
+      <% if workspace.assessment.confirmed? %><p class="work-alert" role="alert"><%= t("duplicates.confirmed_tag") %></p><% end %>
+      <p class="work-warning"><%= t("duplicates.gate.#{workspace.assessment.ready? ? 'done' : (workspace.assessment.blocked? ? 'blocked' : 'pending')}") %></p>
+      <% workspace.assessment.candidates.each do |item| %>
+        <% candidate = item.evidence %>
+        <article class="duplicate-candidate cover-option"><h3><%= candidate["title"] %></h3>
+          <%= link_to t("duplicates.open"), candidate["url"], target: "_blank", rel: "noopener noreferrer" %>
+          <p><%= candidate["format"]&.join(" · ").presence || t("duplicates.format_unknown") %> · <%= number_to_human_size(candidate["size_bytes"]) if candidate["size_bytes"] %></p>
+          <p class="preserved-text"><%= candidate["description"] %></p><p class="editor-hint"><%= t("duplicates.evidence_warning") %></p>
+          <p><strong><%= t("duplicates.decisions.#{item.decision}") %></strong><% if item.review&.reason %> · <%= item.review.reason %><% end %></p>
+          <% if workspace.current %><%= form_with url: release_duplicate_review_path(@release), scope: :duplicate, namespace: "candidate-#{candidate["key"]}" do |form| %>
+            <%= form.hidden_field :kind, value: "review" %><%= form.hidden_field :check_id, value: check.id %><%= form.hidden_field :candidate_key, value: candidate["key"] %>
+            <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+            <%= form.label :decision, t("duplicates.decision") %><%= form.select :decision, %w[likely confirmed false_positive].map { |key| [t("duplicates.decisions.#{key}"), key] }, selected: item.decision %>
+            <%= form.label :reason, t("duplicates.reason") %><%= form.text_area :reason, rows: 2, maxlength: 2000 %>
+            <%= form.submit t("duplicates.record"), class: "work-button" %>
+          <% end %><% end %>
+        </article>
+      <% end %>
+      <% if workspace.current && check.query["status"] == "unavailable" %>
+        <section class="cover-option"><h3><%= t("duplicates.manual_title") %></h3><p><%= t("duplicates.manual_scope") %></p>
+          <% if workspace.assessment.manual_exception? %><p class="work-warning"><%= t("duplicates.manual_recorded") %></p><% end %>
+          <%= form_with url: release_duplicate_review_path(@release), scope: :duplicate do |form| %>
+            <%= form.hidden_field :kind, value: "manual" %><%= form.hidden_field :check_id, value: check.id %>
+            <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+            <%= form.label :reason, t("duplicates.manual_note") %><%= form.text_area :reason, rows: 3, minlength: 20, maxlength: 2000, required: true %>
+            <%= form.submit t("duplicates.manual_submit"), class: "work-button" %>
+          <% end %>
+        </section>
+      <% end %>
+    <% else %><p><%= t("duplicates.not_searched") %></p><% end %>
+  </div>
+<% end %>

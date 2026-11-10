@@ -9,12 +9,9 @@ module Providers
     MAX_BYTES = 1_048_576
 
     class << self
-      def call(endpoint:, path:, headers: {}, body: nil, redirects: 0)
+      def call(endpoint:, path:, headers: {}, body: nil, form: nil, redirects: 0)
         uri = URI.parse(endpoint + path)
-        request = body ? Net::HTTP::Post.new(uri) : Net::HTTP::Get.new(uri)
-        request['User-Agent'] = 'Seedbench/1.0'
-        headers.each { |key, value| request[key] = value }
-        request.body = JSON.generate(body) if body
+        request = request_for(uri, headers, body, form)
         Timeout.timeout(10) { execute(uri, request, redirects) }
       rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Zlib::Error
         raise Failure.new('invalid_response', I18n.t('messages.providers.http.reponse_http_illisible_du_fournisseur')), cause: nil
@@ -29,6 +26,15 @@ module Providers
       end
 
       private
+
+      def request_for(uri, headers, body, form)
+        request = body || form ? Net::HTTP::Post.new(uri) : Net::HTTP::Get.new(uri)
+        request['User-Agent'] = 'Seedbench/1.0'
+        headers.each { |key, value| request[key] = value }
+        request.body = JSON.generate(body) if body
+        request.set_form_data(form) if form
+        request
+      end
 
       def execute(uri, request, redirects)
         http = Net::HTTP.new(uri.host, uri.port, nil)

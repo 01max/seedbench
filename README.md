@@ -35,7 +35,9 @@ light themes, compact desktop review, and narrower screens.
 > Background ebook inspection and source-linked fact review are also available.
 > Local BBCode/NFO generation and safe preview are available.
 > Explicit canonical-file preparation and verified local torrents are available.
-> Cover hosting, AI assistance, C411 drafts/publication, and seeding are still being built.
+> Cover selection and read-only C411 duplicate search/review are available.
+> Cover hosting is implemented at the remote-operation boundary.
+> AI assistance, C411 drafts/publication, and seeding are still being built.
 > Draft and Publish are currently disabled.
 
 ## Features
@@ -46,6 +48,8 @@ light themes, compact desktop review, and narrower screens.
 | **Find the next book** | Search titles and authors without worrying about accents or capitalization. Filter by state and navigate queues larger than a single page. |
 | **Inspect without rewriting** | Background EPUB/PDF/MOBI inspection checks structure and extracts metadata, page or document counts, text samples, and cover candidates. Optional PDF OCR leaves the original untouched. |
 | **Compare edition evidence** | Look up an ISBN in Open Library, compare source-linked candidates, and explicitly adopt reviewed facts. Checksum validity and digital-edition authenticity remain separate. |
+| **Choose the cover** | Compare embedded and edition-linked images, select a local image or HTTPS URL, and retain its native dimensions, edition review and provenance without uploading it. |
+| **Review C411 matches** | Search title variants, author and ISBN; compare edition/format evidence, confirm duplicates, and retain reasoned false-positive decisions. Failed or incomplete searches stay unresolved. |
 | **Review in one place** | Edit metadata, presentation, notes, and complete BBCode/NFO. Open files, source evidence, history, and an escaped local prose preview when needed. |
 | **Assemble release text** | Generate exact-template BBCode and factual NFO as reviewable proposals. Preview unsaved BBCode safely, keep full manual edits, and review text affected by changed facts or covers. |
 | **Prepare explicitly** | Review a release name, move the same file into the configured payload folder, and verify a private single-file torrent. Re-prepare after name changes; published names stay locked. |
@@ -57,7 +61,7 @@ light themes, compact desktop review, and narrower screens.
 Uploads retain the original bytes and queue bounded background inspection.
 See [ebook inspection](docs/ebook-inspection.md) for sampling and resource limits. Saving or navigating never prepares a
 torrent or writes to a provider. See the [workbench guide](docs/workbench.md)
-for current behavior and limits.
+for current behavior and limits. See [covers and duplicate review](docs/covers-and-duplicates.md) for image selection and C411 match handling.
 
 ## Get started
 

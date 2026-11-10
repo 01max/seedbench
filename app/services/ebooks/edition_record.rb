@@ -28,7 +28,11 @@ module Ebooks
           'edition_medium' => medium(format), 'digital_edition_verified' => false,
           'isbn_matches_query' => isbn_match?(data, source, isbn),
           'publishers' => Array(data['publishers']).grep(String).first(5).map { |value| value.first(500) },
-          'publish_date' => data['publish_date'].to_s.first(120), 'metadata' => metadata(data, source) }
+          'publish_date' => data['publish_date'].to_s.first(120), 'cover_ids' => cover_ids(data), 'metadata' => metadata(data, source) }
+      end
+
+      def cover_ids(data)
+        Array(data['covers']).grep(Integer).select(&:positive?).first(5)
       end
 
       def metadata(data, source)
