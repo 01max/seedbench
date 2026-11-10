@@ -17,7 +17,6 @@ module Providers
         def fields(kind, name, bytes)
           { "#{kind}FileName" => name, "#{kind}FileData" => bytes.nil? ? nil : Base64.strict_encode64(bytes) }
         end
-
       end
     end
   end

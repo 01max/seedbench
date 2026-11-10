@@ -19,25 +19,42 @@ class DraftActionsController < ApplicationController
 
   def perform(attributes)
     case attributes[:kind]
-    when 'reconcile'
-      Drafts::Reconcile.call(release_id: @release.id, write_id: attributes[:write_id], remote_id: attributes[:remote_id], confirmed: attributes[:confirmed] == '1')
-      @draft_notice = t('drafts.reconciled')
-      nil
+    when 'delete', 'recreate' then request_mutation(attributes)
+    when 'reconcile' then reconcile(attributes)
     when 'link' then link_payload(attributes)
-    when 'resolve'
-      resolve_conflict(attributes)
-      @draft_notice = t('drafts.resolved')
-      nil
-    when 'sync'
-      @draft_error = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
-      nil
+    when 'resolve' then resolve_conflict(attributes)
+    when 'sync' then sync
     else raise Drafts::Failure.new(:invalid_action)
     end
+  end
+
+  def reconcile(attributes)
+    Drafts::Reconcile.call(release_id: @release.id, write_id: attributes[:write_id], remote_id: attributes[:remote_id], confirmed: attributes[:confirmed] == '1')
+    @draft_notice = t('drafts.reconciled')
+    nil
+  end
+
+  def sync
+    @draft_error = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
+    nil
+  end
+
+  def request_mutation(attributes)
+    arguments = { release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false) }
+    if attributes[:kind] == 'delete'
+      Drafts::DeleteRequest.call(**arguments, remote_id: attributes[:remote_id], confirmed: attributes[:confirmed] == '1')
+    else
+      Drafts::Request.call(**arguments, recreate_confirmed: attributes[:confirmed] == '1')
+    end
+    @draft_notice = t('drafts.queued')
+    nil
   end
 
   def resolve_conflict(attributes)
     Drafts::Resolve.call(release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false),
       snapshot_id: attributes[:snapshot_id], choice: attributes[:choice])
+    @draft_notice = t('drafts.resolved')
+    nil
   end
 
   def link_payload(attributes)

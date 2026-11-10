@@ -2,17 +2,28 @@ module Drafts
   class Sync
     class << self
       def call(link:)
-        base_id = latest_id(link)
-        version = link.provider_connection.credentials_version
-        data = Providers::C411::Drafts.new(link.provider_connection).read(link.remote_id)
-        raise Failure.new(:connection_changed) unless link.provider_connection.reload.credentials_version == version
-        Observe.call(link: link, content: Content.remote(data), remote_revision: data['updatedAt'], expected_snapshot_id: base_id)
+        base_id = link.release.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(id: :desc).pick(:id)
+        data = fetch(link)
+        snapshot = observe(link, data, base_id)
+        AfterPublication.observe(release: link.release, snapshot: snapshot)
+        snapshot
       end
 
       private
 
-      def latest_id(link)
-        link.release.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(id: :desc).pick(:id)
+      def observe(link, data, base_id)
+        return Missing.call(link: link, expected_snapshot_id: base_id) unless data
+        Observe.call(link: link, content: Content.remote(data), remote_revision: data['updatedAt'], expected_snapshot_id: base_id)
+      end
+
+      def fetch(link)
+        version = link.provider_connection.credentials_version
+        Providers::C411::Drafts.new(link.provider_connection).read(link.remote_id)
+      rescue Providers::Failure => error
+        raise unless error.code == 'http_404'
+        nil
+      ensure
+        raise Failure.new(:connection_changed) unless link.provider_connection.reload.credentials_version == version
       end
     end
   end

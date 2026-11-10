@@ -12,6 +12,14 @@ RSpec.describe Drafts::Request do
     stub_request(:get, 'https://c411.org/api/user/drafts/new-draft').to_return { { body: { success: true, data: remote }.to_json } }
   end
 
+  def stub_replacement_draft(remote)
+    stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
+      apply_draft_body(remote, JSON.parse(request.body))['id'] = 'replacement'
+      { body: { success: true, data: { id: 'replacement' } }.to_json }
+    end
+    stub_request(:get, 'https://c411.org/api/user/drafts/replacement').to_return { { body: { success: true, data: remote }.to_json } }
+  end
+
   def prepare_cover_review(release)
     first = run_draft(release)
     expect(first.error_code).to eq('review_required_for_write')
@@ -54,5 +62,23 @@ RSpec.describe Drafts::Request do
     expect(run_draft(release).error_code).to eq('slots_full')
     expect(WebMock).not_to have_requested(:post, 'https://c411.org/api/user/drafts')
     expect(WebMock).not_to have_requested(:delete, /c411/)
+  end
+
+  it 'requires confirmed recreation after deletion and retains both remote identities' do
+    release = prepared_draft_payload
+    prepare_cover_review(release)
+    stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
+      apply_draft_body(remote, JSON.parse(request.body))['id'] = 'new-draft'
+      { body: { success: true, data: { id: 'new-draft' } }.to_json }
+    end
+    run_draft(release)
+    stub_request(:get, 'https://c411.org/api/user/drafts/new-draft').to_return(status: 404)
+    Drafts::Sync.call(link: release.reload.draft_link)
+    expect { described_class.call(release_id: release.id, expected_revision: release.input_revision) }.to raise_error(Drafts::Failure)
+    stub_replacement_draft(remote)
+    operation = described_class.call(release_id: release.id, expected_revision: release.input_revision, recreate_confirmed: true)
+    Workflows::Execute.call(operation_id: operation.id)
+    expect(release.reload.draft_link.remote_id).to eq('replacement')
+    expect(release.remote_snapshots.pluck(:remote_id).uniq).to contain_exactly('new-draft', 'replacement')
   end
 end

@@ -1,13 +1,13 @@
 module Drafts
   class Link
-    def self.call(release_id:, payload_release_id:, expected_revision:, payload_revision:, confirmed:, choice:, allowed_operation_id: nil)
+    def self.call(release_id:, payload_release_id:, expected_revision:, payload_revision:, confirmed:, choice:, allowed_operation_id: nil, replacing_remote_id: nil)
       raise Failure.new(:confirmation_required) unless confirmed == true && %w[local remote].include?(choice)
-      new(release_id, payload_release_id, expected_revision, payload_revision, choice, allowed_operation_id).call
+      new(release_id, payload_release_id, expected_revision, payload_revision, choice, allowed_operation_id, replacing_remote_id).call
     end
 
-    def initialize(source, target, source_revision, target_revision, choice, allowed_operation_id)
+    def initialize(source, target, source_revision, target_revision, choice, allowed_operation_id, replacing_remote_id)
       @source, @target = Release.find(source), Release.find(target)
-      @allowed_operation_id = allowed_operation_id
+      @allowed_operation_id, @replacing_remote_id = allowed_operation_id, replacing_remote_id
       @source_revision, @target_revision, @choice = source_revision, target_revision, choice
     end
 
@@ -34,8 +34,13 @@ module Drafts
     end
 
     def validate_target!
-      valid = @source.draft_link && !@source.payload_revisions.exists? && @target.payload_revisions.exists? && !@target.draft_link
+      valid = @source.draft_link && !@source.payload_revisions.exists? && @target.payload_revisions.exists? && available_target?
       raise Failure.new(:invalid_link) unless valid && @target.publication_state == 'unpublished'
+    end
+
+    def available_target?
+      link = @target.draft_link
+      !link || (@target.draft_state == 'missing' && link.remote_id == @replacing_remote_id)
     end
 
     def assign(connection)
@@ -48,10 +53,16 @@ module Drafts
       Content.adopt(@target, Content.local(@source)) if @choice == 'remote'
       @target.reload.update!(input_revision: @target.input_revision + 1, draft_state: @source.draft_state)
       copy_snapshot(snapshot)
+      clear_target_link
       link.update!(release_id: @target.id)
       @source.association(:draft_link).reset
       @source.update!(input_revision: @source.input_revision + 1, draft_state: 'unlinked')
       record_history
+    end
+
+    def clear_target_link
+      @target.draft_link&.destroy!
+      @target.association(:draft_link).reset
     end
 
     def copy_snapshot(snapshot)

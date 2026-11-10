@@ -13,6 +13,7 @@ module Drafts
     def call
       validate!
       return interrupt_before_send if @write.state == 'pending' && @write.body.nil?
+      return reconcile_delete if @write.action == 'delete'
       id = verified_identity
       recover_imported_link(id)
       link = Receipt.call(write: @write, remote_id: id)
@@ -22,6 +23,15 @@ module Drafts
     end
 
     private
+
+    def reconcile_delete
+      snapshot = Sync.call(link: @write.release.draft_link)
+      raise Failure.new(:delete_unconfirmed) unless snapshot.remote_deleted
+      @write.update!(state: 'accepted', error_code: nil)
+      @operation.update!(state: 'succeeded', phase: 'reconciled', lease_expires_at: nil, finished_at: Time.current)
+      Releases::RecordEvent.call(release_id: @write.release_id, name: 'draft.reconciled', actor: 'operator', data: { write_id: @write.id, deleted: true })
+      @write
+    end
 
     def verified_identity
       id = @write.remote_id || confirmed_id
@@ -45,7 +55,7 @@ module Drafts
       return unless existing && existing.release_id != @write.release_id
       source, target = existing.release, @write.release.reload
       Link.call(release_id: source.id, payload_release_id: target.id, expected_revision: source.input_revision,
-        payload_revision: target.input_revision, confirmed: @confirmed, choice: 'local', allowed_operation_id: @operation.id)
+        payload_revision: target.input_revision, confirmed: @confirmed, choice: 'local', allowed_operation_id: @operation.id, replacing_remote_id: @write.request['replaces_remote_id'])
     end
 
     def validate!

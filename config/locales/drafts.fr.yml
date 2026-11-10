@@ -54,7 +54,15 @@ fr:
       accepted: accepté par C411
       failed: arrêté avant acceptation
       unknown: résultat incertain · nouvel envoi bloqué
+    leftover: La publication est enregistrée, mais le brouillon existe encore sur C411. Vous pouvez le supprimer après confirmation.
+    delete_confirm: Je confirme la suppression définitive de ce brouillon C411. Le fichier et le travail local seront conservés.
+    delete: Supprimer ce brouillon C411
+    recreate_confirm: Je confirme la création d’un nouveau brouillon pour cette fiche dont le brouillon distant a disparu.
+    recreate: Recréer explicitement le brouillon C411
     errors:
+      not_published: La suppression de nettoyage est réservée à une fiche dont la publication est enregistrée.
+      remote_returned: Le brouillon précédent est de nouveau présent. Sa recréation est arrêtée pour éviter un doublon.
+      delete_unconfirmed: La disparition du brouillon n’est pas confirmée. Aucun nouvel appel de suppression ne sera envoyé automatiquement.
       interrupted_before_send: L’opération a été interrompue avant toute transmission à C411. Vérifiez la fiche puis relancez explicitement.
       readback_failed: C411 a accepté le brouillon, mais sa relecture a échoué. Synchronisez avant une nouvelle action.
       slots_full: C411 indique que tous les emplacements de brouillons sont occupés. Libérez un emplacement sur le site puis relancez explicitement.

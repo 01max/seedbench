@@ -4,7 +4,7 @@ module Drafts
       def call(write:, remote_id:)
         release = write.release
         release.with_lock do
-          link = release.draft_link || DraftLink.create!(release: release, provider_connection: write.provider_connection, remote_id: remote_id)
+          link = current_link(release, write, remote_id)
           raise Failure.new(:invalid_link) unless link.remote_id == remote_id
           initial_snapshot(release, write, remote_id)
           accept(write, remote_id)
@@ -13,6 +13,16 @@ module Drafts
       end
 
       private
+
+      def current_link(release, write, id)
+        link = release.draft_link
+        if link && link.remote_id == write.request['replaces_remote_id']
+          link.destroy!
+          release.association(:draft_link).reset
+          link = nil
+        end
+        link || DraftLink.create!(release: release, provider_connection: write.provider_connection, remote_id: id)
+      end
 
       def initial_snapshot(release, write, remote_id)
         return if release.remote_snapshots.exists?(kind: 'draft', remote_id: remote_id)

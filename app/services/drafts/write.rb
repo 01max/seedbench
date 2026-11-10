@@ -23,6 +23,7 @@ module Drafts
     private
 
     def send_draft
+      return delete_draft if @write.action == 'delete'
       PrepareWrite.call(write: @write)
       body = Providers::C411::DraftBody.call(write: @write)
       baseline = baseline_ids
@@ -30,6 +31,30 @@ module Drafts
       id = @write.action == 'create' ? @client.create(body) : update(body)
       link = Receipt.call(write: @write, remote_id: id)
       Sync.call(link: link)
+    end
+
+    def delete_draft
+      link, missing = inspect_deletion
+      intent({}, [])
+      delete_remote unless missing
+      raise Failure.new(:delete_unconfirmed) unless Sync.call(link: link).remote_deleted
+      @write.update!(state: 'accepted', error_code: nil)
+      Workflows::RecordOutcome.call(operation_id: @operation.id, attempt_token: @operation.attempt_token, phase: 'draft_deleted', reference: { draft_id: @write.remote_id })
+    end
+
+    def inspect_deletion
+      release = Guard.call(@write)
+      raise Failure.new(:not_published) unless release.publication_state == 'published'
+      link = release.draft_link
+      observed = Sync.call(link: link)
+      raise Failure.new(:observation_changed) unless observed.remote_deleted || observed.remote_content == @write.request.fetch('remote_content')
+      [ link, observed.remote_deleted ]
+    end
+
+    def delete_remote
+      @client.delete(@write.remote_id)
+    rescue Providers::Failure => error
+      raise unless error.code == 'http_404'
     end
 
     def baseline_ids

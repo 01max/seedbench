@@ -14,6 +14,7 @@
       <% if workspace.link %>
         <p><%= t("drafts.identity", id: workspace.link.remote_id, connection: workspace.link.provider_connection.label) %></p>
         <p><%= @release.payload_revisions.exists? ? t("drafts.linked") : t("drafts.unlinked") %></p>
+        <%= render "draft_deletion", workspace: workspace %>
         <% if workspace.snapshot %>
           <p><%= t("drafts.observed", time: l(workspace.snapshot.observed_at, format: :short)) %></p>
           <p class="work-warning"><%= t("drafts.states.#{@release.draft_state}") %></p>

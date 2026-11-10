@@ -46,3 +46,18 @@ confirm its remote identifier; the application verifies the approved content and
 excludes drafts present before the attempt. It never guesses identity from a
 similar title. An interruption before transmission can be closed without a
 remote effect, then retried explicitly. Publication remains unavailable.
+
+A confirmed draft-detail 404 marks the remote association missing. It never
+deletes local text, evidence, prepared bytes or history. Authentication and
+network failures do not count as deletion. Recreating a missing draft requires a
+linked, prepared payload and a separate confirmation. The old association stays
+until C411 returns the new identity; both sets of snapshots remain in history.
+If the old draft reappears before transmission, recreation stops.
+
+After publication, the read-only leftover observation reports whether the linked
+draft remains. Its alert stays visible in the checklist and draft panel. Cleanup
+requires confirmation of the displayed draft identifier and a fresh read that
+still matches the displayed remote content. It never removes the canonical
+payload or local release. A deletion timeout blocks another delete; reconciliation
+only reads until absence is confirmed. This hook is tested with synthetic local
+publication state; actual publication is still unavailable and unverified.
