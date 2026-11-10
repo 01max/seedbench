@@ -8,7 +8,9 @@ fr:
     limitations: Limites de cette analyse
     saved_prose: Texte enregistré
     suggested_prose: Proposition à relire
-    accept_prose: "Accepter cette %{field}"
+    accept_presentation: Accepter cette présentation
+    accept_notes: Accepter ces notes
+    already_saved: Cette proposition figure déjà dans le texte enregistré.
     regenerate_help: L’acceptation conserve votre BBCode et votre NFO. Relisez les textes devenus obsolètes ou proposez une nouvelle version, puis acceptez-la explicitement.
     regenerate: Proposer le BBCode avec la prose retenue
     stale_notice: Les preuves, les faits ou le texte ciblé ont changé. Le résultat reste consultable ; relancez si nécessaire ou conservez votre version.

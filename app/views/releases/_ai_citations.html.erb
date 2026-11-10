@@ -1,0 +1,5 @@
+<details class="ai-citations"><summary><%= t("ai.evidence_sent") %></summary>
+  <% run.request.fetch("pack").fetch("items").select { |item| ids.include?(item["id"]) }.each do |item| %>
+    <p><%= item["source"] %></p><pre><%= item["text"] %></pre>
+  <% end %>
+</details>

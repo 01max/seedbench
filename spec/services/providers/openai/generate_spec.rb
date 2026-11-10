@@ -30,6 +30,13 @@ RSpec.describe Providers::Openai::Generate do
     end
   end
 
+  it 'keeps a refusal unusable without retaining the refusal text' do
+    data = JSON.parse(ai_response({}))
+    data['output'].first['content'] = [ { 'type' => 'refusal', 'refusal' => 'Synthetic refusal body' } ]
+    stub_request(:post, 'https://api.openai.com/v1/responses').to_return(body: JSON.generate(data))
+    expect { generate }.to raise_error(Ai::Failure) { |error| expect(error.code).to eq('refused') }
+  end
+
   it 'sanitizes transport failures without automatically retrying the paid request' do
     request = stub_request(:post, 'https://api.openai.com/v1/responses').to_timeout
     expect { generate }.to raise_error(Providers::Failure) { |error| expect(error.message).not_to include('synthetic-openai-key') }

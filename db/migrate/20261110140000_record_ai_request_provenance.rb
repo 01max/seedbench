@@ -12,6 +12,8 @@ class RecordAiRequestProvenance < ActiveRecord::Migration[8.1]
 
   def down
     %w[ai_runs_identity ai_runs_terminal ai_runs_no_delete ai_runs_no_replace].each { |name| execute "DROP TRIGGER #{name}" }
+    remove_check_constraint :ai_runs, name: 'ai_request_object'
+    remove_check_constraint :ai_runs, name: 'ai_result_object'
     remove_foreign_key :ai_runs, column: [ :release_id, :workflow_operation_id ]
     remove_index :ai_runs, name: 'one_active_ai_run'
     remove_column :ai_runs, :workflow_operation_id
