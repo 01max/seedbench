@@ -8,6 +8,7 @@ module Ebooks
         evidence = evidence_for(operation, payload, result)
         Findings.call(release: release, payload: payload)
         release.update!(inspection_state: result['error'] ? 'failed' : 'succeeded')
+        Ai::Initial.call(release: release) unless result['error']
         { evidence_id: evidence.id, failed: result['error'].present? }
       end
 

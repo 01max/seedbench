@@ -37,7 +37,8 @@ light themes, compact desktop review, and narrower screens.
 > Explicit canonical-file preparation and verified local torrents are available.
 > Cover selection and read-only C411 duplicate search/review are available.
 > Cover hosting is implemented at the remote-operation boundary.
-> AI assistance, C411 drafts/publication, and seeding are still being built.
+> Optional evidence assessment and French prose suggestions are available.
+> C411 drafts/publication and seeding are still being built.
 > Draft and Publish are currently disabled.
 
 ## Features
@@ -52,6 +53,7 @@ light themes, compact desktop review, and narrower screens.
 | **Review C411 matches** | Search title variants, author and ISBN; compare edition/format evidence, confirm duplicates, and retain reasoned false-positive decisions. Failed or incomplete searches stay unresolved. |
 | **Review in one place** | Edit metadata, presentation, notes, and complete BBCode/NFO. Open files, source evidence, history, and an escaped local prose preview when needed. |
 | **Assemble release text** | Generate exact-template BBCode and factual NFO as reviewable proposals. Preview unsaved BBCode safely, keep full manual edits, and review text affected by changed facts or covers. |
+| **Use optional assistance** | Request evidence-cited assessments and French presentation/notes, compare suggestions, and explicitly adopt them while preserving human BBCode/NFO. Continue manually when AI is disabled or unavailable. |
 | **Prepare explicitly** | Review a release name, move the same file into the configured payload folder, and verify a private single-file torrent. Re-prepare after name changes; published names stay locked. |
 | **Keep your edits** | Autosave while you work or use Save and next. Failed saves keep your text and selected book; concurrent edits require an explicit choice. |
 | **Follow the checks** | Keep manual review marks with reversible history. Automatic checks reflect recorded observations, and uncertainty acknowledgements stay tied to their findings. |
@@ -61,7 +63,7 @@ light themes, compact desktop review, and narrower screens.
 Uploads retain the original bytes and queue bounded background inspection.
 See [ebook inspection](docs/ebook-inspection.md) for sampling and resource limits. Saving or navigating never prepares a
 torrent or writes to a provider. See the [workbench guide](docs/workbench.md)
-for current behavior and limits. See [covers and duplicate review](docs/covers-and-duplicates.md) for image selection and C411 match handling.
+for current behavior and limits. See [covers and duplicate review](docs/covers-and-duplicates.md) for image selection and C411 match handling. The [assistance guide](docs/ai-assistance.md) explains automatic requests, bounded evidence transfers, and explicit acceptance.
 
 ## Get started
 

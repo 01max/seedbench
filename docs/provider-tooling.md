@@ -48,6 +48,13 @@ The resource still requires a deliberate application connection assignment.
 References: [Responses structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses)
 and [the tested model family](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
 
+The application adapter was checked again on 2026-11-10 using a temporary key
+and two synthetic fragments (578 bytes of evidence JSON). Strict assessment and
+prose outputs both passed local schema/citation validation with the same
+`gpt-4.1-mini-2025-04-14` snapshot. Usage was respectively 549/183 and 500/287
+input/output tokens. No ebook contents or keys were added to tracked files.
+The [assistance guide](ai-assistance.md) describes the implemented review flow.
+
 ## Linux tool selection
 
 The [synthetic container check](../script/tooling/README.md) ran successfully

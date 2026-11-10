@@ -14,8 +14,9 @@ def epub(root):
     with zipfile.ZipFile(root / "book.epub", "w") as book:
         book.writestr("mimetype", "application/epub+zip")
         book.writestr("META-INF/container.xml", '<container><rootfiles><rootfile full-path="book.opf"/></rootfiles></container>')
-        book.writestr("book.opf", '''<package xmlns:dc="http://purl.org/dc/elements/1.1/" version="3.0" unique-identifier="isbn"><metadata><dc:title>Synthetic book</dc:title><dc:creator>Test author</dc:creator><dc:language>fr</dc:language><dc:identifier id="isbn">9780306406157</dc:identifier></metadata><manifest><item id="chapter" href="chapter.xhtml" media-type="application/xhtml+xml"/><item id="cover" href="cover.png" media-type="image/png" properties="cover-image"/></manifest><spine><itemref idref="chapter"/></spine></package>''')
+        book.writestr("book.opf", '''<package xmlns:dc="http://purl.org/dc/elements/1.1/" version="3.0" unique-identifier="isbn"><metadata><dc:title>Synthetic book</dc:title><dc:creator>Test author</dc:creator><dc:publisher>Synthetic publisher</dc:publisher><dc:date>2024</dc:date><dc:language>fr</dc:language><dc:identifier id="isbn">9780306406157</dc:identifier></metadata><manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="chapter" href="chapter.xhtml" media-type="application/xhtml+xml"/><item id="cover" href="cover.png" media-type="image/png" properties="cover-image"/></manifest><spine><itemref idref="chapter"/></spine></package>''')
         book.writestr("chapter.xhtml", '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Sample</title></head><body><p>Sample text for a synthetic book.</p></body></html>')
+        book.writestr("nav.xhtml", '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><body><nav epub:type="toc"><h1>Sommaire</h1><a href="chapter.xhtml">Chapitre synthétique</a></nav></body></html>')
         book.writestr("cover.png", image.getvalue())
 
 

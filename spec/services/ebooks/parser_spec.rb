@@ -28,6 +28,12 @@ RSpec.describe Ebooks::Parser do
     expect(release.reviewed_facts).to be_empty
   end
 
+  it 'retains a bounded source-linked contents excerpt without adding it to the spine' do
+    _, _, report = inspect_fixture
+    expect(report.fetch('contents').sole).to include('source' => 'nav.xhtml', 'text' => include('Sommaire', 'Chapitre synthétique'))
+    expect(report.dig('structure', 'spine_documents')).to eq(1)
+  end
+
   it 'applies the background result once and retains cover candidates separately' do
     release, payload, = inspect_fixture
     operation = release.workflow_operations.sole

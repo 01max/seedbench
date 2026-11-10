@@ -6,6 +6,7 @@ require_relative 'runtime_content'
 require_relative 'runtime_uploads'
 require_relative 'runtime_ebooks'
 require_relative 'runtime_reviews'
+require_relative 'runtime_ai'
 
 abort 'Runtime must be unprivileged' if Process.uid.zero?
 abort 'Image contains operator material' if %w[/app/.env /app/.git /app/private /app/tmp/ebooks].any? { |path| File.exist?(path) }
@@ -42,6 +43,7 @@ rescue ActiveRecord::StatementInvalid => error
 end
 RuntimeAccess.prepare
 RuntimeReviews.prepare
+RuntimeAi.prepare
 RuntimeUploads.verify
 RuntimeEbooks.prepare
 puts 'Application image, assets, SQL history guards, domain state and same-file rename verified.'

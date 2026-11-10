@@ -1,0 +1,38 @@
+<% output = run.result.fetch("output") %>
+<% current = Ai::Relevance.current?(run: run, context: workspace.context) %>
+<% unless current %><p class="work-warning"><%= t("ai.stale_notice") %></p><% end %>
+<p class="editor-hint"><strong><%= t("ai.limitations") %></strong> · <%= output["limitations"] %></p>
+<% if run.purpose == "assessment" %>
+  <h4><%= t("ai.fact_candidates") %></h4>
+  <% output.fetch("candidates").each_with_index do |candidate, index| %>
+    <section class="ai-candidate"><p><strong><%= t("workbench.fields.#{candidate['field']}") %></strong> · <%= candidate["value"] %></p>
+      <%= render "releases/ai_citations", run: run, ids: candidate.fetch("evidence_ids") %>
+      <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-fact-#{run.id}-#{index}" do |form| %>
+        <%= form.hidden_field :kind, value: "adopt_fact" %><%= form.hidden_field :run_id, value: run.id %><%= form.hidden_field :candidate_index, value: index %>
+        <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+        <%= form.submit t("ai.adopt"), class: "work-button", disabled: !current %>
+      <% end %>
+    </section>
+  <% end %>
+  <% if output.fetch("findings").any? %><h4><%= t("ai.uncertain_findings") %></h4><ul><% output["findings"].each do |finding| %><li><%= finding["summary"] %><%= render "releases/ai_citations", run: run, ids: finding.fetch("evidence_ids") %></li><% end %></ul><% end %>
+<% else %>
+  <% %w[presentation notes].each do |field| %>
+    <% next unless output[field].present? %>
+    <% eligible = Ai::Relevance.prose?(run: run, context: workspace.context, content_ids: workspace.content_ids, field: field) %>
+    <section class="ai-prose" data-ai-field="<%= field %>"><h4><%= t("workbench.fields.#{field}") %></h4>
+      <div class="content-comparison"><section><h5><%= t("ai.saved_prose") %></h5><pre><%= workspace.values[field] %></pre></section><section><h5><%= t("ai.suggested_prose") %></h5><pre><%= output[field] %></pre></section></div>
+      <% unless eligible %><p class="editor-hint"><%= workspace.values[field] == output[field] ? t("ai.already_saved") : t("ai.stale_notice") %></p><% end %>
+      <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-prose-#{run.id}-#{field}" do |form| %>
+        <%= form.hidden_field :kind, value: "accept_prose" %><%= form.hidden_field :run_id, value: run.id %><%= form.hidden_field :field, value: field %>
+        <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+        <%= form.submit t("ai.accept_#{field}"), class: "work-button", disabled: !eligible %>
+      <% end %>
+    </section>
+  <% end %>
+  <%= render "releases/ai_citations", run: run, ids: output.fetch("evidence_ids") %>
+  <p class="editor-hint"><%= t("ai.regenerate_help") %></p>
+  <%= form_with url: release_content_action_path(@release), scope: :content, data: { turbo_frame: dom_id(@release, :content) } do |form| %>
+    <%= form.hidden_field :kind, value: "propose_bbcode" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+    <%= form.submit t("ai.regenerate"), class: "work-button quiet" %>
+  <% end %>
+<% end %>

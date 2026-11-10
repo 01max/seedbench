@@ -1,6 +1,6 @@
 <section class="editor-area" aria-label="<%= t("workbench.editor.label") %>" data-controller="workspace-tabs">
   <div class="editor-tabs" role="tablist" aria-label="<%= t("workbench.editor.sections_label") %>">
-    <% %w[review bbcode nfo files history evidence covers duplicates preview].each_with_index do |key, index| %>
+    <% %w[review bbcode nfo files history evidence covers duplicates ai preview].each_with_index do |key, index| %>
       <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= t("workbench.tabs.#{key}") %></button>
     <% end %>
   </div>
@@ -46,6 +46,7 @@
   <section id="panel-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden data-workspace-tabs-target="panel" data-panel="evidence"><%= render "evidence_frame" %></section>
   <section id="panel-covers" role="tabpanel" aria-labelledby="tab-covers" hidden data-workspace-tabs-target="panel" data-panel="covers"><%= render "covers_frame" %></section>
   <section id="panel-duplicates" role="tabpanel" aria-labelledby="tab-duplicates" hidden data-workspace-tabs-target="panel" data-panel="duplicates"><%= render "duplicates_frame" %></section>
+  <section id="panel-ai" role="tabpanel" aria-labelledby="tab-ai" hidden data-workspace-tabs-target="panel" data-panel="ai"><%= render "ai_frame" %></section>
   <section id="panel-preview" role="tabpanel" aria-labelledby="tab-preview" hidden data-workspace-tabs-target="panel" data-panel="preview">
     <section class="bbcode-preview" data-preview-url="<%= release_content_preview_path(@release) %>">
       <h2><%= t("content.preview.title") %></h2><p class="editor-hint"><%= t("content.preview.scope") %></p>

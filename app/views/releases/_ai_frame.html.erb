@@ -1,0 +1,43 @@
+<% workspace = @ai_workspace || Ai::Workspace.call(release: @release) %>
+<%= turbo_frame_tag dom_id(@release, :ai), data: { evidence_url: release_ai_action_path(@release) } do %>
+  <div data-evidence-revision="<%= @release.input_revision %>" data-reviewed-values="<%= workspace.values.to_json %>">
+    <h2><%= t("ai.title") %></h2><p class="editor-hint"><%= t("ai.scope") %></p>
+    <% if @ai_error %><p role="alert" class="work-alert"><%= @ai_error %></p><% end %>
+    <% if @ai_notice %><p role="status" class="work-warning"><%= @ai_notice %></p><% end %>
+    <p><%= t("ai.automatic.#{@release.automatic_ai ? 'enabled' : 'disabled'}") %></p>
+    <% unless workspace.configured %><p class="work-warning"><%= t("ai.errors.connection_required") %> <%= link_to t("ai.connections"), release_connections_path(@release), data: { turbo_frame: "_top" } %></p><% end %>
+    <div class="inspection-actions">
+      <% %w[assessment prose].each do |purpose| %>
+        <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-#{purpose}" do |form| %>
+          <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %><%= form.hidden_field :purpose, value: purpose %>
+          <%= form.submit t("ai.actions.#{purpose}"), class: "work-button", disabled: !workspace.configured || workspace.catalog.empty? %>
+        <% end %>
+      <% end %>
+      <%= link_to t("ai.refresh"), release_ai_action_path(@release), class: "work-button quiet" %>
+    </div>
+    <% if workspace.catalog.any? %>
+      <details class="source-detail"><summary><%= t("ai.targeted") %></summary><p class="editor-hint"><%= t("ai.targeted_scope") %></p>
+        <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-targeted", class: "ai-targeted" do |form| %>
+          <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+          <%= form.label :purpose, t("ai.purpose") %><%= form.select :purpose, %w[assessment prose].map { |key| [t("ai.purposes.#{key}"), key] } %>
+          <%= form.fields_for :scope do |scope| %>
+            <%= scope.hidden_field :mode, value: "selected" %>
+            <% workspace.catalog.each do |item| %><label class="cover-review"><%= check_box_tag "assistance[scope][evidence_ids][]", item["id"], false, id: "ai-evidence-#{item['id']}" %> <%= item["source"] %> · <%= t("ai.kinds.#{item['kind']}") %></label><details><summary><%= t("ai.excerpt") %></summary><pre><%= item["text"] %></pre></details><% end %>
+            <%= scope.label :note, t("ai.scope_note") %><%= scope.text_area :note, minlength: 20, maxlength: 500, rows: 2, required: true %>
+          <% end %>
+          <%= form.submit t("ai.targeted_submit"), class: "work-button", disabled: !workspace.configured %>
+        <% end %>
+      </details>
+    <% end %>
+    <% workspace.runs.each do |run| %>
+      <article class="ai-run cover-option" data-ai-run-id="<%= run.id %>">
+        <h3><%= t("ai.run", number: run.id, purpose: t("ai.purposes.#{run.purpose}"), state: t("ai.states.#{run.status}")) %></h3>
+        <details><summary><%= t("ai.provenance_title") %></summary><p class="editor-hint"><%= t("ai.provenance", model: run.model, version: run.prompt_version, revision: run.input_revision) %></p><pre><%= JSON.pretty_generate(run.result) %></pre></details>
+        <% if run.error_code %><p class="work-warning"><%= t("ai.errors.#{run.error_code}", default: t("ai.failed")) %></p><% end %>
+        <details><summary><%= t("ai.evidence_sent") %></summary><pre><%= JSON.pretty_generate(run.request["pack"]) %></pre></details>
+        <% if run.result&.dig("output") %><%= render "releases/ai_suggestions", run: run, workspace: workspace %><% end %>
+      </article>
+    <% end %>
+    <% if workspace.runs.empty? %><p><%= t("ai.none") %></p><% end %>
+  </div>
+<% end %>

@@ -147,15 +147,6 @@ FOREIGN KEY ("release_id")
 , CONSTRAINT remote_snapshots_provider_role CHECK (provider_role = 'publishing'), CONSTRAINT remote_snapshots_base_content_object CHECK (json_valid(base_content) AND json_type(base_content) = 'object'), CONSTRAINT remote_snapshots_remote_content_object CHECK (json_valid(remote_content) AND json_type(remote_content) = 'object'), CONSTRAINT remote_snapshots_kind CHECK (kind IN ('draft', 'submission')), CONSTRAINT remote_revision_nonnegative CHECK (local_revision >= 0));
 CREATE INDEX "index_remote_snapshots_on_release_id" ON "remote_snapshots" ("release_id");
 CREATE UNIQUE INDEX "index_remote_snapshots_on_release_id_and_id" ON "remote_snapshots" ("release_id", "id");
-CREATE TABLE IF NOT EXISTS "ai_runs" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'ai' NOT NULL, "input_revision" integer NOT NULL, "purpose" varchar NOT NULL, "prompt_version" varchar NOT NULL, "model" varchar NOT NULL, "evidence_keys" json DEFAULT '[]' NOT NULL, "status" varchar DEFAULT 'pending' NOT NULL, "result" json, "error_code" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_9ce3a73ba1"
-FOREIGN KEY ("provider_role", "provider_connection_id")
-  REFERENCES "provider_connections" ("role", "id")
-, CONSTRAINT "fk_rails_869165a4b6"
-FOREIGN KEY ("release_id")
-  REFERENCES "releases" ("id")
-, CONSTRAINT ai_runs_provider_role CHECK (provider_role = 'ai'), CONSTRAINT ai_runs_input_nonnegative CHECK (input_revision >= 0), CONSTRAINT ai_runs_evidence_keys_array CHECK (json_valid(evidence_keys) AND json_type(evidence_keys) = 'array'), CONSTRAINT ai_runs_purpose CHECK (purpose IN ('assessment', 'prose')), CONSTRAINT ai_runs_status CHECK (status IN ('pending', 'running', 'succeeded', 'failed', 'unusable', 'stale')));
-CREATE INDEX "index_ai_runs_on_release_id" ON "ai_runs" ("release_id");
-CREATE UNIQUE INDEX "index_ai_runs_on_release_id_and_id" ON "ai_runs" ("release_id", "id");
 CREATE TABLE IF NOT EXISTS "release_events" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "sequence" integer NOT NULL, "name" varchar NOT NULL, "actor" varchar NOT NULL, "input_revision" integer NOT NULL, "data" json DEFAULT '{}' NOT NULL, "occurred_at" datetime(6) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_fbf078e78f"
 FOREIGN KEY ("release_id")
   REFERENCES "releases" ("id")
@@ -306,7 +297,26 @@ CREATE TRIGGER cover_uploads_identity BEFORE UPDATE OF release_id, workflow_oper
 CREATE TRIGGER cover_uploads_receipt BEFORE UPDATE OF page_url, direct_url ON cover_uploads WHEN (OLD.page_url IS NOT NULL AND NEW.page_url IS NOT OLD.page_url) OR (OLD.direct_url IS NOT NULL AND NEW.direct_url IS NOT OLD.direct_url) BEGIN SELECT RAISE(ABORT, 'Upload receipt is immutable'); END;
 CREATE TRIGGER cover_uploads_no_delete BEFORE DELETE ON cover_uploads BEGIN SELECT RAISE(ABORT, 'Upload history is retained'); END;
 CREATE TRIGGER cover_uploads_no_replace BEFORE INSERT ON cover_uploads WHEN EXISTS (SELECT 1 FROM cover_uploads WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id OR (release_id = NEW.release_id AND cover_revision_id = NEW.cover_revision_id AND provider_connection_id = NEW.provider_connection_id AND state IN ('pending', 'outcome_unknown') AND NEW.state IN ('pending', 'outcome_unknown'))) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: cover_uploads.workflow_operation_id'); END;
+CREATE TABLE IF NOT EXISTS "ai_runs" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'ai' NOT NULL, "input_revision" integer NOT NULL, "purpose" varchar NOT NULL, "prompt_version" varchar NOT NULL, "model" varchar NOT NULL, "evidence_keys" json DEFAULT '[]' NOT NULL, "status" varchar DEFAULT 'pending' NOT NULL, "result" json, "error_code" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, "request" json DEFAULT '{}' NOT NULL, "workflow_operation_id" bigint, CONSTRAINT "fk_rails_869165a4b6"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_9ce3a73ba1"
+FOREIGN KEY ("provider_role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT "fk_rails_59abc5f1ba"
+FOREIGN KEY ("release_id", "workflow_operation_id")
+  REFERENCES "workflow_operations" ("release_id", "id")
+, CONSTRAINT ai_runs_provider_role CHECK (provider_role = 'ai'), CONSTRAINT ai_runs_input_nonnegative CHECK (input_revision >= 0), CONSTRAINT ai_runs_evidence_keys_array CHECK (json_valid(evidence_keys) AND json_type(evidence_keys) = 'array'), CONSTRAINT ai_runs_purpose CHECK (purpose IN ('assessment', 'prose')), CONSTRAINT ai_runs_status CHECK (status IN ('pending', 'running', 'succeeded', 'failed', 'unusable', 'stale')), CONSTRAINT ai_request_object CHECK (json_valid(request) AND json_type(request) = 'object'), CONSTRAINT ai_result_object CHECK (result IS NULL OR (json_valid(result) AND json_type(result) = 'object')));
+CREATE INDEX "index_ai_runs_on_release_id" ON "ai_runs" ("release_id");
+CREATE UNIQUE INDEX "index_ai_runs_on_release_id_and_id" ON "ai_runs" ("release_id", "id");
+CREATE UNIQUE INDEX "index_ai_runs_on_workflow_operation_id" ON "ai_runs" ("workflow_operation_id");
+CREATE UNIQUE INDEX "one_active_ai_run" ON "ai_runs" ("release_id", "purpose") WHERE workflow_operation_id IS NOT NULL AND status IN ('pending', 'running');
+CREATE TRIGGER ai_runs_identity BEFORE UPDATE OF release_id, provider_connection_id, provider_role, input_revision, purpose, prompt_version, model, evidence_keys, workflow_operation_id, request ON ai_runs BEGIN SELECT RAISE(ABORT, 'AI run identity is immutable'); END;
+CREATE TRIGGER ai_runs_terminal BEFORE UPDATE ON ai_runs WHEN OLD.status IN ('succeeded', 'failed', 'unusable', 'stale') BEGIN SELECT RAISE(ABORT, 'AI result history is immutable'); END;
+CREATE TRIGGER ai_runs_no_delete BEFORE DELETE ON ai_runs BEGIN SELECT RAISE(ABORT, 'AI run history is retained'); END;
+CREATE TRIGGER ai_runs_no_replace BEFORE INSERT ON ai_runs WHEN EXISTS (SELECT 1 FROM ai_runs WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: ai_runs.id'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261110140000'),
 ('20261110120000'),
 ('20261110100000'),
 ('20261109150000'),
