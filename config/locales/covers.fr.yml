@@ -1,0 +1,48 @@
+fr:
+  workbench:
+    tabs:
+      covers: "Couverture"
+    events:
+      cover:
+        selected: "Couverture retenue"
+  covers:
+    tab: "Couverture"
+    title: "Comparer et retenir une couverture"
+    scope: "La sélection reste locale. L’image sera hébergée uniquement lors d’un envoi explicite de brouillon ou de publication."
+    selected: "Couverture retenue localement. Les textes existants sont conservés."
+    lookup_queued: "Recherche d’édition demandée. Actualisez les couvertures après son résultat."
+    refresh: "Actualiser les couvertures"
+    current: "Couverture retenue · version %{number}"
+    none: "Aucune couverture retenue."
+    dimensions: "%{width} × %{height} pixels natifs"
+    target: "Cible de qualité : 600 × 900 pixels. Une couverture plus petite reste utilisable ; aucun agrandissement automatique."
+    provenance: "Source et édition comparée"
+    source: "Choisir une source"
+    compare_values: "Valeurs affichées à comparer"
+    edition_warning: "Une notice papier ou un ISBN valide ne prouve pas l’édition numérique du fichier. Comparez l’édition et la langue de l’image."
+    medium:
+      print_record: "Notice d’édition papier"
+      digital_record: "Notice d’édition numérique"
+      unspecified: "Support non précisé"
+    embedded: "Image intégrée au livre"
+    online: "Image de l’édition Open Library"
+    compare: "Ouvrir l’image pour comparaison"
+    manual: "Image sur cet appareil"
+    image: "Fichier PNG, JPEG ou WebP (8 Mio maximum)"
+    url: "Image depuis une adresse HTTPS"
+    image_url: "Adresse directe de l’image"
+    edition_match: "J’ai vérifié que l’image correspond à cette édition et à sa langue."
+    quality_reviewed: "J’ai vérifié la netteté, les artefacts et les filigranes."
+    comparable_detail: "Format non portrait : le niveau de détail reste comparable (expliquez ci-dessous)."
+    note: "Note de comparaison d’édition ou de qualité"
+    select: "Retenir cette couverture"
+    lookup: "Chercher les couvertures de cette édition"
+    isbn: "ISBN pour la recherche d’édition"
+    errors:
+      unsafe_url: "Adresse refusée. Utilisez une image HTTPS publique, sans identifiants, port particulier ni redirection vers un réseau privé."
+      fetch_failed: "Image inaccessible. Vérifiez son adresse et réessayez explicitement."
+      too_large: "L’image est vide ou dépasse la limite de 8 Mio."
+      invalid_image: "Image illisible ou non prise en charge. Utilisez un PNG, JPEG ou WebP fixe, de 20 millions de pixels maximum."
+      invalid_source: "Cette source n’est plus disponible pour le livre actuel. Actualisez les couvertures."
+      review_required: "Confirmez la correspondance d’édition et la qualité de l’image. La note est limitée à 2 000 caractères."
+      landscape_review: "Pour une image non portrait, confirmez un détail comparable et donnez une explication d’au moins 20 caractères."

@@ -226,3 +226,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .editor-area, .work-queue { overflow-y: auto; }
   .release-checklist { max-height: none; min-height: 0; }
 }
+
+.selected-cover { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 12px; }
+.selected-cover-image { display: block; max-width: 150px; max-height: 225px; object-fit: contain; }
+.selected-cover > div { min-width: 0; max-width: 100%; }
+.selected-cover pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+.cover-selection fieldset { border: 1px solid var(--border); padding: 8px; min-width: 0; }
+.cover-option { margin-block: 8px; padding-block: 6px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.cover-option input[type="url"], .cover-selection textarea { width: 100%; min-width: 0; }
+.cover-option input[type="file"] { display: block; max-width: 100%; }
+.cover-review { display: flex; gap: 6px; align-items: flex-start; margin-block: 9px; }
