@@ -45,8 +45,8 @@ RSpec.describe 'Local status refresh', type: :system do
 
   it 'saves the displayed revision before rejecting an unavailable explicit action' do
     fill_in 'Présentation', with: 'Reviewed before action'
-    page.execute_script("document.querySelector('button[formaction*=prepare]').disabled = false")
-    click_button 'Préparer', exact: true
+    page.execute_script("document.querySelector('button[formaction*=draft]').disabled = false")
+    find('button[formaction*=draft]').click
 
     expect(page).to have_text('Cette action n’est pas disponible')
     expect(release.content_revisions.where(kind: 'presentation').last.body).to eq('Reviewed before action')

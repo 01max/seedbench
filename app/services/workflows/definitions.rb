@@ -1,12 +1,13 @@
 module Workflows
   class Definitions
     class UnsupportedKind < StandardError; end
-    Definition = Data.define(:compute, :apply, :effect, :stale) do
-      def initialize(compute:, apply:, effect:, stale: nil)
+    Definition = Data.define(:compute, :apply, :effect, :stale, :recoverable) do
+      def initialize(compute:, apply:, effect:, stale: nil, recoverable: false)
         super
       end
     end
     ENTRIES = {
+      'preparation' => Definition.new(compute: Preparation::Build, apply: Preparation::Record, effect: 'filesystem', stale: Preparation::Stale, recoverable: true),
       'inspection' => Definition.new(compute: Ebooks::Inspect, apply: Ebooks::Record, effect: 'local', stale: Ebooks::Refresh),
       'edition_lookup' => Definition.new(compute: Ebooks::Lookup, apply: Ebooks::RecordLookup, effect: 'local')
     }.freeze

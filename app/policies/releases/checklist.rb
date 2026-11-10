@@ -47,14 +47,8 @@ module Releases
     def preparation
       prepared = @snapshot.preparation
       payload = @snapshot.payload
-      done = @release.preparation_state == 'prepared' && preparation_matches_payload?(prepared, payload)
+      done = Preparation::Current.call(release: @release, payload: payload, preparation: prepared)
       item('preparation', state: done ? 'done' : 'pending', note: I18n.t("workbench.checklist.preparation.#{done ? 'done' : 'pending'}"))
-    end
-
-    def preparation_matches_payload?(prepared, payload)
-      return false unless prepared && payload
-
-      prepared.payload_revision_id == payload.id && prepared.payload_sha256 == payload.sha256 && prepared.payload_size_bytes == payload.size_bytes
     end
 
     def duplicates

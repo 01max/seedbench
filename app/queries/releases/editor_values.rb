@@ -1,6 +1,6 @@
 module Releases
   class EditorValues
-    METADATA = %w[title author].freeze
+    METADATA = %w[title author proposed_name].freeze
     FACTS = %w[isbn edition language publisher publication_year isbn_kind].freeze
     CONTENT = %w[presentation notes bbcode nfo].freeze
 

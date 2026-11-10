@@ -1,5 +1,6 @@
 require_relative '../../config/environment'
 require_relative 'workflow_fixture'
+require_relative 'preparation_fixture'
 
 # The isolated runtime stack installs this synthetic definition before starting jobs.
 entries = Workflows::Definitions::ENTRIES.merge(

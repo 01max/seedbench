@@ -1,6 +1,16 @@
+<%= turbo_frame_tag dom_id(@release, :preparation), data: { preparation_url: release_preparation_path(@release) } do %>
 <h2><%= t("workbench.files.title") %></h2>
 <% if @snapshot.payload %>
   <dl class="release-facts"><dt><%= t("workbench.files.original") %></dt><dd><%= @snapshot.payload.original_filename %></dd><dt><%= t("workbench.files.size") %></dt><dd><%= number_to_human_size(@snapshot.payload.size_bytes) %></dd><dt><%= t("workbench.files.sha256") %></dt><dd class="fingerprint"><%= @snapshot.payload.sha256 %></dd><dt><%= t("workbench.files.proposed") %></dt><dd><%= @release.proposed_name.presence || t("workbench.files.undefined") %></dd></dl>
   <p><%= t("workbench.files.preserved") %></p>
 <% else %><p><%= t("workbench.files.missing") %></p><% end %>
 <% if @snapshot.preparation %><h3><%= t("workbench.files.preparation") %></h3><p class="fingerprint"><%= @snapshot.preparation.payload_name %></p><p><%= workflow_label(@release.preparation_state) %></p><% end %>
+
+<% if @snapshot.payload && !@snapshot.payload.locator.start_with?("staging/") %><p><%= t("preparation.canonical") %> : <span class="fingerprint"><%= @snapshot.payload.locator %></span></p><% end %>
+<% if @snapshot.preparation %>
+  <dl class="release-facts"><dt><%= t("preparation.torrent") %></dt><dd><%= File.basename(@snapshot.preparation.torrent_locator) %></dd><dt><%= t("preparation.info_hash") %></dt><dd class="fingerprint"><%= @snapshot.preparation.torrent_info_hash %></dd></dl>
+  <p class="editor-hint"><%= t("preparation.local_only") %></p>
+<% end %>
+<% if @release.preparation_state == "stale" %><p class="work-warning"><%= t("preparation.stale_note") %></p><% end %>
+<%= link_to t("preparation.refresh"), release_preparation_path(@release), class: "work-button" %>
+<% end %>

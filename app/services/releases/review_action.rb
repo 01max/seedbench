@@ -9,12 +9,15 @@ module Releases
         super(I18n.t('workbench.errors.unavailable_action'))
       end
     end
-    KINDS = %w[prepare draft publish].freeze
+    KINDS = %w[suggest_name prepare draft publish].freeze
 
     def self.call(release_id:, kind:, expected_revision:, changes:)
       raise UnknownAction, I18n.t('workbench.errors.unknown_action') unless KINDS.include?(kind)
 
       release = Save.call(release_id: release_id, expected_revision: expected_revision, changes: changes)
+      return Preparation::SuggestName.call(release: release) if kind == 'suggest_name'
+      return Preparation::Request.call(release_id: release.id, expected_revision: release.input_revision) if kind == 'prepare'
+
       raise Unavailable.new(release.input_revision)
     end
   end

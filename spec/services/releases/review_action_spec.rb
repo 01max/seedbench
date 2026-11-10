@@ -4,7 +4,7 @@ RSpec.describe Releases::ReviewAction do
   it 'saves the reviewed text before any action can be attempted' do
     release = Releases::Create.call(title: 'Synthetic')
     expect do
-      described_class.call(release_id: release.id, kind: 'prepare', expected_revision: 0, changes: { bbcode: 'Reviewed text' })
+      described_class.call(release_id: release.id, kind: 'draft', expected_revision: 0, changes: { bbcode: 'Reviewed text' })
     end.to raise_error(described_class::Unavailable) { |error| expect(error.revision).to eq(1) }
 
     expect(release.content_revisions.sole.body).to eq('Reviewed text')

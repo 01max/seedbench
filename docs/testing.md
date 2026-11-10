@@ -163,3 +163,14 @@ Production/test migrations do not dump schema into the read-only application
 image. Schema updates belong in source changes; runtime migrations only update
 the configured persistent databases. The quality source/build context is an
 allowlist that excludes credentials, books, databases, extracts, and reports.
+
+Preparation checks include no-replace collision handling, same-file identity,
+symlink/traversal/mount failures, immutable move journals, stale and published-name
+rejection, all supported format names, multi-piece hash mismatch, and dirty editor
+preservation. Each Compose runtime mode kills a real worker after rename and before
+locator commit, then verifies one recovered canonical inode, unchanged SHA-256 and
+an independently checked private torrent after recreation.
+
+The uncovered probe scales with the physical app/lib source size, with a minimum
+of 240 lines. It remains large enough to fail the 90% gate even as the application
+grows; successful examples must still exit unsuccessfully for each unloaded probe.

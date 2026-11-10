@@ -270,7 +270,24 @@ CREATE INDEX "index_content_proposals_on_release_id" ON "content_proposals" ("re
 CREATE TRIGGER content_proposals_no_update BEFORE UPDATE ON content_proposals BEGIN SELECT RAISE(ABORT, 'Proposal history is append-only'); END;
 CREATE TRIGGER content_proposals_no_delete BEFORE DELETE ON content_proposals BEGIN SELECT RAISE(ABORT, 'Proposal history is append-only'); END;
 CREATE TRIGGER content_proposals_no_replace BEFORE INSERT ON content_proposals WHEN EXISTS (SELECT 1 FROM content_proposals WHERE id = NEW.id) BEGIN SELECT RAISE(ABORT, 'Proposal history is append-only'); END;
+CREATE TABLE IF NOT EXISTS "payload_moves" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "payload_revision_id" bigint NOT NULL, "workflow_operation_id" bigint NOT NULL, "source_locator" varchar NOT NULL, "destination_locator" varchar NOT NULL, "source_device" bigint NOT NULL, "source_inode" bigint NOT NULL, "root_device" bigint NOT NULL, "root_inode" bigint NOT NULL, "state" varchar DEFAULT 'reserved' NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_6f03c0072a"
+FOREIGN KEY ("release_id", "workflow_operation_id")
+  REFERENCES "workflow_operations" ("release_id", "id")
+, CONSTRAINT "fk_rails_bc882e176f"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_85d631825d"
+FOREIGN KEY ("release_id", "payload_revision_id")
+  REFERENCES "payload_revisions" ("release_id", "id")
+, CONSTRAINT payload_move_state CHECK (state IN ('reserved', 'moved', 'completed', 'cancelled')), CONSTRAINT payload_move_source_locator CHECK (length(source_locator) > 0 AND substr(source_locator, 1, 1) != '/'), CONSTRAINT payload_move_destination_locator CHECK (length(destination_locator) > 0 AND substr(destination_locator, 1, 1) != '/'));
+CREATE INDEX "index_payload_moves_on_release_id" ON "payload_moves" ("release_id");
+CREATE UNIQUE INDEX "index_payload_moves_on_workflow_operation_id" ON "payload_moves" ("workflow_operation_id");
+CREATE UNIQUE INDEX "active_payload_destination" ON "payload_moves" ("destination_locator") WHERE state IN ('reserved', 'moved');
+CREATE TRIGGER payload_moves_no_input BEFORE UPDATE OF release_id, payload_revision_id, workflow_operation_id, source_locator, destination_locator, source_device, source_inode, root_device, root_inode ON payload_moves BEGIN SELECT RAISE(ABORT, 'Move identity is immutable'); END;
+CREATE TRIGGER payload_moves_no_delete BEFORE DELETE ON payload_moves BEGIN SELECT RAISE(ABORT, 'Move journal is retained'); END;
+CREATE TRIGGER payload_moves_no_replace BEFORE INSERT ON payload_moves WHEN EXISTS (SELECT 1 FROM payload_moves WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id OR (destination_locator = NEW.destination_locator AND state IN ('reserved', 'moved') AND NEW.state IN ('reserved', 'moved'))) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: payload_moves.destination_locator'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261110100000'),
 ('20261109150000'),
 ('20261109100000'),
 ('20261109090000'),

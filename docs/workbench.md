@@ -82,7 +82,13 @@ completion, uncertainty, failure, or leaving the page stops them. Manual refresh
 starts another bounded cycle. Status responses never replace editor fields, and
 an older status response cannot undo newer review history.
 
-Prepare, C411 draft, and Publish remain disabled. Their server endpoints save a
-valid displayed revision before returning an explicit unavailable response.
+Use **Suggérer un nom** to save a deterministic candidate, review **Nom de
+release**, then choose **Préparer**. Preparation moves the same file into the
+configured canonical folder and verifies its private local torrent. Name or byte
+changes make it stale until explicit **Re-préparer**. Files shows the results;
+worker completion preserves newer dirty text through the conflict choice. See
+[payload preparation](payload-preparation.md) for storage requirements, interrupted
+moves and the inert local tracker boundary. C411 draft and Publish remain disabled;
+their endpoints save a valid displayed revision before returning unavailable.
 Local editing, navigation, checklist changes, and shortcuts do not prepare files,
 host covers, create drafts, publish, or start seeding.

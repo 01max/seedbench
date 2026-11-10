@@ -4,6 +4,7 @@ module Releases
 
     def self.call(release_id:)
       release = Release.find(release_id)
+      Preparation::Observe.call(release: release)
       release.with_lock do
         snapshot = Snapshot.call(release: release)
         checklist = Checklist.call(release: release, snapshot: snapshot)

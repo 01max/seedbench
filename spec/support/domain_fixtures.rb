@@ -1,4 +1,15 @@
 module DomainFixtures
+  def mark_preparation_current(release)
+    payload = release.payload_revisions.sole
+    names = Providers::C411::EbookNaming.call(title: release.title, author: release.author, language: 'fr', format: payload.format)
+    previous = release.preparation_revisions.order(:number).last
+    attributes = previous.attributes.except('id', 'created_at', 'updated_at').merge('number' => previous.number + 1,
+      'policy_version' => Preparation::Current::POLICY, 'release_name' => names.release, 'payload_name' => names.payload)
+    release.preparation_revisions.create!(attributes)
+    payload.update!(locator: names.payload)
+    release.reload.update!(preparation_state: 'prepared', proposed_name: names.release)
+  end
+
   def build_release_graph
     release = Release.create!(title: 'Synthetic book', author: 'Test author')
     payload = PayloadRevision.create!(release: release, number: 1, original_filename: 'fixture.epub',

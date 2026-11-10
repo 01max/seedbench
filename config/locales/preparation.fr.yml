@@ -1,0 +1,39 @@
+fr:
+  workbench:
+    events:
+      preparation:
+        verified: "Fichier et torrent vérifiés"
+        failed: "Échec de la préparation"
+        invalidated: "Préparation à refaire"
+    fields:
+      proposed_name: "Nom de release"
+  preparation:
+    name: "Nom de release"
+    suggest: "Suggérer un nom"
+    name_help: "Vérifiez le titre, l’auteur et la langue, suggérez le nom puis corrigez la team si elle est connue. Le nom est enregistré sans déplacer le livre."
+    queued: "Préparation demandée. Le résultat apparaîtra dans la liste des vérifications."
+    suggested: "Nom proposé enregistré. Vérifiez-le avant de préparer le fichier."
+    reprepare: "Re-préparer"
+    local_only: "Torrent local vérifié avec une annonce inactive. Aucun envoi à C411 ni à Deluge."
+    canonical: "Fichier canonique"
+    torrent: "Torrent local"
+    info_hash: "Empreinte du torrent"
+    refresh: "Actualiser les fichiers"
+    stale_note: "Le nom ou les fichiers ont changé. Une nouvelle préparation explicite est nécessaire."
+    errors:
+      stale: "La préparation n’est plus valide. Vérifiez le nom et les fichiers puis utilisez Re-préparer."
+      inspection_required: "Un livre lié et une inspection réussie sans échec certain sont nécessaires avant la préparation."
+      input_changed: "La révision a changé pendant la préparation. Les modifications et le fichier ont été conservés. Re-préparez la révision actuelle."
+      invalid_torrent: "Le torrent ne décrit pas exactement un fichier privé avec le nom, la taille et les morceaux attendus."
+      torrent_mismatch: "Les empreintes des morceaux du torrent ne correspondent pas au fichier canonique."
+      torrent_creation: "La création locale du torrent a échoué ou dépassé le délai prévu. Le livre est conservé à son emplacement enregistré."
+      published_locked: "Le nom d’un fichier publié, en cours de publication ou déjà confié au client torrent est verrouillé."
+      operation_expired: "La préparation a été interrompue. Attendez sa reprise avant de recommencer."
+      mapping_changed: "Le montage a changé depuis le début du déplacement. Rétablissez la racine d’origine avant de reprendre."
+      unsafe_path: "Chemin non sûr : utilisez les racines montées, sans lien symbolique ni traversée de dossier."
+      storage_unavailable: "Stockage indisponible. Vérifiez les montages et les droits du compte de service."
+      payload_changed: "L’identité du fichier a changé : taille, empreinte ou emplacement différent. Le fichier est conservé ; corrigez le montage ou réimportez-le."
+      collision: "La destination existe ou est réservée pour une autre préparation. Aucun fichier n’a été remplacé."
+      different_filesystem: "Le déplacement doit rester sur le même système de fichiers. Montez le dossier de transit sous la racine des livres."
+      rename_unavailable: "Ce montage ne permet pas le renommage atomique sans remplacement. Vérifiez les droits et le système de fichiers."
+      invalid_name: "Renseignez titre, auteur et langue française. Le nom attendu est Titre.Auteur.FRENCH.[EPUB|PDF|MOBI]-Team, sans chemin ni tag vidéo (NOTAG si la team est inconnue)."

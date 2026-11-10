@@ -31,8 +31,7 @@ module Content
     end
 
     def prepared?
-      @preparation && @payload && @release.preparation_state == 'prepared' && @preparation.payload_revision_id == @payload.id &&
-        @preparation.payload_sha256 == @payload.sha256 && @preparation.payload_size_bytes == @payload.size_bytes
+      Preparation::Current.call(release: @release, payload: @payload, preparation: @preparation)
     end
 
     private

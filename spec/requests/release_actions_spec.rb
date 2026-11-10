@@ -4,7 +4,7 @@ RSpec.describe 'Explicit reviewed actions' do
   it 'saves reviewed inputs but keeps unavailable actions closed without remote or file effects' do
     release = Releases::Create.call(title: 'Synthetic')
     sign_in_operator
-    %w[prepare draft publish].each_with_index do |kind, revision|
+    %w[draft publish].each_with_index do |kind, revision|
       patch action_release_path(release, kind: kind), params: { edit: { expected_revision: revision, bbcode: "Text #{revision}" } }, as: :json
       expect(response).to have_http_status(:service_unavailable)
       expect(response.parsed_body.fetch('revision')).to eq(revision + 1)
