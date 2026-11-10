@@ -7,7 +7,7 @@ module Workflows
         release.with_lock do
           operation.reload
           return operation unless operation.state == 'running' && operation.attempt_token == attempt_token
-          return reject_stale(operation) if operation.input_revision != release.input_revision
+          return reject_stale(operation) if operation.input_revision != release.input_revision && !Definitions.fetch(operation.kind).retain_stale
           return Lease.expire(operation_id: operation.id) unless operation.lease_expires_at.future?
 
           apply_result(operation, result, apply)

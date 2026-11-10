@@ -3,6 +3,12 @@ fr:
     sources:
       reviewed: Faits relus par l’opérateur
     errors:
+      invalid_output: La réponse ne respecte pas le contrat de suggestions ou ses preuves. Elle reste inutilisable.
+      incomplete: Le fournisseur n’a pas terminé la réponse. Relancez explicitement ou continuez manuellement.
+      refused: Le fournisseur a refusé la demande. Vous pouvez continuer manuellement.
+      connection_changed: La connexion IA a changé. Relancez avec sa configuration actuelle.
+      prompt_changed: Les instructions ont changé depuis la demande. Relancez l’analyse.
+      interrupted: Une génération a été interrompue. Aucun nouvel appel automatique n’est effectué ; relancez explicitement.
       inspection_required: Une inspection réussie du fichier actuel est nécessaire pour préparer les preuves.
       scope_required: Sélectionnez une à huit preuves et décrivez le périmètre ciblé avec 20 à 500 caractères.
       pack_too_large: Le dossier dépasse la limite de 32 Kio. Réduisez la sélection ciblée.

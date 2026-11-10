@@ -9,10 +9,10 @@ module Providers
     MAX_BYTES = 1_048_576
 
     class << self
-      def call(endpoint:, path:, headers: {}, body: nil, form: nil, redirects: 0)
+      def call(endpoint:, path:, headers: {}, body: nil, form: nil, redirects: 0, total_timeout: 10, read_timeout: 5)
         uri = URI.parse(endpoint + path)
         request = request_for(uri, headers, body, form)
-        Timeout.timeout(10) { execute(uri, request, redirects) }
+        Timeout.timeout(total_timeout) { execute(uri, request, redirects, read_timeout) }
       rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Zlib::Error
         raise Failure.new('invalid_response', I18n.t('messages.providers.http.reponse_http_illisible_du_fournisseur')), cause: nil
       rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError
@@ -36,30 +36,30 @@ module Providers
         request
       end
 
-      def execute(uri, request, redirects)
+      def execute(uri, request, redirects, read_timeout)
         http = Net::HTTP.new(uri.host, uri.port, nil)
         http.use_ssl = uri.scheme == 'https'
         http.open_timeout = 3
-        http.read_timeout = http.write_timeout = 5
+        http.read_timeout = http.write_timeout = read_timeout
         http.max_retries = 0
         http.start do |client|
-          client.request(request) { |response| return resolve_response(uri, request, response, redirects) }
+          client.request(request) { |response| return resolve_response(uri, request, response, redirects, read_timeout) }
         end
       end
 
-      def resolve_response(uri, request, response, redirects)
-        return redirect(uri, request, response, redirects) if response.is_a?(Net::HTTPRedirection) && redirects.positive?
+      def resolve_response(uri, request, response, redirects, read_timeout)
+        return redirect(uri, request, response, redirects, read_timeout) if response.is_a?(Net::HTTPRedirection) && redirects.positive?
 
         read(response)
       end
 
-      def redirect(uri, request, response, remaining)
+      def redirect(uri, request, response, remaining, read_timeout)
         target = URI.join(uri, response['location'].to_s)
         raise Failure.new('invalid_redirect', I18n.t('messages.providers.http.redirection_du_catalogue_refusee')) unless request.is_a?(Net::HTTP::Get) && same_origin?(target, uri)
 
         redirected = Net::HTTP::Get.new(target)
         request.each_header { |key, value| redirected[key] = value }
-        execute(target, redirected, remaining - 1)
+        execute(target, redirected, remaining - 1, read_timeout)
       rescue URI::InvalidURIError
         raise Failure.new('invalid_redirect', I18n.t('messages.providers.http.redirection_du_catalogue_refusee')), cause: nil
       end
