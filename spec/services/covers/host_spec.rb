@@ -69,6 +69,18 @@ RSpec.describe Covers::Host do
     expect(WebMock).to have_requested(:post, 'https://api.postimage.org/1/upload').once
   end
 
+  it 'retains a receipt but rejects verification completed after a different cover was selected' do
+    operation
+    stub_request(:get, 'https://i.postimg.cc/abc123/cover.png').to_return do
+      choose_manual_cover(release, bytes: cover_bytes(color: 'green'))
+      { body: cover_bytes(width: 512, height: 768), headers: { 'Content-Type' => 'image/png' } }
+    end
+    expect { host }.to raise_error(Covers::Failure, /ont changé/)
+    expect(release.cover_hostings).to be_empty
+    expect(release.cover_uploads.sole.page_url).to eq('https://postimg.cc/abc123')
+    expect(WebMock).not_to have_requested(:post, %r{c411.org})
+  end
+
   it 'does not repeat an upload after an ambiguous timeout, even from a new write operation' do
     stub_request(:post, 'https://api.postimage.org/1/upload').to_timeout
     expect { host }.to raise_error(Providers::Failure)

@@ -4,7 +4,7 @@ module Duplicates
   class Inputs
     class << self
       def call(release:)
-        values = Releases::EditorValues.call(release: release).slice('title', 'author', 'isbn', 'edition', 'publisher', 'publication_year', 'language')
+        values = Releases::EditorValues.call(release: release).slice('title', 'author', 'isbn', 'isbn_kind', 'edition', 'publisher', 'publication_year', 'language')
         payload = release.payload_revisions.order(number: :desc).first
         values.merge('format' => payload&.format.to_s, 'payload_revision_id' => payload&.id)
       end

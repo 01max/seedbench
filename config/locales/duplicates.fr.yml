@@ -36,6 +36,9 @@ fr:
     manual_submit: Enregistrer le contrôle manuel
     manual_recorded: Contrôle manuel enregistré pour cette recherche et ces données.
     errors:
+      transaction_open: La recherche avant publication doit se faire hors transaction locale.
+      explicit_publish_required: La vérification finale est réservée à une opération Publier active et approuvée.
+      review_required: De nouveaux candidats ou un échec de recherche nécessitent une revue avant publication.
       invalid_decision: Choisissez un candidat connu et une décision autorisée.
       stale_review: Les résultats ont changé. Actualisez et revoyez les candidats.
       reason_required: Documentez le motif avec 20 à 2 000 caractères.

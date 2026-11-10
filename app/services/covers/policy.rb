@@ -3,7 +3,7 @@ require 'digest'
 module Covers
   class Policy
     VERSION = 'cover-verification-v1'.freeze
-    FACTS = %w[title author isbn edition publisher publication_year language].freeze
+    FACTS = %w[title author isbn isbn_kind edition publisher publication_year language].freeze
 
     class << self
       def current?(release:, cover:)

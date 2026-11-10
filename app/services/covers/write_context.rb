@@ -19,8 +19,12 @@ module Covers
 
       def validate!(operation, attempt)
         valid = %w[draft_write publish].include?(operation.kind) && operation.effect == 'remote' && operation.state == 'running'
-        raise Failure.new(:explicit_write_required) unless valid && operation.attempt_token == attempt && operation.lease_expires_at.future?
+        raise Failure.new(:explicit_write_required) unless valid && live_attempt?(operation, attempt)
         raise Failure.new(:selection_changed) unless operation.input_revision == operation.release.input_revision
+      end
+
+      def live_attempt?(operation, attempt)
+        attempt.present? && operation.attempt_token == attempt && operation.lease_expires_at&.future?
       end
 
       def connection(release)

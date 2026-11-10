@@ -34,7 +34,7 @@ module Duplicates
     def manual_exception?
       pair = reviews.reverse.find { |_, review| review.candidate_key == 'manual-search' }
       pair && current? && pair.first.query['fingerprint'] == @fingerprint &&
-        pair.first.query['search_operation_id'] == @check.query['search_operation_id']
+        pair.first.query['search_id'].present? && pair.first.query['search_id'] == @check.query['search_id']
     end
 
     private

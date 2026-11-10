@@ -24,7 +24,7 @@
           <p><%= candidate["format"]&.join(" · ").presence || t("duplicates.format_unknown") %> · <%= number_to_human_size(candidate["size_bytes"]) if candidate["size_bytes"] %></p>
           <p class="preserved-text"><%= candidate["description"] %></p><p class="editor-hint"><%= t("duplicates.evidence_warning") %></p>
           <p><strong><%= t("duplicates.decisions.#{item.decision}") %></strong><% if item.review&.reason %> · <%= item.review.reason %><% end %></p>
-          <% if workspace.current %><%= form_with url: release_duplicate_review_path(@release), scope: :duplicate do |form| %>
+          <% if workspace.current %><%= form_with url: release_duplicate_review_path(@release), scope: :duplicate, namespace: "candidate-#{candidate["key"]}" do |form| %>
             <%= form.hidden_field :kind, value: "review" %><%= form.hidden_field :check_id, value: check.id %><%= form.hidden_field :candidate_key, value: candidate["key"] %>
             <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
             <%= form.label :decision, t("duplicates.decision") %><%= form.select :decision, %w[likely confirmed false_positive].map { |key| [t("duplicates.decisions.#{key}"), key] }, selected: item.decision %>

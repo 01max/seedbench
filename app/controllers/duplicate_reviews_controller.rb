@@ -22,7 +22,7 @@ class DuplicateReviewsController < ApplicationController
     arguments = { release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false) }
     case attributes[:kind]
     when 'review'
-      Duplicates::Review.call(**arguments, **attributes.slice(:check_id, :candidate_key, :decision, :reason).symbolize_keys)
+      Duplicates::Review.call(**arguments, **attributes.slice(:check_id, :candidate_key, :decision, :reason).to_h.symbolize_keys)
     when 'manual'
       Duplicates::Review.manual_exception(**arguments, check_id: attributes[:check_id], reason: attributes[:reason])
     else

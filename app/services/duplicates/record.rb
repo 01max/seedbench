@@ -1,9 +1,9 @@
 module Duplicates
   class Record
     class << self
-      def call(operation:, result:)
-        verify_connection!(operation)
-        query = operation.parameters.merge(result.except('candidates')).merge('search_operation_id' => operation.id)
+      def call(operation:, result:, parameters: operation.parameters)
+        verify_connection!(parameters)
+        query = parameters.merge(result.except('candidates')).merge('search_operation_id' => operation.id, 'search_id' => SecureRandom.uuid)
         check = operation.release.duplicate_checks.create!(input_revision: operation.input_revision,
           query: query, candidates: result.fetch('candidates'), searched_at: Time.current)
         record_event(operation, check)
@@ -12,9 +12,9 @@ module Duplicates
 
       private
 
-      def verify_connection!(operation)
-        connection = ProviderConnection.find(operation.parameters.fetch('connection_id'))
-        raise Failure.new(:connection_changed) unless connection.credentials_version == operation.parameters.fetch('connection_version')
+      def verify_connection!(parameters)
+        connection = ProviderConnection.find(parameters.fetch('connection_id'))
+        raise Failure.new(:connection_changed) unless connection.credentials_version == parameters.fetch('connection_version')
       end
 
       def record_event(operation, check)

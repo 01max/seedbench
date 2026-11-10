@@ -18,7 +18,7 @@
         <%= form.label :isbn, t("covers.isbn") %><%= form.text_field :isbn, value: workspace.values["isbn"], required: true, maxlength: 64 %><%= form.submit t("covers.lookup"), class: "work-button" %>
       <% end %>
     <% end %>
-    <details class="source-detail"><summary><%= t("covers.compare_values") %></summary><dl class="release-facts"><% %w[title author isbn edition publisher publication_year language].each do |field| %><dt><%= t("workbench.fields.#{field}") %></dt><dd><%= workspace.values[field] %></dd><% end %></dl></details>
+    <details class="source-detail"><summary><%= t("covers.compare_values") %></summary><dl class="release-facts"><% %w[title author isbn isbn_kind edition publisher publication_year language].each do |field| %><dt><%= t("workbench.fields.#{field}") %></dt><dd><%= workspace.values[field] %></dd><% end %></dl></details>
     <%= form_with url: release_cover_review_path(@release), scope: :cover, multipart: true, class: "cover-selection" do |form| %>
       <%= form.hidden_field :kind, value: "select" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
       <fieldset><legend><%= t("covers.source") %></legend>

@@ -236,3 +236,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .cover-option input[type="url"], .cover-selection textarea { width: 100%; min-width: 0; }
 .cover-option input[type="file"] { display: block; max-width: 100%; }
 .cover-review { display: flex; gap: 6px; align-items: flex-start; margin-block: 9px; }
+
+.cover-option > label,
+.cover-option form > label { display: block; margin-top: .4rem; }
+.cover-option input[type="file"] { display: block; margin-block: .4rem; max-width: 100%; }
+.cover-option input[type="file"]::file-selector-button {
+  border: 1px solid var(--border); border-radius: 3px; padding: .4rem .65rem;
+  background: var(--panel); color: var(--text); cursor: pointer; margin-right: .6rem;
+}
+.duplicate-candidate form { display: grid; gap: .4rem; margin-top: .6rem; max-width: 68rem; }
+.duplicate-candidate select { width: 100%; }
+.duplicate-candidate textarea, .cover-selection textarea { min-height: 5rem; height: auto; }
+.duplicate-candidate input[type="submit"] { justify-self: start; }

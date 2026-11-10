@@ -4,8 +4,10 @@ module Content
 
     class << self
       def call(operation_id:, attempt_token:)
-        context = Covers::WriteContext.call(operation_id: operation_id, attempt_token: attempt_token)
-        context.operation.release.with_lock { capture(context) }
+        operation = WorkflowOperation.find(operation_id)
+        operation.release.with_lock do
+          capture(Covers::WriteContext.call(operation_id: operation_id, attempt_token: attempt_token))
+        end
       end
 
       private
