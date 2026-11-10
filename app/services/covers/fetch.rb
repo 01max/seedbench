@@ -15,6 +15,8 @@ module Covers
     end
 
     def call(url)
+      raise Failure.new(:unsafe_url) unless url.is_a?(String) && url.bytesize <= 4096
+
       Timeout.timeout(20) { fetch(url, 2) }
     rescue URI::InvalidURIError, SocketError, Resolv::ResolvError, SystemCallError, IOError, Timeout::Error, OpenSSL::SSL::SSLError, Net::ProtocolError
       raise Failure.new(:fetch_failed), cause: nil

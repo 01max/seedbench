@@ -5,6 +5,7 @@ fr:
     events:
       cover:
         selected: "Couverture retenue"
+        hosted: "Couverture hébergée et vérifiée"
   covers:
     tab: "Couverture"
     title: "Comparer et retenir une couverture"
@@ -39,6 +40,13 @@ fr:
     lookup: "Chercher les couvertures de cette édition"
     isbn: "ISBN pour la recherche d’édition"
     errors:
+      explicit_write_required: "L’hébergement est réservé à une opération explicite d’écriture de brouillon ou de publication en cours."
+      selection_changed: "La couverture ou les faits de cette édition ont changé. Retenez et relisez la sélection actuelle avant l’envoi."
+      connection_required: "Configurez et affectez la connexion Postimages de cette release avant l’envoi."
+      upload_unknown: "L’hébergement a peut-être été accepté. Aucun nouvel envoi automatique ne sera tenté ; vérifiez le résultat avant de reprendre."
+      hosted_image: "Le lien hébergé ne charge pas une image directe Postimages vérifiable. L’écriture C411 est bloquée."
+      hosted_mismatch: "L’image hébergée ne correspond pas aux pixels ou au format de la couverture retenue. L’écriture C411 est bloquée."
+      transaction_open: "L’hébergement doit être exécuté hors d’une transaction d’écriture locale."
       unsafe_url: "Adresse refusée. Utilisez une image HTTPS publique, sans identifiants, port particulier ni redirection vers un réseau privé."
       fetch_failed: "Image inaccessible. Vérifiez son adresse et réessayez explicitement."
       too_large: "L’image est vide ou dépasse la limite de 8 Mio."

@@ -57,7 +57,7 @@ module Covers
     def provenance
       @source.provenance.merge(@image.except('width', 'height'), @review.slice('note', 'comparable_detail'))
         .merge('edition_match' => true, 'quality_reviewed' => true,
-          'reviewed_facts' => Releases::EditorValues.call(release: @release).slice('title', 'author', 'isbn', 'edition', 'publisher', 'publication_year', 'language'))
+          'reviewed_facts' => Policy.facts(@release))
     end
   end
 end

@@ -39,7 +39,8 @@ module Releases
 
     def cover
       selected = @snapshot.covers.first
-      hosted = selected && selected.cover_hostings.exists?
+      hosting = Content::Inputs.new(@release).hosting
+      hosted = hosting.present?
       item('cover', state: hosted ? 'done' : 'pending', owner: :mixed,
         note: I18n.t("workbench.checklist.cover.#{selected ? 'selected' : 'missing'}"))
     end

@@ -42,15 +42,14 @@ module Content
     end
 
     def selected_hosting
-      return unless Providers::C411::EbookContent.portrait_cover?(@cover)
+      return unless Covers::Policy.current?(release: @release, cover: @cover)
 
       assignment = @release.provider_assignments.find_by(role: 'image_host')
       candidate = @cover.cover_hostings.where(provider_connection_id: assignment&.provider_connection_id).order(:id).last
       candidate if usable_hosting?(candidate)
     end
     def usable_hosting?(candidate)
-      Providers::C411::EbookContent.portrait_cover?(candidate) && %w[image/jpeg image/png image/webp].include?(candidate.media_type) &&
-        Providers::C411::EbookContent.safe_url?(candidate.direct_url)
+      Covers::Policy.verified?(candidate, @cover)
     end
   end
 end

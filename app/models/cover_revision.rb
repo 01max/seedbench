@@ -26,6 +26,7 @@
 #  release_id                         (release_id => releases.id)
 #
 class CoverRevision < ApplicationRecord
+  has_many :cover_uploads, foreign_key: [ :release_id, :cover_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :cover_revision, dependent: :restrict_with_exception
   has_many :cover_hostings, foreign_key: [ :release_id, :cover_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :cover_revision, dependent: :restrict_with_exception
   has_many :content_revisions, foreign_key: [ :release_id, :cover_revision_id ], primary_key: [ :release_id, :id ], inverse_of: :cover_revision, dependent: :restrict_with_exception
   belongs_to :release
