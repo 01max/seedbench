@@ -45,6 +45,23 @@ RSpec.describe Duplicates::Search do
     expect(WebMock).to have_requested(:get, %r{c411.org/api\?}).with(query: hash_including('offset' => '100')).times(3)
   end
 
+  it 'keeps a short page incomplete when its advertised total includes unseen results' do
+    stub_duplicate_search(body: duplicate_feed(total: 2))
+    check = search_duplicates(release)
+    expect(check.query['status']).to eq('incomplete')
+    expect(check.candidates.size).to eq(1)
+    stub_duplicate_search(body: '<rss><channel><response total="1"/></channel></rss>')
+    expect(search_duplicates(release).query['status']).to eq('incomplete')
+  end
+
+  it 'accepts a final short page only when its returned items exhaust the advertised total' do
+    body = duplicate_feed(total: 101)
+    full = body.sub('</item>', '</item>' + (body[/<item>.*?<\/item>/m] * 99))
+    stub_duplicate_search(body: full)
+    stub_request(:get, %r{c411.org/api\?}).with(query: hash_including('offset' => '100')).to_return(body: body)
+    expect(search_duplicates(release).query['status']).to eq('complete')
+  end
+
   it 'discards results when reviewed inputs change while the search is running' do
     operation = Duplicates::Request.call(release_id: release.id, expected_revision: release.input_revision)
     token = Workflows::Claim.call(operation_id: operation.id)

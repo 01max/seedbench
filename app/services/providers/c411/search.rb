@@ -28,6 +28,7 @@ module Providers
           @candidates.concat(feed.candidates)
           @incomplete ||= feed.incomplete
           return true if finished?(feed, page)
+          break if feed.count < PAGE_SIZE
         end
         @incomplete = true
       end
@@ -40,7 +41,9 @@ module Providers
       end
 
       def finished?(feed, page)
-        feed.count < PAGE_SIZE || (feed.total && (page + 1) * PAGE_SIZE >= feed.total)
+        return (page * PAGE_SIZE) + feed.count >= feed.total if feed.total
+
+        feed.count < PAGE_SIZE
       end
 
       def result(status)
