@@ -1,0 +1,15 @@
+<section class="draft-conflict">
+  <h3><%= t("drafts.conflict.title") %></h3><p class="editor-hint"><%= t("drafts.conflict.race") %></p>
+  <div class="draft-versions">
+    <% { "base" => workspace.snapshot.base_content, "local" => workspace.local, "remote" => workspace.snapshot.remote_content }.each do |kind, content| %>
+      <details open><summary><%= t("drafts.conflict.#{kind}") %></summary><pre><%= JSON.pretty_generate(content) %></pre></details>
+    <% end %>
+  </div>
+  <%= form_with url: release_draft_action_path(@release), scope: :draft, class: "draft-form" do |form| %>
+    <%= form.hidden_field :kind, value: "resolve" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+    <%= form.hidden_field :snapshot_id, value: workspace.snapshot.id %>
+    <label><%= form.radio_button :choice, "local", required: true %> <%= t("drafts.conflict.local_choice") %></label>
+    <label><%= form.radio_button :choice, "remote", required: true %> <%= t("drafts.conflict.remote_choice") %></label>
+    <%= form.submit t("drafts.conflict.submit"), class: "work-button" %>
+  <% end %>
+</section>

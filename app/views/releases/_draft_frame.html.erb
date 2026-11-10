@@ -16,6 +16,7 @@
           <p><%= t("drafts.observed", time: l(workspace.snapshot.observed_at, format: :short)) %></p>
           <p class="work-warning"><%= t("drafts.states.#{@release.draft_state}") %></p>
           <% if workspace.local != workspace.snapshot.remote_content %><p><%= t("drafts.local_pending") %></p><% end %>
+          <% if @release.draft_state == "conflicted" %><%= render "draft_conflict", workspace: workspace %><% end %>
           <details class="draft-versions"><summary><%= t("drafts.remote_copy") %></summary><pre><%= JSON.pretty_generate(workspace.snapshot.remote_content) %></pre></details>
         <% end %>
         <% unless @release.payload_revisions.exists? %>

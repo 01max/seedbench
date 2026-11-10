@@ -6,14 +6,9 @@ class DraftActionsController < ApplicationController
 
   def create
     @release = Release.find(params.expect(:release_id))
-    attributes = params.expect(draft: [ :kind, :expected_revision, :payload_choice, :confirmed, :choice ])
-    if attributes[:kind] == 'sync'
-      @draft_error = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
-      render_panel
-    else
-      linked = link_payload(attributes)
-      redirect_to release_path(linked), status: :see_other
-    end
+    attributes = params.expect(draft: [ :kind, :expected_revision, :payload_choice, :confirmed, :choice, :snapshot_id ])
+    target = perform(attributes)
+    target ? redirect_to(release_path(target), status: :see_other) : render_panel
   rescue Releases::RevisionConflict => error
     render_error(error, :conflict)
   rescue Drafts::Failure => error
@@ -21,6 +16,25 @@ class DraftActionsController < ApplicationController
   end
 
   private
+
+  def perform(attributes)
+    case attributes[:kind]
+    when 'link' then link_payload(attributes)
+    when 'resolve'
+      resolve_conflict(attributes)
+      @draft_notice = t('drafts.resolved')
+      nil
+    when 'sync'
+      @draft_error = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
+      nil
+    else raise Drafts::Failure.new(:invalid_action)
+    end
+  end
+
+  def resolve_conflict(attributes)
+    Drafts::Resolve.call(release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false),
+      snapshot_id: attributes[:snapshot_id], choice: attributes[:choice])
+  end
 
   def link_payload(attributes)
     raise Drafts::Failure.new(:invalid_action) unless attributes[:kind] == 'link'
