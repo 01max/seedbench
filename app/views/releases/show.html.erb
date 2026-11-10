@@ -24,7 +24,7 @@
     <% if @release %>
       <section class="work-main" aria-label="<%= t("workbench.selected_release") %>" data-release-id="<%= @release.id %>">
         <header class="release-heading">
-          <div><h1><%= @release.title.presence || t("workbench.untitled") %></h1><p><%= @release.author.presence || t("workbench.unknown_author") %> <span><%= @snapshot.payload&.format&.upcase || t("workbench.no_file") %></span> <span><%= number_to_human_size(@snapshot.payload&.size_bytes || 0) %></span> <span>#<%= @release.id %></span></p></div>
+          <div><h1><%= @release.title.presence || t("workbench.untitled") %></h1><p><%= @release.author.presence || t("workbench.unknown_author") %> <span><%= @snapshot.payload&.format&.upcase || t("workbench.no_file") %></span> <span><%= number_to_human_size(@snapshot.payload&.size_bytes || 0) %></span> <span>#<%= @release.id %></span><% if @release.draft_link && !@snapshot.payload %><span><%= t("drafts.unlinked") %></span><% end %></p></div>
           <span class="save-status" role="status" id="save-status" data-editor-target="status"><%= t("workbench.editor.messages.saved") %></span>
         </header>
         <div class="release-workspace">

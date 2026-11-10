@@ -1,0 +1,6 @@
+fr:
+  drafts:
+    title: Brouillon C411
+    unlinked: Brouillon importé · aucun fichier lié
+    errors:
+      invalid_response: La réponse de brouillon C411 est invalide ou dépasse les limites prises en charge.

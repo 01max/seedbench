@@ -315,7 +315,17 @@ CREATE TRIGGER ai_runs_identity BEFORE UPDATE OF release_id, provider_connection
 CREATE TRIGGER ai_runs_terminal BEFORE UPDATE ON ai_runs WHEN OLD.status IN ('succeeded', 'failed', 'unusable', 'stale') BEGIN SELECT RAISE(ABORT, 'AI result history is immutable'); END;
 CREATE TRIGGER ai_runs_no_delete BEFORE DELETE ON ai_runs BEGIN SELECT RAISE(ABORT, 'AI run history is retained'); END;
 CREATE TRIGGER ai_runs_no_replace BEFORE INSERT ON ai_runs WHEN EXISTS (SELECT 1 FROM ai_runs WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: ai_runs.id'); END;
+CREATE TABLE IF NOT EXISTS "draft_links" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'publishing' NOT NULL, "remote_id" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_a36a655574"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_42f05d63ed"
+FOREIGN KEY ("provider_role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT draft_link_publishing CHECK (provider_role = 'publishing'), CONSTRAINT draft_link_identity CHECK (length(remote_id) BETWEEN 1 AND 100));
+CREATE UNIQUE INDEX "index_draft_links_on_release_id" ON "draft_links" ("release_id");
+CREATE UNIQUE INDEX "index_draft_links_on_provider_connection_id_and_remote_id" ON "draft_links" ("provider_connection_id", "remote_id");
 INSERT INTO "schema_migrations" (version) VALUES
+('20261110160000'),
 ('20261110140000'),
 ('20261110120000'),
 ('20261110100000'),
