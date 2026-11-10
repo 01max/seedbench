@@ -17,7 +17,7 @@ module Providers
         @queries.each { |query| search(query) }
         result(@incomplete ? 'incomplete' : 'complete')
       rescue Providers::Failure, Duplicates::Failure => error
-        result('unavailable').merge('failure_code' => error.code)
+        result(@incomplete ? 'incomplete' : 'unavailable').merge('failure_code' => error.code)
       end
 
       private
