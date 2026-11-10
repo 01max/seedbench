@@ -28,6 +28,20 @@ module EditingBrowserHelpers
     JS
   end
 
+  def hold_prepare_response
+    page.execute_script(<<~JS)
+      const original = window.fetch.bind(window)
+      window.fetch = async (url, options = {}) => {
+        const response = await original(url, options)
+        if (String(url).includes('/actions/prepare')) {
+          document.querySelector('#workbench').dataset.prepareHeld = "true"
+          await new Promise(resolve => { window.releasePrepareResponse = resolve })
+        }
+        return response
+      }
+    JS
+  end
+
   def hold_first_status_response
     page.execute_script(<<~JS)
       const original = window.fetch.bind(window)

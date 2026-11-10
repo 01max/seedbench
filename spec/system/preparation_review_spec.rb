@@ -39,4 +39,22 @@ RSpec.describe 'Canonical payload review', type: :system do
     expect(page).to have_field('Présentation', with: 'Texte humain non enregistré à conserver.')
     expect(release.content_revisions.where(kind: 'presentation')).to be_empty
   end
+
+  it 'retains a completed autosave when an older preparation response arrives' do
+    fill_in 'Nom de release', with: 'Synthetic.Book.Test.Author.FRENCH.[EPUB]-NOTAG'
+    click_button 'Enregistrer', exact: true
+    find('[data-editor-target="status"][data-dirty="false"]')
+    hold_prepare_response
+    click_button 'Préparer', exact: true
+    find('#workbench[data-prepare-held="true"]')
+    fill_in 'Présentation', with: 'New prose saved while preparation was pending.'
+    find('[data-editor-target="status"][data-dirty="false"]')
+    revision = release.reload.input_revision
+    expect(release.content_revisions.where(kind: 'presentation').last.body).to eq('New prose saved while preparation was pending.')
+    page.execute_script('window.releasePrepareResponse()')
+    expect(page).to have_text('Préparation demandée')
+    expect(page).to have_field('Présentation', with: 'New prose saved while preparation was pending.')
+    expect(find('input[name="edit[expected_revision]"]', visible: :all).value).to eq(revision.to_s)
+    expect(page).not_to have_css('.save-conflict:not([hidden])')
+  end
 end

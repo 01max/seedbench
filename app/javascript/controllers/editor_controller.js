@@ -237,7 +237,7 @@ export default class extends Controller {
       })
       const data = await response.json()
       if (response.status === 409) this.showConflict(data)
-      if (response.ok && data.values) {
+      if (response.ok && data.values && Number(data.revision) >= Number(this.revisionInput.value)) {
         if (this.dirty || this.saving) this.showConflict({ current_revision: data.revision, values: data.values })
         else {
           this.writeValues(data.values)
