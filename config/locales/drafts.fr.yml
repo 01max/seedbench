@@ -1,6 +1,26 @@
 fr:
+  workbench:
+    tabs:
+      draft: Brouillon
   drafts:
     title: Brouillon C411
     unlinked: Brouillon importé · aucun fichier lié
+    identity: "Brouillon %{id} · %{connection}"
+    linked: Fichier lié · préparation requise avant envoi
+    no_link: Aucun brouillon C411 associé.
+    loading: Chargement du brouillon…
+    link_title: Lier un fichier importé
+    link_help: Choisissez le fichier correspondant et le texte à conserver. Le lien sera transféré à sa fiche ; cette fiche restera disponible avec son texte et son historique.
+    payload: Fichier importé (100 premières fiches disponibles)
+    content_choice: Texte à utiliser sur la fiche du fichier
+    keep_payload: Conserver le nom, le titre et le BBCode du fichier
+    keep_draft: Reprendre le nom, le titre et le BBCode de ce brouillon
+    confirm_link: Je confirme que ce fichier correspond à ce brouillon.
+    link_submit: Confirmer le lien
     errors:
+      invalid_action: Action de brouillon inconnue.
+      confirmation_required: Confirmez le fichier et le texte à conserver.
+      invalid_link: Choisissez un fichier non publié sans autre brouillon associé.
+      different_connection: Le fichier est affecté à une autre identité C411.
+      operation_active: Attendez ou réconciliez les opérations en cours avant de modifier le lien.
       invalid_response: La réponse de brouillon C411 est invalide ou dépasse les limites prises en charge.

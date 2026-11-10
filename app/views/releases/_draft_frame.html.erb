@@ -1,0 +1,26 @@
+<%= turbo_frame_tag dom_id(@release, :draft), data: { evidence_url: release_draft_action_path(@release) } do %>
+  <% if @draft_workspace %>
+    <% workspace = @draft_workspace %>
+    <div data-evidence-revision="<%= @release.input_revision %>" data-reviewed-values="<%= Releases::EditorValues.call(release: @release).to_json %>">
+      <h2><%= t("drafts.title") %></h2>
+      <% if @draft_error %><p role="alert" class="work-alert"><%= @draft_error %></p><% end %>
+      <% if @draft_notice %><p role="status"><%= @draft_notice %></p><% end %>
+      <% if workspace.link %>
+        <p><%= t("drafts.identity", id: workspace.link.remote_id, connection: workspace.link.provider_connection.label) %></p>
+        <p><%= @release.payload_revisions.exists? ? t("drafts.linked") : t("drafts.unlinked") %></p>
+        <% unless @release.payload_revisions.exists? %>
+          <details><summary><%= t("drafts.link_title") %></summary>
+            <p class="editor-hint"><%= t("drafts.link_help") %></p>
+            <%= form_with url: release_draft_action_path(@release), scope: :draft, data: { turbo_frame: "_top" }, class: "draft-form" do |form| %>
+              <%= form.hidden_field :kind, value: "link" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+              <%= form.label :payload_choice, t("drafts.payload") %><%= form.select :payload_choice, workspace.candidates.map { |release| ["##{release.id} · #{release.title}", "#{release.id}:#{release.input_revision}"] }, include_blank: true %>
+              <%= form.label :choice, t("drafts.content_choice") %><%= form.select :choice, [[t("drafts.keep_payload"), "local"], [t("drafts.keep_draft"), "remote"]] %>
+              <label><%= form.check_box :confirmed, required: true %> <%= t("drafts.confirm_link") %></label>
+              <%= form.submit t("drafts.link_submit"), class: "work-button" %>
+            <% end %>
+          </details>
+        <% end %>
+      <% else %><p><%= t("drafts.no_link") %></p><% end %>
+    </div>
+  <% else %><p><%= t("drafts.loading") %></p><% end %>
+<% end %>

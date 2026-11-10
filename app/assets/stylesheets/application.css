@@ -253,3 +253,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .ai-targeted { display: grid; gap: .4rem; }
 .ai-targeted textarea { min-height: 5rem; height: auto; }
 .ai-candidate, .ai-prose { margin-block: .75rem; padding-block: .5rem; border-top: 1px solid var(--border); }
+
+.draft-form { display: grid; gap: .5rem; margin-block: .75rem; }
+.draft-form select { min-width: 0; width: 100%; }
+.draft-form input[type="submit"] { justify-self: start; }
+.draft-versions pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 22rem; overflow: auto; }
