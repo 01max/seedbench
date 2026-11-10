@@ -8,7 +8,7 @@ class ReleaseActionsController < ApplicationController
     render json: { message: error.message }, status: :bad_request
   rescue Releases::ReviewAction::Unavailable => error
     render json: { message: error.message, revision: error.revision }, status: :service_unavailable
-  rescue Releases::Save::InvalidChanges, Preparation::Failure, Providers::C411::EbookNaming::InvalidName => error
+  rescue Drafts::Failure, Releases::Save::InvalidChanges, Preparation::Failure, Providers::C411::EbookNaming::InvalidName => error
     render json: { message: error.message }, status: :unprocessable_content
   rescue Releases::RevisionConflict
     render_conflict
@@ -24,7 +24,12 @@ class ReleaseActionsController < ApplicationController
     release = Release.find(params.expect(:id))
     render json: { revision: release.input_revision, values: Releases::EditorValues.call(release: release),
       operation_id: result.is_a?(WorkflowOperation) ? result.id : nil,
-      message: t("preparation.#{params[:kind] == 'prepare' ? 'queued' : 'suggested'}") }
+      message: action_message }
+  end
+
+  def action_message
+    return t('drafts.queued') if params[:kind] == 'draft'
+    t("preparation.#{params[:kind] == 'prepare' ? 'queued' : 'suggested'}")
   end
 
   def render_conflict

@@ -34,6 +34,7 @@
 #  release_id  (release_id => releases.id)
 #
 class WorkflowOperation < ApplicationRecord
+  has_one :draft_write, foreign_key: [ :release_id, :workflow_operation_id ], primary_key: [ :release_id, :id ], inverse_of: :workflow_operation, dependent: :restrict_with_exception
   has_many :cover_uploads, foreign_key: [ :release_id, :workflow_operation_id ], primary_key: [ :release_id, :id ], inverse_of: :workflow_operation, dependent: :restrict_with_exception
   has_many :payload_moves, foreign_key: [ :release_id, :workflow_operation_id ], primary_key: [ :release_id, :id ], inverse_of: :workflow_operation, dependent: :restrict_with_exception
   has_one :ai_run, foreign_key: [ :release_id, :workflow_operation_id ], primary_key: [ :release_id, :id ], inverse_of: :workflow_operation, dependent: :restrict_with_exception

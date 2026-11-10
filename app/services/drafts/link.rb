@@ -1,12 +1,13 @@
 module Drafts
   class Link
-    def self.call(release_id:, payload_release_id:, expected_revision:, payload_revision:, confirmed:, choice:)
+    def self.call(release_id:, payload_release_id:, expected_revision:, payload_revision:, confirmed:, choice:, allowed_operation_id: nil)
       raise Failure.new(:confirmation_required) unless confirmed == true && %w[local remote].include?(choice)
-      new(release_id, payload_release_id, expected_revision, payload_revision, choice).call
+      new(release_id, payload_release_id, expected_revision, payload_revision, choice, allowed_operation_id).call
     end
 
-    def initialize(source, target, source_revision, target_revision, choice)
+    def initialize(source, target, source_revision, target_revision, choice, allowed_operation_id)
       @source, @target = Release.find(source), Release.find(target)
+      @allowed_operation_id = allowed_operation_id
       @source_revision, @target_revision, @choice = source_revision, target_revision, choice
     end
 
@@ -29,7 +30,7 @@ module Drafts
         raise Releases::RevisionConflict.new(expected_revision: revision, actual_revision: release.input_revision) unless revision == release.input_revision
       end
       validate_target!
-      raise Failure.new(:operation_active) if [ @source, @target ].any? { |release| release.workflow_operations.exists?(state: %w[pending running outcome_unknown]) }
+      raise Failure.new(:operation_active) if [ @source, @target ].any? { |release| release.workflow_operations.where.not(id: @allowed_operation_id).exists?(state: %w[pending running outcome_unknown]) }
     end
 
     def validate_target!

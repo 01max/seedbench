@@ -18,6 +18,8 @@ module Releases
       return Preparation::SuggestName.call(release: release) if kind == 'suggest_name'
       return Preparation::Request.call(release_id: release.id, expected_revision: release.input_revision) if kind == 'prepare'
 
+      return Drafts::Request.call(release_id: release.id, expected_revision: release.input_revision) if kind == 'draft'
+
       raise Unavailable.new(release.input_revision)
     end
   end

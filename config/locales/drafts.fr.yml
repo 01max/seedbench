@@ -13,8 +13,8 @@ fr:
     link_help: Choisissez le fichier correspondant et le texte à conserver. Le lien sera transféré à sa fiche ; cette fiche restera disponible avec son texte et son historique.
     payload: Fichier importé (100 premières fiches disponibles)
     content_choice: Texte à utiliser sur la fiche du fichier
-    keep_payload: Conserver le nom, le titre et le BBCode du fichier
-    keep_draft: Reprendre le nom, le titre et le BBCode de ce brouillon
+    keep_payload: Conserver le nom, le titre, le BBCode et le NFO du fichier
+    keep_draft: Reprendre le nom, le titre, le BBCode et le NFO de ce brouillon
     confirm_link: Je confirme que ce fichier correspond à ce brouillon.
     link_submit: Confirmer le lien
     sync: Synchroniser maintenant
@@ -37,7 +37,40 @@ fr:
       remote_choice: Utiliser la copie distante localement
       submit: Confirmer ce choix
       race: C411 ne fournit pas de verrou conditionnel fiable. Une nouvelle lecture précède chaque envoi, mais un autre client peut encore modifier le brouillon entre cette lecture et l’envoi.
+    create: Créer le brouillon C411
+    update: Mettre à jour le brouillon C411
+    queued: Envoi du brouillon demandé. Consultez l’onglet Brouillon pour son résultat.
+    refresh_result: Actualiser le résultat local
+    write_result: "Envoi #%{id} · %{state}"
+    slots: Les places de brouillons sont limitées. Une réponse de refus conserve votre travail et ne publie ni ne supprime rien.
+    reconciled: Identité distante réconciliée par lecture. Aucun nouvel envoi effectué.
+    reconcile: Vérifier le résultat sans renvoyer
+    reconcile_id: Identifiant du brouillon créé sur C411
+    reconcile_confirm: Je confirme avoir identifié ce brouillon comme le résultat de cet envoi.
+    reconcile_help: Une création incertaine ne sera jamais répétée automatiquement. Identifiez son résultat sur C411 ; la lecture vérifiera son contenu et exclura les brouillons déjà présents avant l’envoi.
+    write_states:
+      pending: en attente
+      sending: envoi en cours
+      accepted: accepté par C411
+      failed: arrêté avant acceptation
+      unknown: résultat incertain · nouvel envoi bloqué
     errors:
+      interrupted_before_send: L’opération a été interrompue avant toute transmission à C411. Vérifiez la fiche puis relancez explicitement.
+      readback_failed: C411 a accepté le brouillon, mais sa relecture a échoué. Synchronisez avant une nouvelle action.
+      slots_full: C411 indique que tous les emplacements de brouillons sont occupés. Libérez un emplacement sur le site puis relancez explicitement.
+      provider_rejected: "C411 ou le fournisseur a refusé l’opération (%{code}). Vérifiez notamment les places disponibles et les droits de la clé. Le texte local est conservé."
+      reconcile_mismatch: Le brouillon distant ne correspond pas au texte approuvé. Aucun nouvel envoi ni changement de lien effectué.
+      category_changed: Les catégories ou options C411 ont changé. Aucun envoi effectué.
+      connection_required: Affectez une connexion C411 configurée à cette fiche.
+      conflict_required: Résolvez le conflit avec C411 avant tout envoi.
+      remote_missing: Le brouillon a disparu. Sa recréation nécessite une action explicite.
+      payload_required: Liez un fichier avant de créer un brouillon.
+      preparation_required: Préparez le fichier et vérifiez son torrent avant cet envoi.
+      published_locked: Cette fiche est publiée. Aucun envoi de brouillon autorisé.
+      input_changed: La fiche a changé depuis l’action approuvée. Vérifiez-la puis relancez.
+      cover_required: Toute nouvelle image du BBCode doit provenir de la couverture sélectionnée, hébergée et vérifiée.
+      transaction_open: L’envoi distant nécessite une transaction locale terminée.
+      outcome_unknown: Le résultat de l’envoi est incertain. Réconciliez-le avant tout nouvel essai.
       invalid_choice: Choisissez explicitement la copie locale ou distante.
       no_conflict: Aucun conflit courant à résoudre.
       observation_changed: Une autre lecture a terminé pendant la synchronisation. Relancez-la.

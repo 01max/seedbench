@@ -324,7 +324,21 @@ FOREIGN KEY ("provider_role", "provider_connection_id")
 , CONSTRAINT draft_link_publishing CHECK (provider_role = 'publishing'), CONSTRAINT draft_link_identity CHECK (length(remote_id) BETWEEN 1 AND 100));
 CREATE UNIQUE INDEX "index_draft_links_on_release_id" ON "draft_links" ("release_id");
 CREATE UNIQUE INDEX "index_draft_links_on_provider_connection_id_and_remote_id" ON "draft_links" ("provider_connection_id", "remote_id");
+CREATE TABLE IF NOT EXISTS "draft_writes" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "workflow_operation_id" bigint NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'publishing' NOT NULL, "action" varchar NOT NULL, "remote_id" varchar, "state" varchar DEFAULT 'pending' NOT NULL, "error_code" varchar, "request" json DEFAULT '{}' NOT NULL, "body" json, "baseline_ids" json DEFAULT '[]' NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_58d79ae84a"
+FOREIGN KEY ("release_id", "workflow_operation_id")
+  REFERENCES "workflow_operations" ("release_id", "id")
+, CONSTRAINT "fk_rails_2310b0a284"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_982e555779"
+FOREIGN KEY ("provider_role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT draft_write_action CHECK (action IN ('create', 'update', 'delete')), CONSTRAINT draft_write_state CHECK (state IN ('pending', 'sending', 'accepted', 'failed', 'unknown')), CONSTRAINT draft_write_request CHECK (provider_role = 'publishing' AND json_valid(request) AND json_type(request) = 'object'), CONSTRAINT draft_write_body CHECK (body IS NULL OR (json_valid(body) AND json_type(body) = 'object')));
+CREATE INDEX "index_draft_writes_on_release_id" ON "draft_writes" ("release_id");
+CREATE UNIQUE INDEX "index_draft_writes_on_workflow_operation_id" ON "draft_writes" ("workflow_operation_id");
+CREATE UNIQUE INDEX "one_active_draft_write" ON "draft_writes" ("release_id") WHERE state IN ('pending', 'sending', 'unknown');
 INSERT INTO "schema_migrations" (version) VALUES
+('20261110170000'),
 ('20261110160000'),
 ('20261110140000'),
 ('20261110120000'),

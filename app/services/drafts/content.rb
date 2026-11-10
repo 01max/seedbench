@@ -1,14 +1,15 @@
 module Drafts
   class Content
-    FIELDS = { 'name' => 'proposed_name', 'title' => 'title', 'description' => 'bbcode' }.freeze
+    FIELDS = { 'name' => 'proposed_name', 'title' => 'title', 'description' => 'bbcode', 'nfo' => 'nfo' }.freeze
 
     class << self
       def remote(data)
-        FIELDS.each_key.index_with do |field|
+        values = FIELDS.except('nfo').each_key.index_with do |field|
           value = data[field].to_s
           raise Failure.new(:invalid_response) unless value.valid_encoding? && value.length <= limit(field)
           value
         end
+        values.merge('nfo' => Providers::C411::DraftAttachment.nfo(data['nfoFile']))
       end
 
       def local(release)

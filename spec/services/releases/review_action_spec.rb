@@ -5,7 +5,7 @@ RSpec.describe Releases::ReviewAction do
     release = Releases::Create.call(title: 'Synthetic')
     expect do
       described_class.call(release_id: release.id, kind: 'draft', expected_revision: 0, changes: { bbcode: 'Reviewed text' })
-    end.to raise_error(described_class::Unavailable) { |error| expect(error.revision).to eq(1) }
+    end.to raise_error(Drafts::Failure, /connexion C411/)
 
     expect(release.content_revisions.sole.body).to eq('Reviewed text')
     expect(release.workflow_operations.count).to eq(0)

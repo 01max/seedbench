@@ -6,8 +6,8 @@ RSpec.describe 'Explicit reviewed actions' do
     sign_in_operator
     %w[draft publish].each_with_index do |kind, revision|
       patch action_release_path(release, kind: kind), params: { edit: { expected_revision: revision, bbcode: "Text #{revision}" } }, as: :json
-      expect(response).to have_http_status(:service_unavailable)
-      expect(response.parsed_body.fetch('revision')).to eq(revision + 1)
+      expect(response).to have_http_status(kind == 'draft' ? :unprocessable_content : :service_unavailable)
+      expect(release.reload.input_revision).to eq(revision + 1)
     end
     expect(release.remote_snapshots.count).to eq(0)
     expect(release.preparation_revisions.count).to eq(0)

@@ -9,6 +9,8 @@
         <%= form.hidden_field :kind, value: "sync" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
         <%= form.submit t("drafts.sync"), class: "work-button quiet", disabled: !workspace.configured %>
       <% end %>
+      <%= link_to t("drafts.refresh_result"), release_draft_action_path(@release), class: "work-button quiet" %>
+      <%= render "draft_writes", writes: workspace.writes %>
       <% if workspace.link %>
         <p><%= t("drafts.identity", id: workspace.link.remote_id, connection: workspace.link.provider_connection.label) %></p>
         <p><%= @release.payload_revisions.exists? ? t("drafts.linked") : t("drafts.unlinked") %></p>

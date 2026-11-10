@@ -6,12 +6,12 @@ class DraftActionsController < ApplicationController
 
   def create
     @release = Release.find(params.expect(:release_id))
-    attributes = params.expect(draft: [ :kind, :expected_revision, :payload_choice, :confirmed, :choice, :snapshot_id ])
+    attributes = params.expect(draft: [ :kind, :expected_revision, :payload_choice, :confirmed, :choice, :snapshot_id, :write_id, :remote_id ])
     target = perform(attributes)
     target ? redirect_to(release_path(target), status: :see_other) : render_panel
   rescue Releases::RevisionConflict => error
     render_error(error, :conflict)
-  rescue Drafts::Failure => error
+  rescue Drafts::Failure, Providers::Failure => error
     render_error(error, :unprocessable_content)
   end
 
@@ -19,6 +19,10 @@ class DraftActionsController < ApplicationController
 
   def perform(attributes)
     case attributes[:kind]
+    when 'reconcile'
+      Drafts::Reconcile.call(release_id: @release.id, write_id: attributes[:write_id], remote_id: attributes[:remote_id], confirmed: attributes[:confirmed] == '1')
+      @draft_notice = t('drafts.reconciled')
+      nil
     when 'link' then link_payload(attributes)
     when 'resolve'
       resolve_conflict(attributes)
