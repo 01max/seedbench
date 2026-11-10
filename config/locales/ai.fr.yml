@@ -1,8 +1,53 @@
 fr:
   ai:
+    title: Assistance IA facultative
+    scope: Les suggestions ne remplacent ni votre revue ni les contrôles. Seuls des extraits limités sont envoyés à OpenAI ; le livre complet n’est jamais joint. Les résultats restent des propositions à accepter.
+    queued: Demande enregistrée. Actualisez après son exécution.
+    refresh: Actualiser l’assistance
+    connections: Choisir la connexion de ce livre
+    purpose: Type de demande
+    purposes:
+      assessment: Analyse des preuves
+      prose: Proposition de prose
+    actions:
+      assessment: Analyser les preuves
+      prose: Proposer une présentation
+    automatic:
+      enabled: Premier passage automatique activé à la création de ce livre.
+      disabled: Premier passage automatique désactivé pour ce livre. Une demande explicite reste possible.
+    targeted: Analyse ciblée avec périmètre explicite
+    targeted_scope: Choisissez une à huit preuves déjà extraites et décrivez le contrôle souhaité. Chaque texte est limité à 1 800 octets ; les passages absents doivent d’abord être examinés ou extraits manuellement.
+    excerpt: Voir l’extrait disponible
+    scope_note: Périmètre et raison de l’analyse ciblée
+    targeted_submit: Demander l’analyse ciblée
+    kinds:
+      reviewed: Faits relus
+      metadata: Métadonnées
+      structure: Mesures locales
+      excerpt: Extrait du livre
+      contents: Sommaire
+      edition: Notice d’édition
+    run: "%{purpose} · demande %{number} · %{state}"
+    provenance: "%{model} · %{version} · révision %{revision}"
+    states:
+      pending: En attente
+      running: En cours
+      succeeded: Suggestions disponibles
+      failed: Fournisseur indisponible
+      unusable: Réponse inutilisable
+      stale: Données modifiées — résultat conservé pour revue
+    evidence_sent: Preuves et périmètre envoyés
+    result: Résultat et provenance
+    none: Aucune demande effectuée. La revue manuelle reste disponible.
+    failed: La demande n’a pas abouti. Relancez explicitement ou continuez manuellement.
     sources:
       reviewed: Faits relus par l’opérateur
     errors:
+      invalid_action: Choisissez une analyse des preuves ou une proposition de prose.
+      connection_required: Affectez une connexion OpenAI configurée à ce livre. La revue manuelle reste disponible.
+      busy: Une demande de ce type est déjà en attente ou en cours.
+      input_changed: Les données ont changé avant l’appel. Relancez explicitement avec la révision actuelle.
+      execution_failed: Une erreur a interrompu la demande. La revue manuelle reste disponible.
       invalid_output: La réponse ne respecte pas le contrat de suggestions ou ses preuves. Elle reste inutilisable.
       incomplete: Le fournisseur n’a pas terminé la réponse. Relancez explicitement ou continuez manuellement.
       refused: Le fournisseur a refusé la demande. Vous pouvez continuer manuellement.
@@ -12,3 +57,10 @@ fr:
       inspection_required: Une inspection réussie du fichier actuel est nécessaire pour préparer les preuves.
       scope_required: Sélectionnez une à huit preuves et décrivez le périmètre ciblé avec 20 à 500 caractères.
       pack_too_large: Le dossier dépasse la limite de 32 Kio. Réduisez la sélection ciblée.
+  workbench:
+    tabs:
+      ai: Assistance
+    events:
+      ai:
+        completed: Assistance IA terminée
+        skipped: Assistance automatique non lancée
