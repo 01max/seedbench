@@ -3,7 +3,7 @@ module Duplicates
     class << self
       def call(operation:, result:)
         verify_connection!(operation)
-        query = operation.parameters.merge(result.except('candidates'))
+        query = operation.parameters.merge(result.except('candidates')).merge('search_operation_id' => operation.id)
         check = operation.release.duplicate_checks.create!(input_revision: operation.input_revision,
           query: query, candidates: result.fetch('candidates'), searched_at: Time.current)
         record_event(operation, check)

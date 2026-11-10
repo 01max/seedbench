@@ -54,29 +54,28 @@ RSpec.describe Releases::Queue do
 
   it 'shows duplicate decisions from actual records and clamps malformed criteria' do
     release = build_release_graph
-    release.duplicate_decisions.create!(duplicate_check: release.duplicate_checks.sole,
-      candidate_key: 'confirmed-second', decision: 'confirmed', actor: 'operator', reviewed_at: Time.current)
+    confirm_duplicate(release)
 
     expect(described_class.call(state: 'duplicate').records).to eq([ release ])
     expect(described_class.call(state: 'forged', page: -4).criteria[:state]).to eq('all')
   end
 
-  it 'ignores historical confirmations after the reviewed inputs change' do
+  it 'retains known confirmations after reviewed inputs change' do
     release = Releases::Create.call(title: 'Old edition')
     confirm_duplicate(release)
     Releases::Save.call(release_id: release.id, expected_revision: 0, changes: { title: 'Corrected edition' })
     release.reload.duplicate_checks.create!(input_revision: 1, searched_at: Time.current, candidates: [])
 
-    expect(described_class.call(state: 'duplicate').records).to be_empty
-    expect(Releases::Checklist.call(release: release).find { |item| item.key == 'duplicates' }.state).to eq('done')
+    expect(described_class.call(state: 'duplicate').records).to eq([ release ])
+    expect(Releases::Checklist.call(release: release).find { |item| item.key == 'duplicates' }.state).to eq('blocked')
     expect(release.duplicate_decisions.sole.decision).to eq('confirmed')
   end
 
-  it 'uses only the latest search for the current input revision' do
+  it 'retains confirmed matches when a newer search omits them' do
     release = Releases::Create.call(title: 'Synthetic')
     confirm_duplicate(release)
     release.duplicate_checks.create!(input_revision: 0, searched_at: Time.current, candidates: [])
-    expect(described_class.call(state: 'duplicate').records).to be_empty
+    expect(described_class.call(state: 'duplicate').records).to eq([ release ])
     confirm_duplicate(release)
 
     expect(described_class.call(state: 'duplicate').records).to eq([ release ])
@@ -84,7 +83,8 @@ RSpec.describe Releases::Queue do
   end
 
   def confirm_duplicate(release)
-    check = release.duplicate_checks.create!(input_revision: release.input_revision, searched_at: Time.current, candidates: [ { id: 'site-match' } ])
+    check = release.duplicate_checks.create!(input_revision: release.input_revision, searched_at: Time.current, query: { fingerprint: Duplicates::Inputs.fingerprint(Duplicates::Inputs.call(release: release)),
+      connection_id: release.provider_assignments.find_by(role: 'publishing')&.provider_connection_id }, candidates: [ { key: 'site-match' } ])
     release.duplicate_decisions.create!(duplicate_check: check, candidate_key: 'site-match', decision: 'confirmed', actor: 'operator', reviewed_at: Time.current)
   end
 end

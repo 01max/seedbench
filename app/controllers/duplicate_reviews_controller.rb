@@ -6,9 +6,9 @@ class DuplicateReviewsController < ApplicationController
 
   def create
     @release = Release.find(params.expect(:release_id))
-    attributes = params.expect(duplicate: [ :expected_revision ])
-    Duplicates::Request.call(release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false))
-    @duplicate_notice = t('duplicates.queued')
+    attributes = params.expect(duplicate: %i[expected_revision kind check_id candidate_key decision reason])
+    perform(attributes)
+    @duplicate_notice = t(attributes[:kind] == 'review' || attributes[:kind] == 'manual' ? 'duplicates.reviewed' : 'duplicates.queued')
     render_panel
   rescue Releases::RevisionConflict => error
     render_error(error, :conflict)
@@ -17,6 +17,18 @@ class DuplicateReviewsController < ApplicationController
   end
 
   private
+
+  def perform(attributes)
+    arguments = { release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false) }
+    case attributes[:kind]
+    when 'review'
+      Duplicates::Review.call(**arguments, **attributes.slice(:check_id, :candidate_key, :decision, :reason).symbolize_keys)
+    when 'manual'
+      Duplicates::Review.manual_exception(**arguments, check_id: attributes[:check_id], reason: attributes[:reason])
+    else
+      Duplicates::Request.call(**arguments)
+    end
+  end
 
   def render_panel(status: :ok)
     @release.reload

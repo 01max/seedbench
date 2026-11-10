@@ -47,7 +47,9 @@ module DomainFixtures
       direct_url: 'https://images.invalid/synthetic.png', media_type: 'image/png', width: 600, height: 900, verified_at: Time.current, verification: synthetic_cover_proof(cover)) if cover
     ContentRevision.create!(release: release, payload_revision: payload, preparation_revision: preparation,
       cover_revision_id: cover&.id, kind: 'bbcode', number: 1, body: 'Human text', origin: 'human', input_revision: 0)
-    check = DuplicateCheck.create!(release: release, input_revision: 0, searched_at: Time.current)
+    check = DuplicateCheck.create!(release: release, input_revision: 0, searched_at: Time.current,
+      query: { 'status' => 'complete', 'fingerprint' => Duplicates::Inputs.fingerprint(Duplicates::Inputs.call(release: release)),
+        'connection_id' => connections.fetch('publishing').id, 'connection_version' => 0 })
     DuplicateDecision.create!(release: release, duplicate_check: check, candidate_key: 'synthetic-candidate',
       decision: 'false_positive', reason: 'Different edition', actor: 'operator', reviewed_at: Time.current)
     RemoteSnapshot.create!(release: release, provider_connection: connections.fetch('publishing'), kind: 'draft',

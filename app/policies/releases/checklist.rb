@@ -53,11 +53,10 @@ module Releases
     end
 
     def duplicates
-      check = @release.duplicate_checks.where(input_revision: @release.input_revision).order(:id).last
-      blocked = check && check.duplicate_decisions.exists?(decision: %w[confirmed likely])
-      state = blocked ? 'blocked' : 'pending'
-      state = 'done' if check && check.candidates.empty? && !blocked
-      item('duplicates', state: state, owner: :c411, note: I18n.t("workbench.checklist.duplicates.#{blocked ? 'blocked' : 'pending'}"))
+      assessment = Duplicates::Assessment.new(@release)
+      state = assessment.blocked? ? 'blocked' : 'pending'
+      state = 'done' if assessment.ready?
+      item('duplicates', state: state, owner: :c411, note: I18n.t("duplicates.gate.#{state}"))
     end
 
     def content_steps

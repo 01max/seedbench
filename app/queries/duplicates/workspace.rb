@@ -1,11 +1,11 @@
 module Duplicates
   class Workspace
-    State = Data.define(:check, :current, :values, :operation)
+    State = Data.define(:check, :current, :values, :operation, :assessment)
 
     class << self
       def call(release:)
         check = release.duplicate_checks.order(:id).last
-        State.new(check: check, current: current?(release, check), values: Releases::EditorValues.call(release: release),
+        State.new(assessment: Assessment.new(release), check: check, current: current?(release, check), values: Releases::EditorValues.call(release: release),
           operation: release.workflow_operations.where(kind: 'duplicate_search').order(:id).last)
       end
 

@@ -17,7 +17,29 @@ fr:
       complete: Recherche terminée
       incomplete: Résultats limités ou partiellement illisibles — contrôle requis
       unavailable: Recherche indisponible — contrôle requis
+    reviewed: Décision enregistrée dans l’historique.
+    confirmed_tag: Doublon C411 déjà existant
+    decision: Décision pour ce candidat
+    reason: Motif (20 caractères minimum pour écarter un faux positif)
+    record: Enregistrer la décision
+    decisions:
+      likely: Correspondance possible — revue requise
+      confirmed: Doublon confirmé — publication bloquée
+      false_positive: Faux positif — motif obligatoire
+    gate:
+      done: Recherche et candidats revus pour les données actuelles.
+      pending: La recherche doit être terminée ou faire l’objet d’un contrôle manuel documenté.
+      blocked: "Publication bloquée : examinez chaque correspondance possible ou confirmée."
+    manual_title: Recherche manuelle exceptionnelle
+    manual_scope: Si seule la recherche est indisponible, vérifiez les variantes du titre, l’auteur, l’ISBN, l’édition et le format sur C411. Décrivez les recherches et leurs résultats. Les candidats déjà connus restent à examiner. L’accès C411 sera vérifié avant l’enregistrement.
+    manual_note: Recherches manuelles effectuées et résultats
+    manual_submit: Enregistrer le contrôle manuel
+    manual_recorded: Contrôle manuel enregistré pour cette recherche et ces données.
     errors:
+      invalid_decision: Choisissez un candidat connu et une décision autorisée.
+      stale_review: Les résultats ont changé. Actualisez et revoyez les candidats.
+      reason_required: Documentez le motif avec 20 à 2 000 caractères.
+      publication_unavailable: L’accès au compte C411 est aussi indisponible. Le contrôle manuel ne peut pas remplacer cette panne.
       invalid_response: La réponse de recherche C411 est illisible. Aucun résultat clair n’est déduit.
       connection_required: Affectez une connexion C411 configurée à ce livre avant la recherche.
       connection_changed: La connexion C411 a changé. Relancez la recherche.
@@ -28,3 +50,4 @@ fr:
     events:
       duplicates:
         searched: Recherche de doublons effectuée
+        reviewed: Décision de doublon enregistrée
