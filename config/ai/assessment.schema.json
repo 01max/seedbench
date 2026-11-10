@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "candidates": {"type": "array", "items": {
+      "type": "object", "properties": {
+        "field": {"type": "string", "enum": ["title", "author", "publisher", "publication_year", "edition", "language", "isbn"]},
+        "value": {"type": "string"},
+        "evidence_ids": {"$ref": "#/$defs/citations"}
+      }, "required": ["field", "value", "evidence_ids"], "additionalProperties": false
+    }},
+    "findings": {"type": "array", "items": {
+      "type": "object", "properties": {
+        "summary": {"type": "string"}, "evidence_ids": {"$ref": "#/$defs/citations"}
+      }, "required": ["summary", "evidence_ids"], "additionalProperties": false
+    }},
+    "limitations": {"type": "string"}
+  },
+  "required": ["candidates", "findings", "limitations"],
+  "additionalProperties": false,
+  "$defs": {"citations": {"type": "array", "items": {"type": "string"}}}
+}

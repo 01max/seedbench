@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "presentation": {"type": ["string", "null"]},
+    "notes": {"type": ["string", "null"]},
+    "evidence_ids": {"$ref": "#/$defs/citations"},
+    "limitations": {"type": "string"}
+  },
+  "required": ["presentation", "notes", "evidence_ids", "limitations"],
+  "additionalProperties": false,
+  "$defs": {"citations": {"type": "array", "items": {"type": "string"}}}
+}
