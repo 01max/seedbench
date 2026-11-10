@@ -40,6 +40,7 @@ fr:
     lookup: "Chercher les couvertures de cette édition"
     isbn: "ISBN pour la recherche d’édition"
     errors:
+      review_required_for_write: "Acceptez la modification de l’URL de couverture et relisez la description et le NFO pour cette révision avant de continuer."
       explicit_write_required: "L’hébergement est réservé à une opération explicite d’écriture de brouillon ou de publication en cours."
       selection_changed: "La couverture ou les faits de cette édition ont changé. Retenez et relisez la sélection actuelle avant l’envoi."
       connection_required: "Configurez et affectez la connexion Postimages de cette release avant l’envoi."

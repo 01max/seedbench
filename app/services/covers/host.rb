@@ -47,10 +47,14 @@ module Covers
       end
     end
 
+    def proof(image, operation)
+      image.fetch('verification').merge('workflow_operation_id' => operation.id, 'attempt' => operation.attempts)
+    end
+
     def record(context, image)
       hosting = context.cover.cover_hostings.create!(release_id: context.operation.release_id, provider_connection: context.connection,
         direct_url: @url, media_type: image.fetch('media_type'), width: image.fetch('width'), height: image.fetch('height'),
-        verification: image.fetch('verification'), verified_at: Time.current)
+        verification: proof(image, context.operation), verified_at: Time.current)
       Releases::RecordEvent.call(release_id: context.operation.release_id, name: 'cover.hosted', data: { cover_id: context.cover.id, hosting_id: hosting.id })
       hosting
     end
