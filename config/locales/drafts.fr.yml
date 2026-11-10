@@ -17,7 +17,19 @@ fr:
     keep_draft: Reprendre le nom, le titre et le BBCode de ce brouillon
     confirm_link: Je confirme que ce fichier correspond à ce brouillon.
     link_submit: Confirmer le lien
+    sync: Synchroniser maintenant
+    sync_failed: "%{connection} · synchronisation impossible : %{message}"
+    observed: "Dernière lecture : %{time}"
+    local_pending: Le texte local diffère du texte distant. Aucun envoi automatique.
+    remote_copy: Voir la copie distante conservée
+    states:
+      synced: Lecture à jour · les modifications locales attendent un envoi explicite.
+      conflicted: Les deux copies ont changé. Choisissez une résolution avant tout envoi.
+      missing: Brouillon distant absent · votre travail local est conservé.
+      unlinked: Aucun brouillon associé.
     errors:
+      observation_changed: Une autre lecture a terminé pendant la synchronisation. Relancez-la.
+      connection_changed: La connexion a changé pendant la lecture. Relancez la synchronisation.
       invalid_action: Action de brouillon inconnue.
       confirmation_required: Confirmez le fichier et le texte à conserver.
       invalid_link: Choisissez un fichier non publié sans autre brouillon associé.

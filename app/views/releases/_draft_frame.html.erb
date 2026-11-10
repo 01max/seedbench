@@ -5,9 +5,19 @@
       <h2><%= t("drafts.title") %></h2>
       <% if @draft_error %><p role="alert" class="work-alert"><%= @draft_error %></p><% end %>
       <% if @draft_notice %><p role="status"><%= @draft_notice %></p><% end %>
+      <%= form_with url: release_draft_action_path(@release), scope: :draft do |form| %>
+        <%= form.hidden_field :kind, value: "sync" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+        <%= form.submit t("drafts.sync"), class: "work-button quiet", disabled: !workspace.configured %>
+      <% end %>
       <% if workspace.link %>
         <p><%= t("drafts.identity", id: workspace.link.remote_id, connection: workspace.link.provider_connection.label) %></p>
         <p><%= @release.payload_revisions.exists? ? t("drafts.linked") : t("drafts.unlinked") %></p>
+        <% if workspace.snapshot %>
+          <p><%= t("drafts.observed", time: l(workspace.snapshot.observed_at, format: :short)) %></p>
+          <p class="work-warning"><%= t("drafts.states.#{@release.draft_state}") %></p>
+          <% if workspace.local != workspace.snapshot.remote_content %><p><%= t("drafts.local_pending") %></p><% end %>
+          <details class="draft-versions"><summary><%= t("drafts.remote_copy") %></summary><pre><%= JSON.pretty_generate(workspace.snapshot.remote_content) %></pre></details>
+        <% end %>
         <% unless @release.payload_revisions.exists? %>
           <details><summary><%= t("drafts.link_title") %></summary>
             <p class="editor-hint"><%= t("drafts.link_help") %></p>

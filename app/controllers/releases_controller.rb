@@ -28,6 +28,7 @@ class ReleasesController < ApplicationController
   end
 
   def load_workspace
+    @draft_sync_errors = Drafts::Refresh.call
     @queue = Releases::Queue.call(**params.permit(:q, :state, :page).to_h.symbolize_keys, release_id: params[:id])
     @release = @queue.selected
     load_selection if @release

@@ -7,8 +7,13 @@ class DraftActionsController < ApplicationController
   def create
     @release = Release.find(params.expect(:release_id))
     attributes = params.expect(draft: [ :kind, :expected_revision, :payload_choice, :confirmed, :choice ])
-    linked = link_payload(attributes)
-    redirect_to release_path(linked), status: :see_other
+    if attributes[:kind] == 'sync'
+      @draft_error = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
+      render_panel
+    else
+      linked = link_payload(attributes)
+      redirect_to release_path(linked), status: :see_other
+    end
   rescue Releases::RevisionConflict => error
     render_error(error, :conflict)
   rescue Drafts::Failure => error
