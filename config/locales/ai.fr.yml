@@ -1,5 +1,18 @@
 fr:
   ai:
+    accepted: Suggestion acceptée après votre revue. Les autres textes restent conservés.
+    fact_source: Suggestion IA revue · demande %{number}
+    fact_candidates: Faits candidats à comparer avec les preuves
+    adopt: Adopter cette valeur après revue
+    uncertain_findings: Points incertains proposés — à examiner
+    limitations: Limites de cette analyse
+    saved_prose: Texte enregistré
+    suggested_prose: Proposition à relire
+    accept_prose: "Accepter cette %{field}"
+    regenerate_help: L’acceptation conserve votre BBCode et votre NFO. Relisez les textes devenus obsolètes ou proposez une nouvelle version, puis acceptez-la explicitement.
+    regenerate: Proposer le BBCode avec la prose retenue
+    stale_notice: Les preuves, les faits ou le texte ciblé ont changé. Le résultat reste consultable ; relancez si nécessaire ou conservez votre version.
+    provenance_title: Modèle, version et résultat conservé
     title: Assistance IA facultative
     scope: Les suggestions ne remplacent ni votre revue ni les contrôles. Seuls des extraits limités sont envoyés à OpenAI ; le livre complet n’est jamais joint. Les résultats restent des propositions à accepter.
     queued: Demande enregistrée. Actualisez après son exécution.
@@ -43,6 +56,7 @@ fr:
     sources:
       reviewed: Faits relus par l’opérateur
     errors:
+      stale_output: Cette suggestion ne correspond plus aux preuves, aux faits ou au texte actuel. Votre texte reste conservé ; relancez si nécessaire.
       invalid_action: Choisissez une analyse des preuves ou une proposition de prose.
       connection_required: Affectez une connexion OpenAI configurée à ce livre. La revue manuelle reste disponible.
       busy: Une demande de ce type est déjà en attente ou en cours.
@@ -63,4 +77,5 @@ fr:
     events:
       ai:
         completed: Assistance IA terminée
+        prose_accepted: Prose proposée acceptée
         skipped: Assistance automatique non lancée

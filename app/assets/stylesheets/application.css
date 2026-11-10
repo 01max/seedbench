@@ -248,3 +248,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .duplicate-candidate select { width: 100%; }
 .duplicate-candidate textarea, .cover-selection textarea { min-height: 5rem; height: auto; }
 .duplicate-candidate input[type="submit"] { justify-self: start; }
+
+.ai-run pre, .ai-targeted pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 20rem; overflow: auto; font-size: 11px; }
+.ai-targeted { display: grid; gap: .4rem; }
+.ai-targeted textarea { min-height: 5rem; height: auto; }
+.ai-candidate, .ai-prose { margin-block: .75rem; padding-block: .5rem; border-top: 1px solid var(--border); }

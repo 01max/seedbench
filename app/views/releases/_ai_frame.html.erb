@@ -32,10 +32,10 @@
     <% workspace.runs.each do |run| %>
       <article class="ai-run cover-option" data-ai-run-id="<%= run.id %>">
         <h3><%= t("ai.run", number: run.id, purpose: t("ai.purposes.#{run.purpose}"), state: t("ai.states.#{run.status}")) %></h3>
-        <p class="editor-hint"><%= t("ai.provenance", model: run.model, version: run.prompt_version, revision: run.input_revision) %></p>
+        <details><summary><%= t("ai.provenance_title") %></summary><p class="editor-hint"><%= t("ai.provenance", model: run.model, version: run.prompt_version, revision: run.input_revision) %></p><pre><%= JSON.pretty_generate(run.result) %></pre></details>
         <% if run.error_code %><p class="work-warning"><%= t("ai.errors.#{run.error_code}", default: t("ai.failed")) %></p><% end %>
         <details><summary><%= t("ai.evidence_sent") %></summary><pre><%= JSON.pretty_generate(run.request["pack"]) %></pre></details>
-        <% if run.result %><details><summary><%= t("ai.result") %></summary><pre><%= JSON.pretty_generate(run.result) %></pre></details><% end %>
+        <% if run.result&.dig("output") %><%= render "releases/ai_suggestions", run: run, workspace: workspace %><% end %>
       </article>
     <% end %>
     <% if workspace.runs.empty? %><p><%= t("ai.none") %></p><% end %>

@@ -1,7 +1,7 @@
 module Ebooks
   class ReviewFact
     class InvalidCandidate < StandardError; end
-    FIELDS = %w[title author isbn edition language publisher].freeze
+    FIELDS = %w[title author isbn edition language publisher publication_year].freeze
 
     class << self
       def call(release_id:, evidence_id:, candidate_index:, expected_revision:)
@@ -18,6 +18,7 @@ module Ebooks
       private
 
       def candidate_for(release, evidence, index)
+        validate_ai_source!(release, evidence) if evidence.kind == 'ai_assessment'
         candidates = evidence.data.fetch('candidates', [])
         candidate = candidates[index] if index.is_a?(Integer) && index >= 0
         current = release.payload_revisions.order(number: :desc).pick(:id)
@@ -25,6 +26,11 @@ module Ebooks
         raise InvalidCandidate, I18n.t('ebooks.review.invalid_isbn') if candidate['field'] == 'isbn' && !Isbn.valid?(candidate['value'])
 
         candidate
+      end
+
+      def validate_ai_source!(release, evidence)
+        run = release.ai_runs.find(evidence.data.fetch('ai_run_id'))
+        raise InvalidCandidate, I18n.t('ai.errors.stale_output') unless Ai::Relevance.current?(run: run, context: Ai::Context.call(release: release))
       end
 
       def validate_candidate!(candidate, current)
