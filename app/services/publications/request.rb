@@ -29,9 +29,9 @@ module Publications
       def persist(release)
         assigned = connection(release)
         Workflows::Start.call(release_id: release.id, kind: 'publish', request_key: SecureRandom.uuid,
-          expected_revision: release.input_revision, parameters: { connection_id: assigned.id,
+          expected_revision: release.input_revision, parameters: Seeding::Request.parameters(release).merge(connection_id: assigned.id,
             connection_version: assigned.credentials_version, preparation_id: release.preparation_revisions.order(number: :desc).pick(:id),
-            manual_search_check_id: Review.manual_search_check_id(release) })
+            manual_search_check_id: Review.manual_search_check_id(release)))
       end
     end
   end

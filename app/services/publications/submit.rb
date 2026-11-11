@@ -77,6 +77,7 @@ module Publications
       raise Failure.new(:input_changed) unless live_attempt?(preparation)
 
       connection
+      verify_seed_configuration!
       reasons = Gate.call(release: @release, before_send: true)
       raise Failure.new(reasons) if reasons.any?
 
@@ -88,6 +89,11 @@ module Publications
       @operation.reload
       @operation.state == 'running' && @operation.attempt_token == @attempt && @operation.lease_expires_at&.future? &&
         @operation.input_revision == @release.input_revision && @operation.parameters['preparation_id'] == preparation.id
+    end
+
+    def verify_seed_configuration!
+      actual = Seeding::Request.parameters(@release).stringify_keys
+      raise Failure.new(:input_changed) unless actual == @operation.parameters.slice(*actual.keys)
     end
 
     def current_content?(content)

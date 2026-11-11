@@ -15,6 +15,7 @@ module Publications
 
         reference = { submission_id: receipt.id, info_hash: receipt.info_hash, submission_status: receipt.status }
         persist(reference, receipt.id)
+        Seeding::Request.call(operation: @operation, receipt: receipt)
       end
     end
 

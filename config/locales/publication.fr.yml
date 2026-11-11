@@ -24,3 +24,16 @@ fr:
       invalid_response: "La réponse de C411 ne permet pas de confirmer la soumission."
       existing_submission: "C411 possède déjà une soumission pour ce torrent."
       reconcile_unconfirmed: "C411 ne confirme pas encore cette soumission. Vérifiez son état avant toute nouvelle tentative."
+      deluge_connection: "Configurez la connexion Deluge affectée à cette fiche."
+      mapping: "Configurez le chemin absolu du dossier des fichiers tel que Deluge le voit."
+  seeding:
+    errors:
+      mapping: "Le chemin du fichier dans Deluge a changé."
+      publication_required: "La publication doit être confirmée avant la mise en partage."
+      torrent_mismatch: "Le torrent C411 ne correspond pas au fichier préparé."
+      torrent_tracker: "Le torrent téléchargé ne contient pas de tracker C411 valide."
+      artifact_storage: "Le torrent personnalisé ne peut pas être enregistré dans le stockage privé."
+      connection_changed: "La connexion C411 ou Deluge a changé."
+      deluge_import: "Deluge n’a pas confirmé l’ajout du torrent C411."
+      deluge_mismatch: "Le torrent présent dans Deluge ne correspond pas au fichier, au dossier ou au tracker attendu."
+      deluge_status: "Deluge n’a pas renvoyé un état valide."

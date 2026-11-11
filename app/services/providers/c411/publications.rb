@@ -36,6 +36,13 @@ module Providers
         nil
       end
 
+      def download(info_hash)
+        raise invalid_response unless HASH.match?(info_hash.to_s)
+
+        query = URI.encode_www_form(t: 'get', id: info_hash, apikey: @connection.credentials.fetch('api_key'))
+        Http.call(endpoint: @connection.endpoint, path: "/api?#{query}", headers: { 'Accept' => 'application/x-bittorrent' }).body
+      end
+
       private
 
       def detail(value, expected_hash)
