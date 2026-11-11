@@ -5,7 +5,7 @@ the workbench or choosing **Synchroniser maintenant** reads account state. A
 similar title never links an uploaded file automatically. The link form requires
 a file, a content choice and confirmation; it moves the active association onto
 that file's release and preserves the former shell's content and history.
-Unlinked shells can edit their name, title and description, but cannot prepare
+Unlinked shells can edit their name, title, description and NFO, but cannot prepare
 or publish without a payload.
 
 Synchronization compares local text and remote text with the retained common
@@ -61,3 +61,19 @@ still matches the displayed remote content. It never removes the canonical
 payload or local release. A deletion timeout blocks another delete; reconciliation
 only reads until absence is confirmed. This hook is tested with synthetic local
 publication state; actual publication is still unavailable and unverified.
+
+The link chooser proposes similar titles and supports searching the full queue;
+proposals never commit an association. Each conflict copy displays French field
+labels and escaped BBCode/NFO. Sync responses use the existing editor revision
+check: unsaved browser text stays in place and requires a save-conflict choice
+if remote-only adoption changed the saved revision.
+
+Validation includes isolated CRUD, linking, conflict/stale reads, remote deletion,
+slot errors, authenticated/CSRF requests, actual Turbo forms at desktop/mobile
+sizes, migration rollback/reapply, SQL request/body history guards, and durable
+unknown-write/conflict records across all three disposable Compose layouts.
+The 2026-11-10 live check used only synthetic torrent/NFO bytes and removed its
+own uniquely marked draft; existing account drafts were unchanged.
+
+Remote title/content adoption does not approve new edition facts. Review those
+facts separately before regenerating or submitting a linked ebook.

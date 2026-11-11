@@ -69,4 +69,18 @@ RSpec.describe Drafts::Write do
     expect(execute(release.reload).error_code).to eq('cover_required')
     expect(WebMock).not_to have_requested(:patch, /c411/)
   end
+
+  it 'retains newer human edits after a successful remote update based on the older approved revision' do
+    release = writable_shell
+    stub_request(:patch, 'https://c411.org/api/user/drafts/draft-1').to_return do |req|
+      apply_draft_body(remote, JSON.parse(req.body))
+      Releases::Save.call(release_id: release.id, expected_revision: release.reload.input_revision, changes: { bbcode: 'Newer human text', nfo: 'Newer human NFO' })
+      { body: { success: true }.to_json }
+    end
+    write = execute(release)
+    expect(write.state).to eq('accepted')
+    expect(write.workflow_operation.state).to eq('succeeded')
+    expect(release.reload.draft_state).to eq('conflicted')
+    expect(Releases::EditorValues.call(release: release)).to include('bbcode' => 'Newer human text', 'nfo' => 'Newer human NFO')
+  end
 end

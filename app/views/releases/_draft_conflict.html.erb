@@ -2,7 +2,7 @@
   <h3><%= t("drafts.conflict.title") %></h3><p class="editor-hint"><%= t("drafts.conflict.race") %></p>
   <div class="draft-versions">
     <% { "base" => workspace.snapshot.base_content, "local" => workspace.local, "remote" => workspace.snapshot.remote_content }.each do |kind, content| %>
-      <details open><summary><%= t("drafts.conflict.#{kind}") %></summary><pre><%= JSON.pretty_generate(content) %></pre></details>
+      <details open><summary><%= t("drafts.conflict.#{kind}") %></summary><%= render "releases/draft_copy", content: content %></details>
     <% end %>
   </div>
   <%= form_with url: release_draft_action_path(@release), scope: :draft, class: "draft-form" do |form| %>

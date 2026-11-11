@@ -10,6 +10,8 @@ class ReleaseActionsController < ApplicationController
     render json: { message: error.message, revision: error.revision }, status: :service_unavailable
   rescue Drafts::Failure, Releases::Save::InvalidChanges, Preparation::Failure, Providers::C411::EbookNaming::InvalidName => error
     render json: { message: error.message }, status: :unprocessable_content
+  rescue Workflows::Start::UnresolvedEffect
+    render_uncertain_draft
   rescue Releases::RevisionConflict
     render_conflict
   end
@@ -30,6 +32,10 @@ class ReleaseActionsController < ApplicationController
   def action_message
     return t('drafts.queued') if params[:kind] == 'draft'
     t("preparation.#{params[:kind] == 'prepare' ? 'queued' : 'suggested'}")
+  end
+
+  def render_uncertain_draft
+    render json: { message: t('drafts.errors.outcome_unknown') }, status: :unprocessable_content
   end
 
   def render_conflict

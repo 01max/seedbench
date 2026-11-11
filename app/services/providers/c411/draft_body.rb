@@ -13,9 +13,18 @@ module Providers
         def linked(write)
           release = write.release
           preparation = release.preparation_revisions.order(number: :desc).first!
-          category = DraftCategory.call(connection: write.provider_connection, format: preparation.payload_revision.format)
+          category = category(write, preparation)
           category.merge('isAutosave' => false).merge(torrent_attachment(preparation),
             DraftAttachment.fields('nfo', "#{preparation.release_name}.nfo", write.request.fetch('content').fetch('nfo')))
+        end
+
+        def category(write, preparation)
+          category = DraftCategory.call(connection: write.provider_connection, format: preparation.payload_revision.format)
+          return category unless write.action == 'update'
+          data = Drafts.new(write.provider_connection).read(write.remote_id)
+          options = data['options'] || {}
+          raise ::Drafts::Failure.new(:invalid_response) unless options.is_a?(Hash)
+          category.merge('options' => options.merge(category.fetch('options')))
         end
 
         def torrent_attachment(preparation)

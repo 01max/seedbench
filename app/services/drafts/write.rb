@@ -27,10 +27,16 @@ module Drafts
       PrepareWrite.call(write: @write)
       body = Providers::C411::DraftBody.call(write: @write)
       baseline = baseline_ids
+      refresh_before_send
       intent(body, baseline)
       id = @write.action == 'create' ? @client.create(body) : update(body)
       link = Receipt.call(write: @write, remote_id: id)
-      Sync.call(link: link)
+      Sync.call(link: link, expected_body: @write.body)
+    end
+
+    def refresh_before_send
+      link = @write.release.reload.draft_link
+      Sync.call(link: link) if link
     end
 
     def delete_draft
@@ -84,7 +90,7 @@ module Drafts
 
     def record_error(error)
       if @write.reload.state == 'accepted'
-        @write.update!(error_code: 'readback_failed')
+        @write.update!(error_code: error.code == 'readback_mismatch' ? error.code : 'readback_failed')
       else
         uncertain = @write.state == 'sending' && !error.code.to_s.match?(/\Ahttp_4(?!08)\d\d\z/)
         @write.update!(state: uncertain ? 'unknown' : 'failed', error_code: error.code)

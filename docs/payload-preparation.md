@@ -92,7 +92,8 @@ contacts no tracker; a separate bounded bencode reader verifies single-file
 inventory, exact UTF-8 name/size, private metadata and every SHA-1 piece, then
 checks the original SHA-256 again. Reusing an artifact requires the same checks.
 
-C411 draft/publication actions remain disabled. Personalized announce handling
-and publication acceptance are not certified by local preparation. Future seeding
+Explicit [C411 draft actions](c411-drafts.md) require this preparation proof.
+Publication remains disabled. Personalized announce handling and publication
+acceptance are not certified by local preparation. Future seeding
 must use the torrent issued by C411 after acceptance, never this local artifact.
 No publication-to-seeding claim follows from a successful local checklist item.

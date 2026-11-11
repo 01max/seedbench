@@ -20,9 +20,18 @@ module Releases
       def observations(release)
         { findings: current_findings(release).includes(:finding_acknowledgements).to_a,
           events: release.release_events.order(sequence: :desc).limit(50).to_a,
-          snapshots: latest(release.remote_snapshots, :kind).index_by(&:kind),
+          snapshots: current_snapshots(release),
           operations: release.workflow_operations.order(id: :desc).limit(20).to_a,
           evidence: evidence(release) }
+      end
+
+      def current_snapshots(release)
+        snapshots = latest(release.remote_snapshots, :kind).index_by(&:kind)
+        draft = snapshots['draft']
+        if draft && DraftLink.where(provider_connection_id: draft.provider_connection_id, remote_id: draft.remote_id).where.not(release_id: release.id).exists?
+          snapshots.delete('draft')
+        end
+        snapshots
       end
 
       def evidence(release)

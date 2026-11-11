@@ -1,15 +1,21 @@
 module Drafts
   class Sync
     class << self
-      def call(link:)
+      def call(link:, expected_body: nil)
         base_id = link.release.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(id: :desc).pick(:id)
         data = fetch(link)
         snapshot = observe(link, data, base_id)
+        verify_readback(data, expected_body) if expected_body
         AfterPublication.observe(release: link.release, snapshot: snapshot)
         snapshot
       end
 
       private
+
+      def verify_readback(data, body)
+        valid = data && %w[torrent nfo].all? { |kind| Providers::C411::DraftAttachment.matches?(kind, body, data) }
+        raise Failure.new(:readback_mismatch) unless valid
+      end
 
       def observe(link, data, base_id)
         return Missing.call(link: link, expected_snapshot_id: base_id) unless data

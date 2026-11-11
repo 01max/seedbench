@@ -19,7 +19,8 @@ module Drafts
 
       def adopt(release, content)
         changes = content.transform_keys { |field| FIELDS.fetch(field) }
-        Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: changes)
+        changes.delete('title') if changes['title'].blank? && release.title.blank?
+        Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: changes, review_facts: false)
       end
 
       private

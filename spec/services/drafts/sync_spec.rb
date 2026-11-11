@@ -49,4 +49,28 @@ RSpec.describe Drafts::Sync do
     expect(release.reload.draft_state).to eq('synced')
     expect(WebMock).not_to have_requested(:delete, /c411/)
   end
+
+  it 'rejects an older read completing after a newer observation without reverting its adopted text' do
+    link = release.draft_link
+    stub_request(:get, 'https://c411.org/api/user/drafts/draft-1').to_return do
+      Drafts::Observe.call(link: link, content: Drafts::Content.remote(draft_data(description: 'Newer observed text')), remote_revision: 'newer')
+      { body: { success: true, data: draft_data(description: 'Older network response') }.to_json }
+    end
+    expect { described_class.call(link: link) }.to raise_error(Drafts::Failure, /autre lecture/)
+    expect(Drafts::Content.local(release.reload)['description']).to eq('Newer observed text')
+  end
+
+  it 'adopts remote-only title edits as content without approving new edition facts' do
+    linked = reviewed_content_release
+    connection = linked.provider_assignments.find_by!(role: 'publishing').provider_connection
+    link = DraftLink.create!(release: linked, provider_connection: connection, remote_id: 'linked-draft')
+    base = Drafts::Content.local(linked)
+    linked.remote_snapshots.create!(provider_connection: connection, kind: 'draft', remote_id: link.remote_id,
+      local_revision: linked.input_revision, base_content: base, remote_content: base, observed_at: Time.current)
+    facts = linked.reviewed_facts.pluck(:id)
+    Drafts::Observe.call(link: link, content: base.merge('title' => 'Unreviewed remote title'), remote_revision: 'changed')
+    expect(linked.reload.title).to eq('Unreviewed remote title')
+    expect(linked.reviewed_facts.pluck(:id)).to eq(facts)
+    expect(linked.release_events.find_by!(name: 'release.revised', input_revision: linked.input_revision).actor).to eq('system')
+  end
 end

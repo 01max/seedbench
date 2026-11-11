@@ -43,4 +43,13 @@ RSpec.describe Drafts::Link do
     Settings::AssignConnection.call(release_id: target.id, role: 'publishing', connection_id: other.id, expected_revision: target.input_revision)
     expect { link(source, target.reload) }.to raise_error(Drafts::Failure, /autre identité/)
   end
+
+  it 'shows current ownership on the payload release while retaining the former shell snapshots only as history' do
+    source = shell
+    target = payload_release
+    link(source, target)
+    expect(Releases::Snapshot.call(release: source.reload).snapshots).not_to have_key('draft')
+    expect(Releases::Snapshot.call(release: target.reload).snapshots['draft'].remote_id).to eq('draft-1')
+    expect(source.remote_snapshots.count).to eq(1)
+  end
 end

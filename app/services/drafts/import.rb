@@ -3,22 +3,27 @@ module Drafts
     def self.call(connection:)
       client = Providers::C411::Drafts.new(connection)
       listing = client.list
-      listing.ids.each do |id|
-        next if DraftLink.exists?(provider_connection_id: connection.id, remote_id: id)
-        data = client.read(id)
-        connection.with_lock { import(connection, id, data) }
-      end
+      errors = listing.ids.filter_map { |id| import_id(connection, client, id) }
+      raise errors.first if errors.any?
       listing
     end
 
     class << self
       private
 
+      def import_id(connection, client, id)
+        return if DraftLink.exists?(provider_connection_id: connection.id, remote_id: id)
+        data = client.read(id)
+        connection.with_lock { import(connection, id, data) }
+        nil
+      rescue Providers::Failure, Failure => error
+        error
+      end
+
       def import(connection, id, data)
         return if DraftLink.exists?(provider_connection_id: connection.id, remote_id: id)
         content = Content.remote(data)
-        release = Releases::Create.call(title: content.fetch('title').presence || content.fetch('name'))
-        release.provider_assignments.find_by!(role: 'publishing').update!(provider_connection: connection, assigned_at: Time.current)
+        release = Releases::Create.call(title: content.fetch('title').presence, publishing_connection: connection)
         Content.adopt(release, content)
         DraftLink.create!(release: release, provider_connection: connection, remote_id: id)
         record_snapshot(release, connection, id, data, content)

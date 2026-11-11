@@ -92,7 +92,8 @@ configured canonical folder and verifies its private local torrent. Name or byte
 changes make it stale until explicit **Re-préparer**. Files shows the results;
 worker completion preserves newer dirty text through the conflict choice. See
 [payload preparation](payload-preparation.md) for storage requirements, interrupted
-moves and the inert local tracker boundary. C411 draft and Publish remain disabled;
-their endpoints save a valid displayed revision before returning unavailable.
+moves and the inert local tracker boundary. [C411 draft actions](c411-drafts.md)
+are available through the explicit reviewed-action flow. Publish remains disabled;
+its endpoint saves a valid displayed revision before returning unavailable.
 Local editing, navigation, checklist changes, and shortcuts do not prepare files,
 host covers, create drafts, publish, or start seeding.

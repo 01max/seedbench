@@ -36,8 +36,12 @@ module Drafts
     def verified_identity
       id = @write.remote_id || confirmed_id
       data = Providers::C411::Drafts.new(@write.provider_connection).read(id)
-      raise Failure.new(:reconcile_mismatch) unless @write.state == 'accepted' || Content.remote(data) == @write.request.fetch('content')
+      raise Failure.new(:reconcile_mismatch) unless @write.state == 'accepted' || matching_receipt?(data)
       id
+    end
+
+    def matching_receipt?(data)
+      Content.remote(data) == @write.request.fetch('content') && %w[torrent nfo].all? { |kind| Providers::C411::DraftAttachment.matches?(kind, @write.body, data) }
     end
 
     def interrupt_before_send

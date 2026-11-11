@@ -42,9 +42,10 @@ A later text edit or cover change makes the proposal stale. Final action
 validation requires current, reviewed BBCode/NFO, the exact selected verified URL,
 and verification performed for that operation and attempt.
 
-Draft and Publish remain disabled in this preview. These operation services and
-their failure boundaries are tested without making C411 writes or live image
-uploads; selecting a cover cannot invoke them.
+Explicit C411 draft actions now use these hosting and content-review gates.
+Selecting a cover still cannot upload it. The automated checks isolate provider
+writes; the live draft attachment check used only synthetic data. Publish remains
+disabled. See [C411 drafts](c411-drafts.md) for the complete action flow.
 
 ## Search and review C411 candidates
 

@@ -11,7 +11,11 @@ fr:
     loading: Chargement du brouillon…
     link_title: Lier un fichier importé
     link_help: Choisissez le fichier correspondant et le texte à conserver. Le lien sera transféré à sa fiche ; cette fiche restera disponible avec son texte et son historique.
-    payload: Fichier importé (100 premières fiches disponibles)
+    payload: Fichier importé (100 résultats maximum par recherche)
+    payload_search: Rechercher le titre du fichier à lier
+    search: Rechercher les fichiers
+    proposals: Des titres proches sont proposés. Vérifiez le fichier exact ; aucun lien n’a été créé.
+    proposed: Proposition ·
     content_choice: Texte à utiliser sur la fiche du fichier
     keep_payload: Conserver le nom, le titre, le BBCode et le NFO du fichier
     keep_draft: Reprendre le nom, le titre, le BBCode et le NFO de ce brouillon
@@ -60,6 +64,7 @@ fr:
     recreate_confirm: Je confirme la création d’un nouveau brouillon pour cette fiche dont le brouillon distant a disparu.
     recreate: Recréer explicitement le brouillon C411
     errors:
+      readback_mismatch: La relecture ne confirme pas les pièces jointes envoyées. Vérifiez le brouillon distant avant toute autre action.
       not_published: La suppression de nettoyage est réservée à une fiche dont la publication est enregistrée.
       remote_returned: Le brouillon précédent est de nouveau présent. Sa recréation est arrêtée pour éviter un doublon.
       delete_unconfirmed: La disparition du brouillon n’est pas confirmée. Aucun nouvel appel de suppression ne sera envoyé automatiquement.

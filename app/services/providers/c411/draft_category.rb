@@ -22,9 +22,9 @@ module Providers
 
       def category_ids
         category = read('/api/categories').find { |item| item['slug'] == 'ebook' }
-        subcategory = category&.fetch('subcategories', [])&.find { |item| item['slug'] == 'livres' }
+        subcategory = (category ? rows(category['subcategories']) : []).find { |item| item['slug'] == 'livres' }
         raise ::Drafts::Failure.new(:category_changed) unless category && subcategory
-        [ category.fetch('id'), subcategory.fetch('id') ]
+        [ identifier(category), identifier(subcategory) ]
       end
 
       def resolve_options(types, format)
@@ -36,16 +36,27 @@ module Providers
 
       def option(types, slug, value)
         type = types.find { |item| item['slug'] == slug }
-        selected = type&.fetch('values', [])&.find { |item| item['slug'] == value }
+        selected = (type ? rows(type['values']) : []).find { |item| item['slug'] == value }
         raise ::Drafts::Failure.new(:category_changed) unless type && selected
-        [ type.fetch('id').to_s, selected.fetch('id') ]
+        [ identifier(type).to_s, identifier(selected) ]
+      end
+
+      def identifier(record)
+        id = record.fetch('id')
+        raise ::Drafts::Failure.new(:category_changed) unless id.is_a?(Integer) && id.positive?
+        id
+      end
+
+      def rows(value)
+        raise ::Drafts::Failure.new(:category_changed) unless value.is_a?(Array) && value.all?(Hash)
+        value
       end
 
       def read(path)
         response = Http.call(endpoint: @connection.endpoint, path: path, headers: { 'Authorization' => "Bearer #{@connection.credentials.fetch('api_key')}" })
         data = Http.json(response)
-        raise ::Drafts::Failure.new(:category_changed) unless data.is_a?(Hash) && data['data'].is_a?(Array)
-        data.fetch('data')
+        raise ::Drafts::Failure.new(:category_changed) unless data.is_a?(Hash)
+        rows(data['data'])
       end
     end
   end

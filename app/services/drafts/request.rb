@@ -24,12 +24,16 @@ module Drafts
 
       def validate!(release, recreate_confirmed)
         raise Failure.new(:conflict_required) if release.draft_state == 'conflicted'
-        if release.draft_state == 'missing'
-          raise Failure.new(:confirmation_required) unless recreate_confirmed == true
-          raise Failure.new(:payload_required) unless release.payload_revisions.exists?
-        end
+        validate_recreation!(release, recreate_confirmed)
         validate_payload!(release)
         raise Failure.new(:published_locked) unless %w[unpublished failed].include?(release.publication_state)
+      end
+
+      def validate_recreation!(release, confirmed)
+        return unless confirmed || release.draft_state == 'missing'
+        raise Failure.new(:remote_returned) unless release.draft_state == 'missing'
+        raise Failure.new(:confirmation_required) unless confirmed == true
+        raise Failure.new(:payload_required) unless release.payload_revisions.exists?
       end
 
       def validate_payload!(release)

@@ -21,11 +21,12 @@ class CreateDraftWrites < ActiveRecord::Migration[8.1]
     add_check_constraint :draft_writes, "action IN ('create', 'update', 'delete')", name: 'draft_write_action'
     add_check_constraint :draft_writes, "state IN ('pending', 'sending', 'accepted', 'failed', 'unknown')", name: 'draft_write_state'
     add_check_constraint :draft_writes, "provider_role = 'publishing' AND json_valid(request) AND json_type(request) = 'object'", name: 'draft_write_request'
+
+    add_check_constraint :draft_writes, "body IS NULL OR (json_valid(body) AND json_type(body) = 'object')", name: 'draft_write_body'
     reversible do |direction|
       direction.up { install_guards }
       direction.down { %w[draft_writes_identity draft_writes_body draft_writes_remote draft_writes_no_delete draft_writes_no_replace].each { |name| execute "DROP TRIGGER #{name}" } }
     end
-    add_check_constraint :draft_writes, "body IS NULL OR (json_valid(body) AND json_type(body) = 'object')", name: 'draft_write_body'
   end
 
   private

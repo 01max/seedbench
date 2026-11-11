@@ -337,6 +337,11 @@ FOREIGN KEY ("provider_role", "provider_connection_id")
 CREATE INDEX "index_draft_writes_on_release_id" ON "draft_writes" ("release_id");
 CREATE UNIQUE INDEX "index_draft_writes_on_workflow_operation_id" ON "draft_writes" ("workflow_operation_id");
 CREATE UNIQUE INDEX "one_active_draft_write" ON "draft_writes" ("release_id") WHERE state IN ('pending', 'sending', 'unknown');
+CREATE TRIGGER draft_writes_identity BEFORE UPDATE OF release_id, workflow_operation_id, provider_connection_id, provider_role, action, request ON draft_writes BEGIN SELECT RAISE(ABORT, 'Draft request identity is immutable'); END;
+CREATE TRIGGER draft_writes_body BEFORE UPDATE OF body, baseline_ids ON draft_writes WHEN OLD.body IS NOT NULL BEGIN SELECT RAISE(ABORT, 'Draft transmission is immutable'); END;
+CREATE TRIGGER draft_writes_remote BEFORE UPDATE OF remote_id ON draft_writes WHEN OLD.remote_id IS NOT NULL AND NEW.remote_id IS NOT OLD.remote_id BEGIN SELECT RAISE(ABORT, 'Draft receipt identity is immutable'); END;
+CREATE TRIGGER draft_writes_no_delete BEFORE DELETE ON draft_writes BEGIN SELECT RAISE(ABORT, 'Draft write history is retained'); END;
+CREATE TRIGGER draft_writes_no_replace BEFORE INSERT ON draft_writes WHEN EXISTS (SELECT 1 FROM draft_writes WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: draft_writes.id'); END;
 INSERT INTO "schema_migrations" (version) VALUES
 ('20261110170000'),
 ('20261110160000'),

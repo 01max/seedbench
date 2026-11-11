@@ -22,7 +22,7 @@ module Drafts
       end
 
       def conflicted?(release, local, base, remote)
-        return local != remote if release.publication_state == 'published'
+        return local != remote if release.publication_state == 'published' || remote['title'].blank?
         local != base && remote != base && local != remote
       end
 

@@ -14,6 +14,13 @@ module Providers
           raise ::Drafts::Failure.new(:invalid_response), cause: nil
         end
 
+        def matches?(kind, body, data)
+          return true unless body.key?("#{kind}FileData")
+          actual = data["#{kind}File"]
+          return actual.nil? if body["#{kind}FileData"].nil?
+          actual.is_a?(Hash) && actual['name'] == body["#{kind}FileName"] && actual['data'] == body["#{kind}FileData"]
+        end
+
         def fields(kind, name, bytes)
           { "#{kind}FileName" => name, "#{kind}FileData" => bytes.nil? ? nil : Base64.strict_encode64(bytes) }
         end

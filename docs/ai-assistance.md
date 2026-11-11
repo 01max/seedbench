@@ -89,7 +89,8 @@ The runtime checks retain a focused request, citations and an unaccepted
 suggestion through container recreation while preserving the original human
 text. Isolated tests exercise a fully manual inspection/content/preparation/
 cover/duplicate review path with assistance disabled and with provider failures.
-Draft and Publish remain disabled in this development preview.
+Explicit [C411 draft actions](c411-drafts.md) are available independently of AI.
+Publish remains disabled in this development preview.
 
 The 2026-11-10 live adapter check used two small synthetic fragments and
 `gpt-4.1-mini-2025-04-14`: both assessment and prose outputs passed application

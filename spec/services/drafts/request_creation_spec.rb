@@ -81,4 +81,35 @@ RSpec.describe Drafts::Request do
     expect(release.reload.draft_link.remote_id).to eq('replacement')
     expect(release.remote_snapshots.pluck(:remote_id).uniq).to contain_exactly('new-draft', 'replacement')
   end
+
+  it 'reconciles an uncertain creation already imported as a shell without duplicating its identity' do
+    release = prepared_draft_payload
+    prepare_cover_review(release)
+    sent = stub_request(:post, 'https://c411.org/api/user/drafts').to_timeout
+    write = run_draft(release)
+    apply_draft_body(remote, write.body)['id'] = 'new-draft'
+    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [ { id: 'new-draft' } ], count: 1, maxAllowed: 15 }.to_json)
+    Drafts::Import.call(connection: write.provider_connection)
+    shell_id = DraftLink.sole.release_id
+    Drafts::Reconcile.call(release_id: release.id, write_id: write.id, remote_id: 'new-draft', confirmed: true)
+    expect(DraftLink.sole.release_id).to eq(release.id)
+    expect(Release.find(shell_id).content_revisions).not_to be_empty
+    expect(sent).to have_been_requested.once
+  end
+
+  it 'preserves unrelated remote option selections when updating a linked ebook' do
+    release = prepared_draft_payload
+    prepare_cover_review(release)
+    stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
+      apply_draft_body(remote, JSON.parse(request.body))['id'] = 'new-draft'
+      { body: { success: true, data: { id: 'new-draft' } }.to_json }
+    end
+    run_draft(release)
+    remote['options']['114'] = [ 2001, 2002 ]
+    stub_request(:patch, 'https://c411.org/api/user/drafts/new-draft').to_return do |request|
+      apply_draft_body(remote, JSON.parse(request.body))
+      { body: { success: true }.to_json }
+    end
+    expect(run_draft(release).body['options']).to include('114' => [ 2001, 2002 ])
+  end
 end

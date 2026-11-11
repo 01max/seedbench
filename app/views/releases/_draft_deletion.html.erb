@@ -1,6 +1,6 @@
 <% if workspace.snapshot&.remote_deleted %>
   <p role="alert" class="work-alert"><%= t("drafts.states.missing") %></p>
-  <% if @release.payload_revisions.exists? && @release.publication_state == "unpublished" %>
+  <% if @release.payload_revisions.exists? && %w[unpublished failed].include?(@release.publication_state) %>
     <%= form_with url: release_draft_action_path(@release), scope: :draft, class: "draft-form" do |form| %>
       <%= form.hidden_field :kind, value: "recreate" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
       <label><%= form.check_box :confirmed, required: true %> <%= t("drafts.recreate_confirm") %></label>

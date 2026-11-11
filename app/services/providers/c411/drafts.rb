@@ -11,7 +11,10 @@ module Providers
       def list
         data = request(:get, PATH)
         invalid! unless data['data'].is_a?(Array) && data['data'].size <= 100
-        ids = data['data'].map { |item| identity(item.fetch('id')) }
+        ids = data['data'].map do |item|
+          invalid! unless item.is_a?(Hash)
+          identity(item.fetch('id'))
+        end
         Listing.new(ids: ids.uniq, count: data['count'], maximum: data['maxAllowed'])
       rescue KeyError, TypeError
         invalid!

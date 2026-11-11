@@ -10,24 +10,29 @@
         <%= form.submit t("drafts.sync"), class: "work-button quiet", disabled: !workspace.configured %>
       <% end %>
       <%= link_to t("drafts.refresh_result"), release_draft_action_path(@release), class: "work-button quiet" %>
-      <%= render "draft_writes", writes: workspace.writes %>
+      <%= render "releases/draft_writes", writes: workspace.writes %>
       <% if workspace.link %>
         <p><%= t("drafts.identity", id: workspace.link.remote_id, connection: workspace.link.provider_connection.label) %></p>
         <p><%= @release.payload_revisions.exists? ? t("drafts.linked") : t("drafts.unlinked") %></p>
-        <%= render "draft_deletion", workspace: workspace %>
+        <%= render "releases/draft_deletion", workspace: workspace %>
         <% if workspace.snapshot %>
           <p><%= t("drafts.observed", time: l(workspace.snapshot.observed_at, format: :short)) %></p>
           <p class="work-warning"><%= t("drafts.states.#{@release.draft_state}") %></p>
           <% if workspace.local != workspace.snapshot.remote_content %><p><%= t("drafts.local_pending") %></p><% end %>
-          <% if @release.draft_state == "conflicted" %><%= render "draft_conflict", workspace: workspace %><% end %>
-          <details class="draft-versions"><summary><%= t("drafts.remote_copy") %></summary><pre><%= JSON.pretty_generate(workspace.snapshot.remote_content) %></pre></details>
+          <% if @release.draft_state == "conflicted" %><%= render "releases/draft_conflict", workspace: workspace %><% end %>
+          <details class="draft-versions"><summary><%= t("drafts.remote_copy") %></summary><%= render "releases/draft_copy", content: workspace.snapshot.remote_content %></details>
         <% end %>
         <% unless @release.payload_revisions.exists? %>
           <details><summary><%= t("drafts.link_title") %></summary>
             <p class="editor-hint"><%= t("drafts.link_help") %></p>
+            <%= form_with url: release_draft_action_path(@release), method: :get, class: "draft-form" do |form| %>
+              <%= form.label :payload_query, t("drafts.payload_search") %><%= form.search_field :payload_query, name: "payload_query", value: params[:payload_query].to_s.first(200) %>
+              <%= form.submit t("drafts.search"), class: "work-button quiet" %>
+            <% end %>
+            <% if workspace.proposed_ids.any? %><p><%= t("drafts.proposals") %></p><% end %>
             <%= form_with url: release_draft_action_path(@release), scope: :draft, data: { turbo_frame: "_top" }, class: "draft-form" do |form| %>
               <%= form.hidden_field :kind, value: "link" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
-              <%= form.label :payload_choice, t("drafts.payload") %><%= form.select :payload_choice, workspace.candidates.map { |release| ["##{release.id} · #{release.title}", "#{release.id}:#{release.input_revision}"] }, include_blank: true %>
+              <%= form.label :payload_choice, t("drafts.payload") %><%= form.select :payload_choice, workspace.candidates.map { |release| ["#{workspace.proposed_ids.include?(release.id) ? t("drafts.proposed") : ""} ##{release.id} · #{release.title} · #{release.payload_revisions.max_by(&:number).original_filename}", "#{release.id}:#{release.input_revision}"] }, include_blank: true %>
               <%= form.label :choice, t("drafts.content_choice") %><%= form.select :choice, [[t("drafts.keep_payload"), "local"], [t("drafts.keep_draft"), "remote"]] %>
               <label><%= form.check_box :confirmed, required: true %> <%= t("drafts.confirm_link") %></label>
               <%= form.submit t("drafts.link_submit"), class: "work-button" %>

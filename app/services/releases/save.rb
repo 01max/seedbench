@@ -12,11 +12,12 @@ module Releases
       'publisher' => 500, 'publication_year' => 4, 'isbn_kind' => 20,
       'presentation' => 100_000, 'notes' => 100_000, 'bbcode' => 250_000, 'nfo' => 250_000 }.freeze
 
-    def self.call(release_id:, expected_revision:, changes:)
-      new(release_id, expected_revision, changes).call
+    def self.call(release_id:, expected_revision:, changes:, review_facts: true)
+      new(release_id, expected_revision, changes, review_facts).call
     end
 
-    def initialize(release_id, expected_revision, changes)
+    def initialize(release_id, expected_revision, changes, review_facts)
+      @review_facts = review_facts
       @release = Release.find(release_id)
       @expected_revision = expected_revision
       @changes = validate_changes(changes)
@@ -69,7 +70,7 @@ module Releases
 
       Preparation::Invalidate.call(release: @release, changes: @changes)
       @revision = @release.input_revision + 1
-      append_facts if @payload
+      append_facts if @payload && @review_facts
       finish_save
       append_content
       Ebooks::Findings.call(release: @release, payload: @payload) if @payload
@@ -79,7 +80,7 @@ module Releases
       metadata = @changes.slice(*EditorValues::METADATA)
       search = SearchText.call(title: metadata.fetch('title', @release.title), author: metadata.fetch('author', @release.author))
       @release.update!(metadata.merge('input_revision' => @revision, 'search_text' => search))
-      RecordEvent.call(release_id: @release.id, name: 'release.revised', actor: 'operator', data: { fields: @changes.keys.sort })
+      RecordEvent.call(release_id: @release.id, name: 'release.revised', actor: @review_facts ? 'operator' : 'system', data: { fields: @changes.keys.sort })
     end
 
     def append_facts
