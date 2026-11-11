@@ -247,7 +247,7 @@ export default class extends Controller {
           this.acceptSave(data.revision, this.valuesFromForm())
         }
       }
-      if (response.ok) this.element.dispatchEvent(new CustomEvent("workbench:action", { bubbles: true }))
+      if (response.ok || Array.isArray(data.reasons)) this.element.dispatchEvent(new CustomEvent("workbench:action", { bubbles: true }))
       this.errorTarget.textContent = data.message || this.messagesValue.action_completed
       this.errorTarget.hidden = false
     } catch {
