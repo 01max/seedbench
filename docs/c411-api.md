@@ -34,8 +34,17 @@ The detail response additionally exposes `description`, `categoryId`,
 
 Existing attachment objects have `name` and `data` fields. The authenticated
 [integration guide](https://c411.org/user/integrations/guide) describes base64
-file data in the JSON body. The isolated test omitted both attachments; they
-were returned as `null`. Attachment round trips have not been tested.
+file data in the JSON body. Reads expose `{name, data}` attachment objects,
+but **writes use flat fields**: `torrentFileName`, `torrentFileData`,
+`nfoFileName`, and `nfoFileData`. Sending the read-shaped objects on create was
+accepted but silently omitted both attachments.
+
+On 2026-11-10 the authenticated guide and official upload client serialization
+were checked again. A uniquely marked synthetic draft verified dynamic ebook
+category/options, private torrent bytes, UTF-8 NFO bytes, partial NFO replacement,
+and removal using both NFO fields set to null. The test draft was deleted and
+the original draft identifiers were unchanged. Only synthetic bytes were sent;
+no publication request was made.
 
 The test created an incomplete draft with `name`, `title`, `description`,
 `categoryId`, `subcategoryId`, `options`, and `isAutosave: false`. It used a

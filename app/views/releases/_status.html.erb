@@ -25,6 +25,7 @@
   <details class="status-dimensions" data-detail-key="dimensions"><summary><%= t("workbench.status.dimensions") %></summary>
     <% { "inspection" => @release.inspection_state, "preparation" => @release.preparation_state, "draft" => @release.draft_state, "publication" => @release.publication_state, "seeding" => @release.seeding_state }.each do |key, state| %><p><%= t("workbench.status.dimension", label: t("workbench.checklist.#{key}.label"), state: workflow_label(state)) %></p><% end %>
   </details>
+  <% if @release.publication_state == "published" && @release.draft_link && !@snapshot.snapshots["draft"]&.remote_deleted %><p role="alert" class="work-alert"><%= t("drafts.leftover") %></p><% end %>
   <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= t("workbench.status.remote", kind: t("workbench.status.#{kind == 'draft' ? 'draft' : 'submission'}"), id: snapshot.remote_id) %><%= t("workbench.status.absent") if snapshot.remote_deleted %></p><% end %>
   <% @snapshot.operations.each do |operation| %>
     <details class="operation-state" data-detail-key="operation_<%= operation.id %>">

@@ -8,7 +8,7 @@ RSpec.describe 'Local work boundaries' do
     Settings::SetDefaults.call(automatic_ai: true, connection_ids: ids, expected_revision: 0)
   end
 
-  it 'performs no provider calls or preparation through upload, save, search, status and manual review' do
+  it 'only reads draft state on workspace open and keeps local work free of remote writes' do
     configure_all_defaults
     allow(Providers::Http).to receive(:call).and_call_original
     sign_in_operator
@@ -20,7 +20,7 @@ RSpec.describe 'Local work boundaries' do
     post release_checks_path(release), params: { mark: { key: 'text_review', checked: '1', expected_revision: 1 } }
 
     expect(response).to have_http_status(:ok)
-    expect(Providers::Http).not_to have_received(:call)
+    expect(Providers::Http).to have_received(:call).with(hash_including(path: '/api/user/drafts', method: :get, body: nil)).once
     expect([ PreparationRevision.count, CoverHosting.count, RemoteSnapshot.count, AiRun.count ]).to eq([ 0, 0, 0, 0 ])
   end
 

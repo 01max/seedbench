@@ -4,7 +4,8 @@ class ProviderConnectionsController < ApplicationController
   end
 
   def create
-    Settings::CreateConnection.call(**connection_params)
+    connection = Settings::CreateConnection.call(**connection_params)
+    Drafts::Connect.call(connection: connection)
     redirect_to settings_path, notice: t('settings.connection_created'), status: :see_other
   end
 
@@ -28,8 +29,9 @@ class ProviderConnectionsController < ApplicationController
 
   def complete
     values = params.expect(completion: [ :expected_version, :confirm_identity, :endpoint, credentials: %i[api_key password], options: [ :model ] ]).to_h.symbolize_keys
-    Settings::CompleteConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
+    connection = Settings::CompleteConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
       confirm_identity: values[:confirm_identity] == '1', endpoint: values[:endpoint], credentials: values.fetch(:credentials, {}), options: values.fetch(:options, {}))
+    Drafts::Connect.call(connection: connection)
     redirect_to settings_path, notice: t('settings.connection_completed'), status: :see_other
   end
 

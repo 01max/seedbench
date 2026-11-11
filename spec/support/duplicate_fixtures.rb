@@ -1,5 +1,6 @@
 module DuplicateFixtures
   def configure_duplicate_search(release)
+    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [] }.to_json)
     connection = release.provider_assignments.find_by!(role: 'publishing').provider_connection
     connection.update!(endpoint: 'https://c411.org', credentials: { 'api_key' => 'synthetic-search-key' })
     connection

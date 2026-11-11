@@ -1,0 +1,15 @@
+<p class="editor-hint"><%= t("drafts.slots") %></p>
+<% writes.each do |write| %>
+  <details class="draft-write"><summary><%= t("drafts.write_result", id: write.id, state: t("drafts.write_states.#{write.state}")) %></summary>
+    <p><%= t("workbench.editor.history_actor", actor: t("workbench.editor.operator"), revision: write.workflow_operation.input_revision) %></p>
+    <% if write.error_code %><p role="alert" class="work-alert"><%= Drafts::Message.call(code: write.error_code) %></p><% end %>
+    <% if %w[sending unknown].include?(write.state) || write.workflow_operation.state == "outcome_unknown" %>
+      <p><%= t("drafts.reconcile_help") %></p>
+      <%= form_with url: release_draft_action_path(@release), scope: :draft, class: "draft-form" do |form| %>
+        <%= form.hidden_field :kind, value: "reconcile" %><%= form.hidden_field :write_id, value: write.id %>
+        <% if !write.remote_id && write.body %><%= form.label :remote_id, t("drafts.reconcile_id") %><%= form.text_field :remote_id, required: true, maxlength: 100 %><label><%= form.check_box :confirmed, required: true %> <%= t("drafts.reconcile_confirm") %></label><% end %>
+        <%= form.submit t("drafts.reconcile"), class: "work-button" %>
+      <% end %>
+    <% end %>
+  </details>
+<% end %>

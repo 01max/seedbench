@@ -8,6 +8,9 @@ module ProviderHelpers
   end
 
   def create_connection(role = 'publishing', identity: 'synthetic-account')
+    if role == 'publishing'
+      stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [], count: 0, maxAllowed: 15 }.to_json)
+    end
     Settings::CreateConnection.call(**connection_attributes(role, identity: identity))
   end
 end

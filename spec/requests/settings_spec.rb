@@ -12,11 +12,13 @@ RSpec.describe 'Provider settings' do
     expect(response.body).not_to include('synthetic-private-credential')
   end
 
-  it 'creates a connection without making remote calls' do
+  it 'creates a connection and immediately imports drafts using read requests' do
+    stub_draft_account
     post provider_connections_path, params: { connection: connection_attributes }
 
     expect(response).to redirect_to(settings_path)
     expect(ProviderConnection.sole.check_status).to eq('untested')
+    expect(DraftLink.count).to eq(1)
   end
 
   it 'does not reflect rejected credentials into the response' do

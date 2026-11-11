@@ -315,7 +315,36 @@ CREATE TRIGGER ai_runs_identity BEFORE UPDATE OF release_id, provider_connection
 CREATE TRIGGER ai_runs_terminal BEFORE UPDATE ON ai_runs WHEN OLD.status IN ('succeeded', 'failed', 'unusable', 'stale') BEGIN SELECT RAISE(ABORT, 'AI result history is immutable'); END;
 CREATE TRIGGER ai_runs_no_delete BEFORE DELETE ON ai_runs BEGIN SELECT RAISE(ABORT, 'AI run history is retained'); END;
 CREATE TRIGGER ai_runs_no_replace BEFORE INSERT ON ai_runs WHEN EXISTS (SELECT 1 FROM ai_runs WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: ai_runs.id'); END;
+CREATE TABLE IF NOT EXISTS "draft_links" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'publishing' NOT NULL, "remote_id" varchar NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_a36a655574"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_42f05d63ed"
+FOREIGN KEY ("provider_role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT draft_link_publishing CHECK (provider_role = 'publishing'), CONSTRAINT draft_link_identity CHECK (length(remote_id) BETWEEN 1 AND 100));
+CREATE UNIQUE INDEX "index_draft_links_on_release_id" ON "draft_links" ("release_id");
+CREATE UNIQUE INDEX "index_draft_links_on_provider_connection_id_and_remote_id" ON "draft_links" ("provider_connection_id", "remote_id");
+CREATE TABLE IF NOT EXISTS "draft_writes" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "release_id" integer NOT NULL, "workflow_operation_id" bigint NOT NULL, "provider_connection_id" bigint NOT NULL, "provider_role" varchar DEFAULT 'publishing' NOT NULL, "action" varchar NOT NULL, "remote_id" varchar, "state" varchar DEFAULT 'pending' NOT NULL, "error_code" varchar, "request" json DEFAULT '{}' NOT NULL, "body" json, "baseline_ids" json DEFAULT '[]' NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_58d79ae84a"
+FOREIGN KEY ("release_id", "workflow_operation_id")
+  REFERENCES "workflow_operations" ("release_id", "id")
+, CONSTRAINT "fk_rails_2310b0a284"
+FOREIGN KEY ("release_id")
+  REFERENCES "releases" ("id")
+, CONSTRAINT "fk_rails_982e555779"
+FOREIGN KEY ("provider_role", "provider_connection_id")
+  REFERENCES "provider_connections" ("role", "id")
+, CONSTRAINT draft_write_action CHECK (action IN ('create', 'update', 'delete')), CONSTRAINT draft_write_state CHECK (state IN ('pending', 'sending', 'accepted', 'failed', 'unknown')), CONSTRAINT draft_write_request CHECK (provider_role = 'publishing' AND json_valid(request) AND json_type(request) = 'object'), CONSTRAINT draft_write_body CHECK (body IS NULL OR (json_valid(body) AND json_type(body) = 'object')));
+CREATE INDEX "index_draft_writes_on_release_id" ON "draft_writes" ("release_id");
+CREATE UNIQUE INDEX "index_draft_writes_on_workflow_operation_id" ON "draft_writes" ("workflow_operation_id");
+CREATE UNIQUE INDEX "one_active_draft_write" ON "draft_writes" ("release_id") WHERE state IN ('pending', 'sending', 'unknown');
+CREATE TRIGGER draft_writes_identity BEFORE UPDATE OF release_id, workflow_operation_id, provider_connection_id, provider_role, action, request ON draft_writes BEGIN SELECT RAISE(ABORT, 'Draft request identity is immutable'); END;
+CREATE TRIGGER draft_writes_body BEFORE UPDATE OF body, baseline_ids ON draft_writes WHEN OLD.body IS NOT NULL BEGIN SELECT RAISE(ABORT, 'Draft transmission is immutable'); END;
+CREATE TRIGGER draft_writes_remote BEFORE UPDATE OF remote_id ON draft_writes WHEN OLD.remote_id IS NOT NULL AND NEW.remote_id IS NOT OLD.remote_id BEGIN SELECT RAISE(ABORT, 'Draft receipt identity is immutable'); END;
+CREATE TRIGGER draft_writes_no_delete BEFORE DELETE ON draft_writes BEGIN SELECT RAISE(ABORT, 'Draft write history is retained'); END;
+CREATE TRIGGER draft_writes_no_replace BEFORE INSERT ON draft_writes WHEN EXISTS (SELECT 1 FROM draft_writes WHERE id = NEW.id OR workflow_operation_id = NEW.workflow_operation_id) BEGIN SELECT RAISE(ABORT, 'UNIQUE constraint failed: draft_writes.id'); END;
 INSERT INTO "schema_migrations" (version) VALUES
+('20261110170000'),
+('20261110160000'),
 ('20261110140000'),
 ('20261110120000'),
 ('20261110100000'),

@@ -1,0 +1,5 @@
+<% Drafts::Content::FIELDS.each do |key, field| %>
+  <div class="draft-field"><h4><%= t("workbench.fields.#{field}", default: t("preparation.name")) %></h4>
+    <% if %w[description nfo].include?(key) %><pre><%= content[key].to_s %></pre><% else %><p><%= content[key].to_s %></p><% end %>
+  </div>
+<% end %>

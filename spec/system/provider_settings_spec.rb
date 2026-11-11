@@ -49,6 +49,7 @@ RSpec.describe 'Provider settings', type: :system do
   end
 
   it 'creates a masked connection from its provider-specific form' do
+    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [] }.to_json)
     sign_in_browser
     click_link 'Réglages'
     within("section[aria-labelledby='role-publishing']") do

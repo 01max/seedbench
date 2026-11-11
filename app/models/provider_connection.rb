@@ -24,6 +24,8 @@
 #  index_provider_connections_on_role_and_identity_key  (role,identity_key) UNIQUE
 #
 class ProviderConnection < ApplicationRecord
+  has_many :draft_writes, foreign_key: [ :provider_role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :provider_connection, dependent: :restrict_with_exception
+  has_many :draft_links, foreign_key: [ :provider_role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :provider_connection, dependent: :restrict_with_exception
   has_many :cover_uploads, foreign_key: [ :provider_role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :provider_connection, dependent: :restrict_with_exception
   serialize :credentials, coder: JSON
   encrypts :credentials

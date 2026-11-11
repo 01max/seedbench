@@ -1,0 +1,57 @@
+module Drafts
+  class Receipt
+    class << self
+      def call(write:, remote_id:)
+        release = write.release
+        release.with_lock do
+          link = current_link(release, write, remote_id)
+          raise Failure.new(:invalid_link) unless link.remote_id == remote_id
+          initial_snapshot(release, write, remote_id)
+          accept(write, remote_id)
+          link
+        end
+      end
+
+      private
+
+      def current_link(release, write, id)
+        imported = recover_imported_link(release, write, id) if write.action == 'create'
+        return imported if imported
+
+        link = release.draft_link
+        if link && link.remote_id == write.request['replaces_remote_id']
+          link.destroy!
+          release.association(:draft_link).reset
+          link = nil
+        end
+        link || DraftLink.create!(release: release, provider_connection: write.provider_connection, remote_id: id)
+      end
+
+      def recover_imported_link(release, write, id)
+        existing = DraftLink.find_by(provider_connection_id: write.provider_connection_id, remote_id: id)
+        return unless existing && existing.release_id != release.id
+        raise Failure.new(:invalid_link) if write.baseline_ids.include?(id)
+
+        source = existing.release
+        target = Link.call(release_id: source.id, payload_release_id: release.id, expected_revision: source.input_revision,
+          payload_revision: release.input_revision, confirmed: true, choice: 'local', allowed_operation_id: write.workflow_operation_id,
+          replacing_remote_id: write.request['replaces_remote_id'])
+        target.draft_link
+      end
+
+      def initial_snapshot(release, write, remote_id)
+        return if release.remote_snapshots.exists?(kind: 'draft', remote_id: remote_id)
+        release.remote_snapshots.create!(provider_connection: write.provider_connection, kind: 'draft', remote_id: remote_id,
+          local_revision: write.workflow_operation.input_revision, base_content: write.request.fetch('content'),
+          remote_content: write.request.fetch('content'), observed_at: Time.current)
+      end
+
+      def accept(write, remote_id)
+        write.update!(state: 'accepted', remote_id: remote_id, error_code: nil)
+        Workflows::RecordOutcome.call(operation_id: write.workflow_operation_id, attempt_token: write.workflow_operation.attempt_token,
+          phase: 'draft_accepted', reference: { draft_id: remote_id })
+        Releases::RecordEvent.call(release_id: write.release_id, name: 'draft.written', data: { write_id: write.id, remote_id: remote_id })
+      end
+    end
+  end
+end

@@ -1,0 +1,19 @@
+<% if workspace.snapshot&.remote_deleted %>
+  <p role="alert" class="work-alert"><%= t("drafts.states.missing") %></p>
+  <% if @release.payload_revisions.exists? && %w[unpublished failed].include?(@release.publication_state) %>
+    <%= form_with url: release_draft_action_path(@release), scope: :draft, class: "draft-form" do |form| %>
+      <%= form.hidden_field :kind, value: "recreate" %><%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+      <label><%= form.check_box :confirmed, required: true %> <%= t("drafts.recreate_confirm") %></label>
+      <%= form.submit t("drafts.recreate"), class: "work-button" %>
+    <% end %>
+  <% end %>
+<% elsif @release.publication_state == "published" && workspace.snapshot %>
+  <p role="alert" class="work-alert"><%= t("drafts.leftover") %></p>
+  <%= form_with url: release_draft_action_path(@release), scope: :draft, class: "draft-form" do |form| %>
+    <%= form.hidden_field :kind, value: "delete" %><%= form.hidden_field :remote_id, value: workspace.link.remote_id %>
+    <%= form.hidden_field :snapshot_id, value: workspace.snapshot.id %>
+    <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
+    <label><%= form.check_box :confirmed, required: true %> <%= t("drafts.delete_confirm") %></label>
+    <%= form.submit t("drafts.delete"), class: "work-button" %>
+  <% end %>
+<% end %>

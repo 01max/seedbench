@@ -253,3 +253,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .ai-targeted { display: grid; gap: .4rem; }
 .ai-targeted textarea { min-height: 5rem; height: auto; }
 .ai-candidate, .ai-prose { margin-block: .75rem; padding-block: .5rem; border-top: 1px solid var(--border); }
+
+.draft-form { display: grid; gap: .5rem; margin-block: .75rem; }
+.draft-form select { min-width: 0; width: 100%; }
+.draft-form input[type="submit"] { justify-self: start; }
+.draft-versions pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 22rem; overflow: auto; }
+
+.draft-conflict > .draft-versions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.draft-conflict details { min-width: 0; }
+.draft-field h4 { font-size: 11px; color: var(--muted); margin: .7rem 0 .25rem; }
+.draft-field p { overflow-wrap: anywhere; }
+.draft-field pre { font-size: 11px; border: 1px solid var(--border); padding: .5rem; }
+@media (max-width: 900px) { .draft-conflict > .draft-versions { grid-template-columns: minmax(0, 1fr); } }
+
+.draft-form input:is([type="text"], [type="search"]), .draft-form select {
+  box-sizing: border-box; min-width: 0; width: 100%; padding: 5px 7px;
+  border: 1px solid var(--border); border-radius: 3px; background: var(--inset); color: var(--foreground);
+}
+.draft-form input:is([type="checkbox"], [type="radio"]) { accent-color: var(--accent); }
+.draft-conflict > .draft-versions > details { padding: .5rem; border: 1px solid var(--border); border-radius: 3px; }

@@ -19,6 +19,8 @@
 #  updated_at        :datetime         not null
 #
 class Release < ApplicationRecord
+  has_many :draft_writes, dependent: :restrict_with_exception
+  has_one :draft_link, dependent: :restrict_with_exception
   has_many :cover_uploads, dependent: :restrict_with_exception
   has_many :content_proposals, dependent: :restrict_with_exception
   has_many :manual_checks, dependent: :restrict_with_exception
