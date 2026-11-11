@@ -35,7 +35,8 @@ module Drafts
 
     def validate_target!
       valid = @source.draft_link && !@source.payload_revisions.exists? && @target.payload_revisions.exists? && available_target?
-      raise Failure.new(:invalid_link) unless valid && @target.publication_state == 'unpublished'
+      eligible_states = @allowed_operation_id ? %w[unpublished failed] : %w[unpublished]
+      raise Failure.new(:invalid_link) unless valid && eligible_states.include?(@target.publication_state)
     end
 
     def available_target?

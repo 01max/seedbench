@@ -32,6 +32,7 @@ RSpec.describe Drafts::Request do
     prepare_cover_review(release)
     stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
       apply_draft_body(remote, JSON.parse(request.body))['id'] = 'new-draft'
+      yield release if block_given?
       { body: { success: true, data: { id: 'new-draft' } }.to_json }
     end
     expect(run_draft(release).state).to eq('accepted')
@@ -100,6 +101,20 @@ RSpec.describe Drafts::Request do
     expect(DraftLink.sole.release_id).to eq(release.id)
     expect(Release.find(shell_id).content_revisions).not_to be_empty
     expect(sent).to have_been_requested.once
+  end
+
+  it 'attaches an acknowledged creation even when refresh imported it before the receipt arrived' do
+    shell = nil
+    release = create_prepared_draft do |target|
+      stub_draft_account(remote)
+      connection = target.provider_assignments.find_by!(role: 'publishing').provider_connection
+      Drafts::Refresh.call(connection: connection)
+      shell = connection.draft_links.sole.release
+    end
+    expect(DraftLink.sole).to have_attributes(release_id: release.id, remote_id: 'new-draft')
+    expect(release.draft_writes.last.workflow_operation).to have_attributes(state: 'succeeded', external_reference: { 'draft_id' => 'new-draft' })
+    expect(shell.reload.content_revisions).not_to be_empty
+    expect(shell.remote_snapshots.pluck(:remote_id).uniq).to eq([ 'new-draft' ])
   end
 
   it 'preserves unrelated option selections from the final read before updating a linked ebook' do

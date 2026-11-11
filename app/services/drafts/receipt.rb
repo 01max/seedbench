@@ -15,6 +15,9 @@ module Drafts
       private
 
       def current_link(release, write, id)
+        imported = recover_imported_link(release, write, id) if write.action == 'create'
+        return imported if imported
+
         link = release.draft_link
         if link && link.remote_id == write.request['replaces_remote_id']
           link.destroy!
@@ -22,6 +25,18 @@ module Drafts
           link = nil
         end
         link || DraftLink.create!(release: release, provider_connection: write.provider_connection, remote_id: id)
+      end
+
+      def recover_imported_link(release, write, id)
+        existing = DraftLink.find_by(provider_connection_id: write.provider_connection_id, remote_id: id)
+        return unless existing && existing.release_id != release.id
+        raise Failure.new(:invalid_link) if write.baseline_ids.include?(id)
+
+        source = existing.release
+        target = Link.call(release_id: source.id, payload_release_id: release.id, expected_revision: source.input_revision,
+          payload_revision: release.input_revision, confirmed: true, choice: 'local', allowed_operation_id: write.workflow_operation_id,
+          replacing_remote_id: write.request['replaces_remote_id'])
+        target.draft_link
       end
 
       def initial_snapshot(release, write, remote_id)
