@@ -10,18 +10,17 @@ module Drafts
       def observe(link:, expected_body: nil)
         base_id = link.release.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(id: :desc).pick(:id)
         data = fetch(link)
+        if expected_body && !Providers::C411::DraftBody.matches?(expected_body, data)
+          record(link, data, base_id) unless data
+          raise Failure.new(:readback_mismatch)
+        end
+
         snapshot = record(link, data, base_id)
-        verify_readback(data, expected_body) if expected_body
         AfterPublication.observe(release: link.release, snapshot: snapshot)
         Observation.new(snapshot: snapshot, data: data)
       end
 
       private
-
-      def verify_readback(data, body)
-        valid = data && %w[torrent nfo].all? { |kind| Providers::C411::DraftAttachment.matches?(kind, body, data) }
-        raise Failure.new(:readback_mismatch) unless valid
-      end
 
       def record(link, data, base_id)
         return Missing.call(link: link, expected_snapshot_id: base_id) unless data

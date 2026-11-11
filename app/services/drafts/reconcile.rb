@@ -40,7 +40,7 @@ module Drafts
     end
 
     def matching_receipt?(data)
-      Content.remote(data) == @write.request.fetch('content') && %w[torrent nfo].all? { |kind| Providers::C411::DraftAttachment.matches?(kind, @write.body, data) }
+      Content.remote(data) == @write.request.fetch('content') && Providers::C411::DraftBody.matches?(@write.body, data)
     end
 
     def interrupt_before_send

@@ -117,6 +117,17 @@ RSpec.describe Drafts::Request do
     expect(shell.remote_snapshots.pluck(:remote_id).uniq).to eq([ 'new-draft' ])
   end
 
+  it 'keeps a timed-out update uncertain when its text and attachments match but an option differs' do
+    release = create_prepared_draft
+    sent = stub_request(:patch, 'https://c411.org/api/user/drafts/new-draft').to_timeout
+    write = run_draft(release)
+    remote.fetch('options')['112'] = 1191
+
+    expect { Drafts::Reconcile.call(release_id: release.id, write_id: write.id) }.to raise_error(Drafts::Failure, /contenu envoyé/)
+    expect(write.reload.state).to eq('unknown')
+    expect(sent).to have_been_requested.once
+  end
+
   it 'preserves unrelated option selections from the final read before updating a linked ebook' do
     release = create_prepared_draft
     selections = [ [ 2001 ], [ 2002 ], [ 2003 ] ]

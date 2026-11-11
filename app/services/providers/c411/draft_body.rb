@@ -16,6 +16,13 @@ module Providers
           body.merge('options' => options.merge(body.fetch('options')))
         end
 
+        def matches?(body, data)
+          return false unless data
+
+          fields = body.except('torrentFileName', 'torrentFileData', 'nfoFileName', 'nfoFileData')
+          data.slice(*fields.keys) == fields && %w[torrent nfo].all? { |kind| DraftAttachment.matches?(kind, body, data) }
+        end
+
         private
 
         def linked(write)

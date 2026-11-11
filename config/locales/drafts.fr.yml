@@ -64,7 +64,7 @@ fr:
     recreate_confirm: Je confirme la création d’un nouveau brouillon pour cette fiche dont le brouillon distant a disparu.
     recreate: Recréer explicitement le brouillon C411
     errors:
-      readback_mismatch: La relecture ne confirme pas les pièces jointes envoyées. Vérifiez le brouillon distant avant toute autre action.
+      readback_mismatch: La relecture ne confirme pas les champs ou les pièces jointes envoyés. Vérifiez le brouillon distant avant toute autre action.
       not_published: La suppression de nettoyage est réservée à une fiche dont la publication est enregistrée.
       remote_returned: Le brouillon précédent est de nouveau présent. Sa recréation est arrêtée pour éviter un doublon.
       delete_unconfirmed: La disparition du brouillon n’est pas confirmée. Aucun nouvel appel de suppression ne sera envoyé automatiquement.
@@ -72,7 +72,7 @@ fr:
       readback_failed: C411 a accepté le brouillon, mais sa relecture a échoué. Synchronisez avant une nouvelle action.
       slots_full: C411 indique que tous les emplacements de brouillons sont occupés. Libérez un emplacement sur le site puis relancez explicitement.
       provider_rejected: "C411 ou le fournisseur a refusé l’opération (%{code}). Vérifiez notamment les places disponibles et les droits de la clé. Le texte local est conservé."
-      reconcile_mismatch: Le brouillon distant ne correspond pas au texte approuvé. Aucun nouvel envoi ni changement de lien effectué.
+      reconcile_mismatch: Le brouillon distant ne correspond pas au contenu envoyé. Aucun nouvel envoi ni changement de lien effectué.
       category_changed: Les catégories ou options C411 ont changé. Aucun envoi effectué.
       connection_required: Affectez une connexion C411 configurée à cette fiche.
       conflict_required: Résolvez le conflit avec C411 avant tout envoi.

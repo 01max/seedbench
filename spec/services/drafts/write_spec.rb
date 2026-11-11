@@ -43,6 +43,19 @@ RSpec.describe Drafts::Write do
     expect(write.attributes.to_json).not_to include('private upstream rejection')
   end
 
+  it 'warns when the acknowledged patch saved its attachment but left the old description' do
+    release = writable_shell
+    stub_request(:patch, 'https://c411.org/api/user/drafts/draft-1').to_return do |request|
+      apply_draft_body(remote, JSON.parse(request.body).except('description'))
+      { body: { success: true }.to_json }
+    end
+
+    write = execute(release)
+    expect(write).to have_attributes(state: 'accepted', error_code: 'readback_mismatch')
+    expect(release.remote_snapshots.last.base_content['description']).to eq('Description distante conservée.')
+    expect(Drafts::Content.local(release.reload)['description']).to eq('Reviewed local description')
+  end
+
   it 'blocks blind resubmission after timeout and reconciles a matching read without another patch' do
     release = writable_shell
     sent = stub_request(:patch, 'https://c411.org/api/user/drafts/draft-1').to_timeout
