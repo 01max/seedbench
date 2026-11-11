@@ -2,7 +2,7 @@
 
 Authenticated documentation and the ebook upload form were reviewed on
 2026-11-08 and rechecked through the authenticated browser on 2026-11-09. This records published rules and observed form behavior; it does
-not establish publication acceptance. Production publication remains forbidden.
+not establish publication acceptance on its own.
 See [API observations](c411-api.md) for verified draft fields, attachment shape,
 slot limits, responses, and the remote concurrency limitation.
 
@@ -145,6 +145,8 @@ sequence. Whether the API accepts a pending submission before seeding, and the
 actual timing permitted before validation, remain untested. Documentation alone
 does not resolve that integration dependency.
 
-No publication or seeding was started during this review. Direct publication,
-submission-state reads, personalized torrent download, and post-publication
-draft behavior remain unverified under the production-key restriction.
+A later authorized production test verified an approved submission followed
+by personalized download and initial seed. Prepare the canonical payload
+on the Deluge filesystem before submission so that it can be rechecked and
+shared immediately after acceptance. The test did not exercise Team Pending.
+See the [API observations](c411-api.md#direct-publication-and-personalized-download).

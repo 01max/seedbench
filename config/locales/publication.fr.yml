@@ -1,0 +1,16 @@
+fr:
+  publication:
+    errors:
+      publication_state: "Cette fiche est déjà publiée ou sa soumission doit être vérifiée."
+      inspection: "Inspectez le fichier de cette fiche."
+      payload: "Associez le fichier original à cette fiche."
+      preparation: "Préparez à nouveau le fichier et son torrent."
+      cover_review: "Vérifiez et sélectionnez la couverture de cette édition."
+      hosted_cover: "Vérifiez l’image hébergée de la couverture."
+      edition_review: "Confirmez la vérification de l’édition."
+      text_review: "Confirmez la relecture du texte."
+      mechanical_failure: "Corrigez les erreurs techniques de l’inspection."
+      acknowledgements: "Examinez et acceptez les avertissements actifs."
+      bbcode: "Vérifiez la présentation BBCode pour la couverture et les informations actuelles."
+      nfo: "Vérifiez le NFO pour le fichier et les informations actuels."
+      duplicates: "Vérifiez la recherche C411 et les doublons possibles."
