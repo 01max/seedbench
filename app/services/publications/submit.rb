@@ -58,8 +58,8 @@ module Publications
     end
 
     def verify_payload!(preparation)
-      payload = preparation.payload_revision
-      Preparation::Identity.call(path: Preparation::Paths.new.path(payload.locator), payload: payload)
+      path = Preparation::Validate.payload_path(release: @release, preparation: preparation)
+      Preparation::Identity.call(path: path, payload: preparation.payload_revision)
     end
 
     def reviewed_content

@@ -66,6 +66,21 @@ RSpec.describe Publications::Submit do
     expect(sent).not_to have_been_requested
   end
 
+  it 'rejects a replaced payload root even when the new root holds identical bytes' do
+    sent = stub_publication(preparation)
+    root = Preparation::Paths.new.root
+    previous = root.parent.join('previous-payload-root')
+    stub_request(:get, submission_url(preparation)).to_return do
+      File.rename(root, previous)
+      root.mkpath
+      FileUtils.cp(previous.join(preparation.payload_name), root)
+      { status: 404 }
+    end
+
+    expect(publish.result).to include('status' => 'failed', 'errors' => [ 'mapping_changed' ])
+    expect(sent).not_to have_been_requested
+  end
+
   it 'blocks duplicate delivery after a timeout and reconciles one matching submission' do
     stub_publication(preparation)
     sent = stub_request(:post, 'https://c411.org/api/torrents').to_timeout
