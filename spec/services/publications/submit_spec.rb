@@ -84,6 +84,20 @@ RSpec.describe Publications::Submit do
     expect(sent).to have_been_requested.once
   end
 
+  it 'keeps a success response for a different torrent unconfirmed' do
+    stub_publication(preparation)
+    wrong_receipt = { success: true, data: { id: 42, infoHash: '0' * 40, status: 'approved' } }
+    stub_request(:post, 'https://c411.org/api/torrents').to_return(body: wrong_receipt.to_json)
+
+    operation = publish
+
+    expect(operation.state).to eq('outcome_unknown')
+    expect(operation.external_reference).to include('prepared_info_hash' => preparation.torrent_info_hash)
+    expect(release.reload.publication_state).to eq('outcome_unknown')
+    expect(release.remote_snapshots.where(kind: 'submission')).to be_empty
+    expect(release.workflow_operations.where(kind: 'initial_seed')).to be_empty
+  end
+
   it 'uses the site-issued torrent, sets only per-torrent options and stops after tracker acceptance' do
     stub_publication(preparation)
     stub_personalized_download(preparation)
