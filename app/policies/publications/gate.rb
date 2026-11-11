@@ -11,7 +11,9 @@ module Publications
     end
 
     def call
-      prerequisite_reasons + review_reasons + content_reasons + duplicate_reasons
+      reasons = prerequisite_reasons + review_reasons + content_reasons + duplicate_reasons
+      reasons << 'draft_write_active' if @release.draft_writes.exists?(state: %w[pending sending unknown])
+      reasons
     end
 
     private

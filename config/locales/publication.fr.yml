@@ -13,6 +13,7 @@ fr:
       hosted_cover: "Vérifiez l’image hébergée de la couverture."
       edition_review: "Confirmez la vérification de l’édition."
       text_review: "Confirmez la relecture du texte."
+      draft_write_active: "Attendez la fin de l’envoi du brouillon ou réconciliez son résultat avant de publier."
       mechanical_failure: "Corrigez les erreurs techniques de l’inspection."
       acknowledgements: "Examinez et acceptez les avertissements actifs."
       bbcode: "Vérifiez la présentation BBCode pour la couverture et les informations actuelles."

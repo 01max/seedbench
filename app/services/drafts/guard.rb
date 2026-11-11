@@ -13,12 +13,12 @@ module Drafts
 
       def validate_content!(write, release)
         raise Failure.new(:connection_changed) unless write.provider_connection.reload.credentials_version == write.request.fetch('connection_version')
-        validate_state!(write, release)
+        validate_state!(write, release) unless write.action == 'delete'
         raise Failure.new(:input_changed) unless Content.local(release) == write.request.fetch('content')
       end
 
       def validate_state!(write, release)
-        return if write.action == 'delete'
+        raise Failure.new(:published_locked) unless %w[unpublished failed].include?(release.publication_state)
         raise Failure.new(:conflict_required) if release.draft_state == 'conflicted'
         replacing = write.request['replaces_remote_id'].present?
         raise Failure.new(:remote_missing) if release.draft_state == 'missing' && !replacing

@@ -24,6 +24,7 @@ module PublicationFixtures
     stub_cover_hosting
     operation = cover_write_operation(release)
     Covers::Host.call(operation_id: operation.id, attempt_token: operation.attempt_token)
+    operation.update!(state: 'succeeded', lease_expires_at: nil, finished_at: Time.current)
     accept_draft_cover(release.reload)
   end
 

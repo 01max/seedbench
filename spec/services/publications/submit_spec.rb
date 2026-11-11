@@ -19,6 +19,10 @@ RSpec.describe Publications::Submit do
     operation.reload
   end
 
+  def request_draft
+    Drafts::Request.call(release_id: release.id, expected_revision: release.reload.input_revision)
+  end
+
   it 'publishes without a draft and preserves the acceptance before initial seeding' do
     sent = stub_publication(preparation)
 
@@ -37,6 +41,33 @@ RSpec.describe Publications::Submit do
 
     expect(publish.result).to include('status' => 'failed', 'errors' => [ 'review_required' ])
     expect(release.reload.publication_state).to eq('unpublished')
+    expect(sent).not_to have_been_requested
+  end
+
+  it 'blocks publication while a draft write is queued' do
+    sent = stub_publication(preparation)
+    request_draft
+
+    expect { request_publication(release) }.to raise_error(Publications::Failure) { |error| expect(error.codes).to include('draft_write_active') }
+    expect(sent).not_to have_been_requested
+  end
+
+  it 'rejects a draft request while publication is queued' do
+    request_publication(release)
+
+    expect { request_draft }.to raise_error(Drafts::Failure) { |error| expect(error.code).to eq('operation_active') }
+    expect(release.draft_writes).to be_empty
+  end
+
+  it 'rechecks publication state before sending a previously queued draft' do
+    stub_publication(preparation)
+    sent = stub_request(:post, 'https://c411.org/api/user/drafts').to_return(status: 422)
+    draft = request_draft
+    release.reload.update!(publication_state: 'published')
+
+    Workflows::Execute.call(operation_id: draft.id)
+
+    expect(draft.draft_write.reload).to have_attributes(state: 'failed', error_code: 'published_locked')
     expect(sent).not_to have_been_requested
   end
 
