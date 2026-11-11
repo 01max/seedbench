@@ -24,7 +24,53 @@ module Providers
         raise Seeding::Failure.new(:deluge_mismatch)
       end
 
+      def recheck(artifact:, preparation:, location:)
+        ensure_paused!
+        @client.rpc('core.set_torrent_options', [ [ @info_hash ], { move_completed: false } ])
+        start_recheck
+        checked = Seeding::Wait.call(seconds: 30) { status if returned_to_paused? }
+        verify_recheck!(checked, artifact.trackers, preparation, location)
+      rescue Providers::Failure, Seeding::Failure
+        ensure_paused!
+        raise
+      end
+
+      def resume
+        @client.rpc('core.resume_torrent', [ @info_hash ])
+      end
+
       private
+
+      def start_recheck
+        @client.rpc('web.register_event_listener', [ 'TorrentStateChangedEvent' ])
+        @client.rpc('web.get_events')
+        @client.rpc('core.force_recheck', [ [ @info_hash ] ])
+      end
+
+      def returned_to_paused?
+        Array(@client.rpc('web.get_events')).include?([ 'TorrentStateChangedEvent', [ @info_hash, 'Paused' ] ])
+      end
+
+      def ensure_paused!
+        return if status['state'] == 'Paused'
+
+        pause
+        raise Seeding::Failure.new(:pause_unconfirmed) unless Seeding::Wait.call(seconds: 5) { status['state'] == 'Paused' }
+      end
+
+      def verify_recheck!(checked, trackers, preparation, location)
+        raise Seeding::Failure.new(:recheck_timeout) unless checked
+        raise Seeding::Failure.new(:deluge_mismatch) unless matches?(checked, trackers, preparation, location) && paused_without_move?(checked)
+
+        progress = checked['progress']
+        raise Seeding::Failure.new(:recheck_incomplete, progress: progress) unless progress == 100 && checked['is_finished'] == true
+
+        progress
+      end
+
+      def paused_without_move?(status)
+        status['state'] == 'Paused' && status['move_completed'] == false
+      end
 
       def add(bytes, preparation, location)
         options = { download_location: location, add_paused: true, auto_managed: false, seed_mode: false, move_completed: false }

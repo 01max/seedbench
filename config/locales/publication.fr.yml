@@ -37,3 +37,7 @@ fr:
       deluge_import: "Deluge n’a pas confirmé l’ajout du torrent C411."
       deluge_mismatch: "Le torrent présent dans Deluge ne correspond pas au fichier, au dossier ou au tracker attendu."
       deluge_status: "Deluge n’a pas renvoyé un état valide."
+      pause_unconfirmed: "Deluge n’a pas confirmé la mise en pause du torrent."
+      recheck_timeout: "Deluge n’a pas terminé la vérification des données."
+      recheck_incomplete: "Le torrent est en pause. Les données vérifiées sont incomplètes."
+      interrupted: "La mise en partage a été interrompue."

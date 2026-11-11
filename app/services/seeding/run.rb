@@ -14,13 +14,38 @@ module Seeding
       preparation = Preparation::Validate.call(release: @release)
       validate_preparation!(preparation)
       artifact = retrieve(preparation)
-      client.import(artifact: artifact, preparation: preparation, location: @parameters.fetch('client_root'))
-      { 'status' => 'checking' }
+      seed(preparation, artifact)
     rescue Failure, Providers::Failure, Preparation::Failure => error
-      { 'status' => 'failed', 'error_code' => error.code }
+      failure(error)
     end
 
     private
+
+    def seed(preparation, artifact)
+      assigned = client
+      location = @parameters.fetch('client_root')
+      phase('seed_importing', personalized_torrent_stored: true)
+      assigned.import(artifact: artifact, preparation: preparation, location: location)
+      phase('seed_rechecking')
+      progress = assigned.recheck(artifact: artifact, preparation: preparation, location: location)
+      phase('seed_resuming', rechecked_progress: progress)
+      assigned.resume
+      @release.update!(seeding_state: 'seeding')
+      { 'status' => 'seeding', 'progress' => progress }
+    end
+
+    def phase(name, reference = {})
+      @operation.reload
+      raise Failure.new(:interrupted) unless @operation.state == 'running' && @operation.lease_expires_at&.future?
+
+      Workflows::RecordOutcome.call(operation_id: @operation.id, attempt_token: @operation.attempt_token, phase: name, reference: reference)
+    end
+
+    def failure(error)
+      result = { 'status' => 'failed', 'error_code' => error.code }
+      result['progress'] = error.progress if error.is_a?(Failure) && error.progress.is_a?(Numeric) && error.progress.between?(0, 100)
+      result
+    end
 
     def start
       @release.with_lock do
