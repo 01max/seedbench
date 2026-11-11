@@ -16,12 +16,16 @@ module Publications
       torrent = torrent_bytes(preparation)
       cover_and_content = reviewed_content
       category = Providers::C411::DraftCategory.call(connection: @connection, format: preparation.payload_revision.format)
+      client = Providers::C411::Publications.new(@connection)
+      raise Failure.new(:existing_submission) if client.read(preparation.torrent_info_hash)
+
       check = Review.refresh(@operation)
+      verify_payload!(preparation)
       intent!(preparation, cover_and_content, check)
-      receipt = Providers::C411::Publications.new(@connection).submit(fields: fields(preparation, cover_and_content, category),
+      receipt = client.submit(fields: fields(preparation, cover_and_content, category),
         torrent: torrent, nfo: cover_and_content.nfo, name: preparation.release_name)
       Receipt.call(operation: @operation, receipt: receipt)
-      { 'status' => 'accepted', 'draft_observation' => observe_draft }
+      { 'status' => 'accepted', 'draft_observation' => DraftObservation.call(release: @release) }
     rescue Failure, Preparation::Failure, Providers::Failure, Covers::Failure, Drafts::Failure, Duplicates::Failure, Releases::RevisionConflict => error
       record_failure(error)
     end
@@ -49,6 +53,11 @@ module Publications
       raise Preparation::Failure.new(:invalid_torrent), cause: nil
     end
 
+    def verify_payload!(preparation)
+      payload = preparation.payload_revision
+      Preparation::Identity.call(path: Preparation::Paths.new.path(payload.locator), payload: payload)
+    end
+
     def reviewed_content
       Covers::Host.call(operation_id: @operation.id, attempt_token: @attempt)
       Content::ReviewedAction.call(operation_id: @operation.id, attempt_token: @attempt)
@@ -58,7 +67,8 @@ module Publications
       @release.with_lock do
         verify_attempt!(preparation, content, check)
         Workflows::RecordOutcome.call(operation_id: @operation.id, attempt_token: @attempt,
-          phase: 'publication_sending', reference: { prepared_info_hash: preparation.torrent_info_hash, duplicate_check_id: check.id })
+          phase: Interrupted::SENDING, reference: { prepared_info_hash: preparation.torrent_info_hash, duplicate_check_id: check.id,
+            sending_at: Time.current.iso8601(6) })
         @release.update!(publication_state: 'submitting')
       end
     end
@@ -91,23 +101,18 @@ module Publications
         'description' => content.bbcode, 'descriptionFormat' => 'standard')
     end
 
-    def observe_draft
-      return 'unlinked' unless @release.reload.draft_link
-
-      Drafts::AfterPublication.call(release_id: @release.id) ? 'present' : 'missing'
-    rescue Providers::Failure, Drafts::Failure
-      'unavailable'
+    def definite_rejection?(error)
+      error.is_a?(Providers::Failure) && error.code.match?(/\Ahttp_4(?!08)\d\d\z/)
     end
 
     def record_failure(error)
       codes = error.respond_to?(:codes) ? error.codes : [ error.respond_to?(:code) ? error.code : 'input_changed' ]
-      @release.with_lock do
-        if @release.publication_state == 'submitting'
-          rejected = error.is_a?(Providers::Failure) && error.code.match?(/\Ahttp_4(?!08)\d\d\z/)
-          @release.update!(publication_state: rejected ? 'failed' : 'outcome_unknown')
-        end
-      end
-      { 'status' => @release.publication_state == 'outcome_unknown' ? 'unknown' : 'failed', 'errors' => codes }
+      state = Interrupted.resolve_failure(operation: @operation, rejected: definite_rejection?(error))
+      return Reconcile.call(release_id: @release.id) if state == 'outcome_unknown'
+
+      { 'status' => 'failed', 'errors' => codes }
+    rescue Failure, Providers::Failure
+      { 'status' => 'unknown', 'errors' => codes }
     end
   end
 end

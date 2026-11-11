@@ -6,6 +6,9 @@ module Publications
         release.with_lock do
           raise Releases::RevisionConflict.new(expected_revision: expected_revision, actual_revision: release.input_revision) unless expected_revision == release.input_revision
 
+          active = release.workflow_operations.find_by(kind: 'publish', state: %w[pending running], input_revision: expected_revision)
+          return active if active
+
           reasons = Gate.call(release: release)
           raise Failure.new(reasons) if reasons.any?
 

@@ -1,13 +1,13 @@
 module Workflows
   class Definitions
     class UnsupportedKind < StandardError; end
-    Definition = Data.define(:compute, :apply, :effect, :stale, :recoverable, :retain_stale) do
-      def initialize(compute:, apply:, effect:, stale: nil, recoverable: false, retain_stale: false)
+    Definition = Data.define(:compute, :apply, :effect, :stale, :recoverable, :retain_stale, :interrupted) do
+      def initialize(compute:, apply:, effect:, stale: nil, recoverable: false, retain_stale: false, interrupted: nil)
         super
       end
     end
     ENTRIES = {
-      'publish' => Definition.new(compute: Publications::Submit, apply: Publications::Record, effect: 'remote', retain_stale: true),
+      'publish' => Definition.new(compute: Publications::Submit, apply: Publications::Record, effect: 'remote', retain_stale: true, interrupted: Publications::Interrupted),
       'draft_delete' => Definition.new(compute: Drafts::Write, apply: Drafts::Record, effect: 'remote', stale: Drafts::Cancel, retain_stale: true),
       'draft_write' => Definition.new(compute: Drafts::Write, apply: Drafts::Record, effect: 'remote', stale: Drafts::Cancel, retain_stale: true),
       'ai_assessment' => Definition.new(compute: Ai::Compute, apply: Ai::Record, effect: 'local', stale: Ai::Cancel, retain_stale: true),

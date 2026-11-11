@@ -4,6 +4,7 @@ module Providers
   class C411
     class Publications
       Receipt = Data.define(:id, :info_hash, :status)
+      Submission = Data.define(:receipt, :name, :size, :created_at)
       HASH = /\A[0-9a-f]{40}\z/
       STATUS = /\A[a-z][a-z_]{0,39}\z/
 
@@ -24,7 +25,29 @@ module Providers
         receipt(data['data'])
       end
 
+      def read(info_hash)
+        raise invalid_response unless HASH.match?(info_hash.to_s)
+
+        response = Http.call(endpoint: @connection.endpoint, path: "/api/torrents/#{info_hash}", headers: headers)
+        detail(Http.json(response), info_hash)
+      rescue Failure => error
+        raise unless error.code == 'http_404'
+
+        nil
+      end
+
       private
+
+      def detail(value, expected_hash)
+        identity = receipt(value)
+        name, size, created = value.values_at('name', 'size', 'createdAt')
+        valid = identity.info_hash == expected_hash && name.is_a?(String) && name.bytesize <= 800 && size.is_a?(Integer) && size.positive?
+        raise invalid_response unless valid
+
+        Submission.new(receipt: identity, name: name, size: size, created_at: Time.iso8601(created.to_s))
+      rescue ArgumentError
+        raise invalid_response, cause: nil
+      end
 
       def receipt(value)
         raise invalid_response unless value.is_a?(Hash)

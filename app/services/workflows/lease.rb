@@ -42,6 +42,7 @@ module Workflows
 
       def mark_unknown(operation)
         operation.update!(state: 'outcome_unknown', lease_expires_at: nil, error_code: 'effect_interrupted')
+        Definitions.fetch(operation.kind).interrupted&.call(operation: operation)
         Releases::RecordEvent.call(release_id: operation.release_id, name: 'operation.outcome_unknown', data: { operation_id: operation.id })
       end
     end
