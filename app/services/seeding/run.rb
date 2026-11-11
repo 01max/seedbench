@@ -30,8 +30,15 @@ module Seeding
       progress = assigned.recheck(artifact: artifact, preparation: preparation, location: location)
       phase('seed_resuming', rechecked_progress: progress)
       assigned.resume
+      observe(assigned, progress)
+    end
+
+    def observe(assigned, progress)
+      phase('seed_observing')
       @release.update!(seeding_state: 'seeding')
-      { 'status' => 'seeding', 'progress' => progress }
+      assigned.observe
+      phase('seed_accepted', tracker_accepted: true)
+      { 'status' => 'succeeded', 'progress' => progress, 'tracker_accepted' => true }
     end
 
     def phase(name, reference = {})
@@ -42,9 +49,16 @@ module Seeding
     end
 
     def failure(error)
-      result = { 'status' => 'failed', 'error_code' => error.code }
+      state = uncertain?(error) ? 'unknown' : 'failed'
+      result = { 'status' => state, 'error_code' => error.code }
       result['progress'] = error.progress if error.is_a?(Failure) && error.progress.is_a?(Numeric) && error.progress.between?(0, 100)
       result
+    end
+
+    def uncertain?(error)
+      return true if error.code == 'tracker_timeout'
+
+      error.is_a?(Providers::Failure) && %w[seed_resuming seed_observing].include?(@operation.phase)
     end
 
     def start

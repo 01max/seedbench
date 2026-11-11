@@ -7,7 +7,7 @@ module Workflows
       end
     end
     ENTRIES = {
-      'initial_seed' => Definition.new(compute: Seeding::Run, apply: Seeding::Record, effect: 'remote', retain_stale: true),
+      'initial_seed' => Definition.new(compute: Seeding::Run, apply: Seeding::Record, effect: 'remote', retain_stale: true, interrupted: Seeding::Interrupted),
       'publish' => Definition.new(compute: Publications::Submit, apply: Publications::Record, effect: 'remote', retain_stale: true, interrupted: Publications::Interrupted),
       'draft_delete' => Definition.new(compute: Drafts::Write, apply: Drafts::Record, effect: 'remote', stale: Drafts::Cancel, retain_stale: true),
       'draft_write' => Definition.new(compute: Drafts::Write, apply: Drafts::Record, effect: 'remote', stale: Drafts::Cancel, retain_stale: true),

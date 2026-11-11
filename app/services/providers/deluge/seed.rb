@@ -39,7 +39,23 @@ module Providers
         @client.rpc('core.resume_torrent', [ @info_hash ])
       end
 
+      def observe
+        return if Seeding::Wait.call(seconds: 60) { accepted?(status) }
+
+        raise Seeding::Failure.new(:tracker_timeout)
+      end
+
       private
+
+      def accepted?(current)
+        tracker = current['tracker_status'].to_s
+        if current['state'] == 'Error' || tracker.match?(/(?:\A|: )Error(?:\b|:)/i)
+          ensure_paused!
+          raise Seeding::Failure.new(:tracker_rejected)
+        end
+
+        current['state'] == 'Seeding' && tracker.match?(/(?:\A|: )Announce OK\b/i)
+      end
 
       def start_recheck
         @client.rpc('web.register_event_listener', [ 'TorrentStateChangedEvent' ])

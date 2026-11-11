@@ -27,6 +27,8 @@ fr:
       deluge_connection: "Configurez la connexion Deluge affectée à cette fiche."
       mapping: "Configurez le chemin absolu du dossier des fichiers tel que Deluge le voit."
   seeding:
+    failure: "La mise en partage initiale a été interrompue (%{code})."
+    progress: "Données vérifiées à %{value} %."
     errors:
       mapping: "Le chemin du fichier dans Deluge a changé."
       publication_required: "La publication doit être confirmée avant la mise en partage."
@@ -41,3 +43,5 @@ fr:
       recheck_timeout: "Deluge n’a pas terminé la vérification des données."
       recheck_incomplete: "Le torrent est en pause. Les données vérifiées sont incomplètes."
       interrupted: "La mise en partage a été interrompue."
+      tracker_timeout: "Deluge n’a pas confirmé l’acceptation du tracker dans le délai prévu."
+      tracker_rejected: "Le tracker a refusé le torrent. Le torrent est en pause."

@@ -41,6 +41,11 @@
       <% if operation.kind == "publish" %>
         <% Array(operation.result["errors"]).each do |code| %><p class="work-warning"><%= t("publication.errors.#{code}", default: t("publication.failure", code: code)) %></p><% end %>
       <% end %>
+      <% if operation.kind == "initial_seed" && operation.result["error_code"] %>
+        <% code = operation.result["error_code"] %>
+        <p class="work-warning"><%= t("seeding.errors.#{code}", default: t("seeding.failure", code: code)) %></p>
+        <% if operation.result["progress"] %><p><%= t("seeding.progress", value: operation.result["progress"]) %></p><% end %>
+      <% end %>
       <% if operation.error_code %><p><%= t("workbench.status.diagnostic", code: operation.error_code) %></p><% end %>
       <% if operation.external_reference.present? %><p><%= t("workbench.status.external_identity") %></p><pre><%= JSON.pretty_generate(operation.external_reference) %></pre><% end %>
     </details>
