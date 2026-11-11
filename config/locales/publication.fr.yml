@@ -1,5 +1,6 @@
 fr:
   publication:
+    queued: "Vérification et soumission C411 en attente."
     errors:
       publication_state: "Cette fiche est déjà publiée ou sa soumission doit être vérifiée."
       inspection: "Inspectez le fichier de cette fiche."
@@ -14,3 +15,7 @@ fr:
       bbcode: "Vérifiez la présentation BBCode pour la couverture et les informations actuelles."
       nfo: "Vérifiez le NFO pour le fichier et les informations actuels."
       duplicates: "Vérifiez la recherche C411 et les doublons possibles."
+      connection: "Configurez la connexion C411 affectée à cette fiche."
+      draft_connection: "Le brouillon associé appartient à une autre connexion C411."
+      input_changed: "La fiche a changé pendant la vérification. Relisez la version actuelle."
+      invalid_response: "La réponse de C411 ne permet pas de confirmer la soumission."

@@ -9,9 +9,9 @@ module Providers
     MAX_BYTES = 1_048_576
 
     class << self
-      def call(endpoint:, path:, headers: {}, body: nil, form: nil, redirects: 0, total_timeout: 10, read_timeout: 5, method: nil)
+      def call(endpoint:, path:, headers: {}, body: nil, form: nil, multipart: nil, redirects: 0, total_timeout: 10, read_timeout: 5, method: nil)
         uri = URI.parse(endpoint + path)
-        request = request_for(uri, headers, body, form, method)
+        request = request_for(uri, headers, body, form, multipart, method)
         Timeout.timeout(total_timeout) { execute(uri, request, redirects, read_timeout) }
       rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Zlib::Error
         raise Failure.new('invalid_response', I18n.t('messages.providers.http.reponse_http_illisible_du_fournisseur')), cause: nil
@@ -27,13 +27,14 @@ module Providers
 
       private
 
-      def request_for(uri, headers, body, form, method)
-        type = { get: Net::HTTP::Get, post: Net::HTTP::Post, patch: Net::HTTP::Patch, delete: Net::HTTP::Delete }.fetch(method || (body || form ? :post : :get))
+      def request_for(uri, headers, body, form, multipart, method)
+        type = { get: Net::HTTP::Get, post: Net::HTTP::Post, patch: Net::HTTP::Patch, delete: Net::HTTP::Delete }.fetch(method || ([ body, form, multipart ].any? ? :post : :get))
         request = type.new(uri)
         request['User-Agent'] = 'Seedbench/1.0'
         headers.each { |key, value| request[key] = value }
         request.body = JSON.generate(body) if body
         request.set_form_data(form) if form
+        request.set_form(multipart, 'multipart/form-data') if multipart
         request
       end
 

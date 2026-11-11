@@ -1,14 +1,6 @@
 module Releases
   class ReviewAction
     class UnknownAction < StandardError; end
-    class Unavailable < StandardError
-      attr_reader :revision
-
-      def initialize(revision)
-        @revision = revision
-        super(I18n.t('workbench.errors.unavailable_action'))
-      end
-    end
     KINDS = %w[suggest_name prepare draft publish].freeze
 
     def self.call(release_id:, kind:, expected_revision:, changes:)
@@ -20,7 +12,7 @@ module Releases
 
       return Drafts::Request.call(release_id: release.id, expected_revision: release.input_revision) if kind == 'draft'
 
-      raise Unavailable.new(release.input_revision)
+      Publications::Request.call(release_id: release.id, expected_revision: release.input_revision)
     end
   end
 end

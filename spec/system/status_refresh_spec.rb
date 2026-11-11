@@ -43,12 +43,11 @@ RSpec.describe 'Local status refresh', type: :system do
     expect(page).to have_css('.refresh-state', text: 'État local à jour')
   end
 
-  it 'saves the displayed revision before rejecting an unavailable explicit action' do
+  it 'saves the displayed revision before rejecting an incomplete publication' do
     fill_in 'Présentation', with: 'Reviewed before action'
-    page.execute_script("document.querySelector('button[formaction*=publish]').disabled = false")
     find('button[formaction*=publish]').click
 
-    expect(page).to have_text('Cette action n’est pas disponible')
+    expect(page).to have_text('Associez le fichier original')
     expect(release.content_revisions.where(kind: 'presentation').last.body).to eq('Reviewed before action')
     expect(release.preparation_revisions.count).to eq(0)
   end

@@ -7,6 +7,7 @@ module Workflows
       end
     end
     ENTRIES = {
+      'publish' => Definition.new(compute: Publications::Submit, apply: Publications::Record, effect: 'remote', retain_stale: true),
       'draft_delete' => Definition.new(compute: Drafts::Write, apply: Drafts::Record, effect: 'remote', stale: Drafts::Cancel, retain_stale: true),
       'draft_write' => Definition.new(compute: Drafts::Write, apply: Drafts::Record, effect: 'remote', stale: Drafts::Cancel, retain_stale: true),
       'ai_assessment' => Definition.new(compute: Ai::Compute, apply: Ai::Record, effect: 'local', stale: Ai::Cancel, retain_stale: true),

@@ -11,18 +11,24 @@ module Publications
     end
 
     def call
+      prerequisite_reasons + review_reasons + content_reasons + duplicate_reasons
+    end
+
+    private
+
+    def prerequisite_reasons
       reasons = []
       reasons << 'publication_state' unless %w[unpublished failed].include?(@release.publication_state)
       reasons << 'inspection' unless @inputs.inspected?
       reasons << preparation_reason unless @inputs.prepared?
       reasons << 'cover_review' unless Covers::Policy.current?(release: @release, cover: @inputs.cover)
       reasons << 'hosted_cover' if @before_send && !@inputs.hosting
-      reasons.concat(review_reasons, content_reasons)
-      reasons << 'duplicates' unless Duplicates::Assessment.new(@release).ready?
-      reasons.compact
+      reasons
     end
 
-    private
+    def duplicate_reasons
+      Duplicates::Assessment.new(@release).ready? ? [] : [ 'duplicates' ]
+    end
 
     def preparation_reason
       @inputs.payload ? 'preparation' : 'payload'
