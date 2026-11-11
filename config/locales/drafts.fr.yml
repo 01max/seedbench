@@ -23,6 +23,7 @@ fr:
     link_submit: Confirmer le lien
     sync: Synchroniser maintenant
     sync_failed: "%{connection} · synchronisation impossible : %{message}"
+    sync_draft_failed: "%{connection} · brouillon %{id} · synchronisation impossible : %{message}"
     observed: "Dernière lecture : %{time}"
     local_pending: Le texte local diffère du texte distant. Aucun envoi automatique.
     remote_copy: Voir la copie distante conservée

@@ -37,7 +37,7 @@ class DraftActionsController < ApplicationController
   end
 
   def sync
-    @draft_error = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
+    @draft_errors = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
     nil
   end
 
@@ -74,7 +74,7 @@ class DraftActionsController < ApplicationController
   end
 
   def render_error(error, status)
-    @draft_error = error.message
+    @draft_errors = [ error.message ]
     render_panel(status: status)
   end
 end

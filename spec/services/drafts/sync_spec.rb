@@ -44,10 +44,32 @@ RSpec.describe Drafts::Sync do
   it 'does not turn a failed account refresh into an implicit mutation' do
     connection = release.draft_link.provider_connection
     stub_request(:get, 'https://c411.org/api/user/drafts').to_return(status: 503)
-    error = Drafts::Refresh.call(connection: connection)
-    expect(error).to include('HTTP 503')
+    expect(Drafts::Refresh.call(connection: connection)).to contain_exactly(include('HTTP 503'))
     expect(release.reload.draft_state).to eq('synced')
     expect(WebMock).not_to have_requested(:delete, /c411/)
+  end
+
+  it 'reports a failed draft read and still refreshes the remaining links' do
+    connection = release.draft_link.provider_connection
+    second = draft_data('draft-2')
+    stub_draft_account(second)
+    Drafts::Import.call(connection: connection)
+    healthy = connection.draft_links.find_by!(remote_id: 'draft-2').release
+    stub_request(:get, 'https://c411.org/api/user/drafts/draft-1').to_return(status: 503)
+    stub_draft_account(second.merge('description' => 'New remote copy'))
+
+    expect(Drafts::Refresh.call(connection: connection)).to contain_exactly(include('draft-1', 'HTTP 503'))
+    expect(Drafts::Content.local(healthy.reload)['description']).to eq('New remote copy')
+  end
+
+  it 'continues refreshing linked drafts when a new draft cannot be imported' do
+    connection = release.draft_link.provider_connection
+    stub_draft_account(draft_data(description: 'Remote edit to an existing draft'))
+    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [ { id: 'unreadable' } ] }.to_json)
+    stub_request(:get, 'https://c411.org/api/user/drafts/unreadable').to_return(status: 503)
+
+    expect(Drafts::Refresh.call(connection: connection)).to contain_exactly(include('unreadable', 'HTTP 503'))
+    expect(Drafts::Content.local(release.reload)['description']).to eq('Remote edit to an existing draft')
   end
 
   it 'rejects an older read completing after a newer observation without reverting its adopted text' do

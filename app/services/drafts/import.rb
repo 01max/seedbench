@@ -3,8 +3,11 @@ module Drafts
     def self.call(connection:)
       client = Providers::C411::Drafts.new(connection)
       listing = client.list
-      errors = listing.ids.filter_map { |id| import_id(connection, client, id) }
-      raise errors.first if errors.any?
+      errors = listing.ids.index_with { |id| import_id(connection, client, id) }.compact
+      errors.each do |id, error|
+        raise error unless block_given?
+        yield id, error
+      end
       listing
     end
 
