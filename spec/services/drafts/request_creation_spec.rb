@@ -27,6 +27,17 @@ RSpec.describe Drafts::Request do
     accept_draft_cover(release)
   end
 
+  def create_prepared_draft
+    release = prepared_draft_payload
+    prepare_cover_review(release)
+    stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
+      apply_draft_body(remote, JSON.parse(request.body))['id'] = 'new-draft'
+      { body: { success: true, data: { id: 'new-draft' } }.to_json }
+    end
+    expect(run_draft(release).state).to eq('accepted')
+    release
+  end
+
   it 'hosts within the explicit action, pauses for URL review, then creates the exact prepared draft once' do
     release = prepared_draft_payload
     prepare_cover_review(release)
@@ -65,13 +76,7 @@ RSpec.describe Drafts::Request do
   end
 
   it 'requires confirmed recreation after deletion and retains both remote identities' do
-    release = prepared_draft_payload
-    prepare_cover_review(release)
-    stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
-      apply_draft_body(remote, JSON.parse(request.body))['id'] = 'new-draft'
-      { body: { success: true, data: { id: 'new-draft' } }.to_json }
-    end
-    run_draft(release)
+    release = create_prepared_draft
     stub_request(:get, 'https://c411.org/api/user/drafts/new-draft').to_return(status: 404)
     Drafts::Sync.call(link: release.reload.draft_link)
     expect { described_class.call(release_id: release.id, expected_revision: release.input_revision) }.to raise_error(Drafts::Failure)
@@ -97,19 +102,21 @@ RSpec.describe Drafts::Request do
     expect(sent).to have_been_requested.once
   end
 
-  it 'preserves unrelated remote option selections when updating a linked ebook' do
-    release = prepared_draft_payload
-    prepare_cover_review(release)
-    stub_request(:post, 'https://c411.org/api/user/drafts').to_return do |request|
-      apply_draft_body(remote, JSON.parse(request.body))['id'] = 'new-draft'
-      { body: { success: true, data: { id: 'new-draft' } }.to_json }
+  it 'preserves unrelated option selections from the final read before updating a linked ebook' do
+    release = create_prepared_draft
+    selections = [ [ 2001 ], [ 2002 ], [ 2003 ] ]
+    stub_request(:get, 'https://c411.org/api/user/drafts/new-draft').to_return do
+      remote.fetch('options')['114'] = selections.shift if selections.any?
+      { body: { success: true, data: remote }.to_json }
     end
-    run_draft(release)
-    remote['options']['114'] = [ 2001, 2002 ]
+    latest_selection = nil
     stub_request(:patch, 'https://c411.org/api/user/drafts/new-draft').to_return do |request|
+      latest_selection = remote.fetch('options').fetch('114')
+      selections.clear
       apply_draft_body(remote, JSON.parse(request.body))
       { body: { success: true }.to_json }
     end
-    expect(run_draft(release).body['options']).to include('114' => [ 2001, 2002 ])
+    write = run_draft(release)
+    expect(write).to have_attributes(state: 'accepted', body: include('options' => include('114' => latest_selection)))
   end
 end

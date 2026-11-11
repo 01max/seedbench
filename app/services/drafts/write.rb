@@ -27,16 +27,21 @@ module Drafts
       PrepareWrite.call(write: @write)
       body = Providers::C411::DraftBody.call(write: @write)
       baseline = baseline_ids
-      refresh_before_send
+      body = refresh_before_send(body)
       intent(body, baseline)
       id = @write.action == 'create' ? @client.create(body) : update(body)
       link = Receipt.call(write: @write, remote_id: id)
       Sync.call(link: link, expected_body: @write.body)
     end
 
-    def refresh_before_send
+    def refresh_before_send(body)
       link = @write.release.reload.draft_link
-      Sync.call(link: link) if link
+      return body unless link
+
+      data = Sync.observe(link: link).data
+      return body unless @write.action == 'update' && data
+
+      Providers::C411::DraftBody.preserve_options(body, data)
     end
 
     def delete_draft
