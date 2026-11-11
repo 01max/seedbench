@@ -43,12 +43,19 @@ RSpec.describe 'Local status refresh', type: :system do
     expect(page).to have_css('.refresh-state', text: 'État local à jour')
   end
 
-  it 'saves the displayed revision before rejecting an unavailable explicit action' do
+  it 'saves the displayed revision and refreshes the stale review after publication is blocked' do
+    operation.update!(state: 'failed')
+    find('button[aria-label="Actualiser les contrôles"]').click
+    find('[data-active-operations="false"]')
+    check 'Texte relu'
+    find('[data-check-key="text_review"][data-check-state="done"]')
     fill_in 'Présentation', with: 'Reviewed before action'
-    page.execute_script("document.querySelector('button[formaction*=publish]').disabled = false")
     find('button[formaction*=publish]').click
 
-    expect(page).to have_text('Cette action n’est pas disponible')
+    expect(page).to have_text('Associez le fichier original')
+    expect(page).to have_css('[data-check-key="text_review"][data-check-state="pending"]')
+    check 'Texte relu'
+    expect(page).to have_css('[data-check-key="text_review"][data-check-state="done"]')
     expect(release.content_revisions.where(kind: 'presentation').last.body).to eq('Reviewed before action')
     expect(release.preparation_revisions.count).to eq(0)
   end

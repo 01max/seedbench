@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resource :settings, only: %i[show update]
   resources :uploads, only: :create
   resources :releases, only: %i[index show update] do
+    resource :publication, only: :create
     resource :draft_action, only: %i[show create]
     resource :ai_action, only: %i[show create]
     resource :duplicate_review, only: %i[show create]

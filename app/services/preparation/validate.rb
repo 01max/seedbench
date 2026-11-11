@@ -7,12 +7,17 @@ module Preparation
         preparation = release.preparation_revisions.order(number: :desc).first!
         payload = preparation.payload_revision
         paths = Paths.new
-        verify_root!(release, preparation, paths)
-        info_hash = Torrents::Verify.call(torrent: paths.path(preparation.torrent_locator, kind: :state), payload_path: paths.path(payload.locator),
+        path = payload_path(release: release, preparation: preparation, paths: paths)
+        info_hash = Torrents::Verify.call(torrent: paths.path(preparation.torrent_locator, kind: :state), payload_path: path,
           payload: payload, name: preparation.payload_name)
         raise Failure.new(:invalid_torrent) unless info_hash == preparation.torrent_info_hash
 
         preparation
+      end
+
+      def payload_path(release:, preparation:, paths: Paths.new)
+        verify_root!(release, preparation, paths)
+        paths.path(preparation.payload_revision.locator)
       end
 
       private

@@ -114,6 +114,9 @@ export default class extends Controller {
 
   evidenceLoaded(event) {
     const frame = event.target
+    const publication = frame.querySelector("[data-publication-state]")
+    const publish = this.element.querySelector("[data-publish-action]")
+    if (publication && publish) publish.disabled = !["unpublished", "failed"].includes(publication.dataset.publicationState)
     const preparation = frame.querySelector("[data-preparation-state]")
     if (preparation) {
       this.refreshPreparation(frame, preparation)
@@ -244,7 +247,7 @@ export default class extends Controller {
           this.acceptSave(data.revision, this.valuesFromForm())
         }
       }
-      if (response.ok) this.element.dispatchEvent(new CustomEvent("workbench:action", { bubbles: true }))
+      if (response.ok || Array.isArray(data.reasons)) this.element.dispatchEvent(new CustomEvent("workbench:action", { bubbles: true }))
       this.errorTarget.textContent = data.message || this.messagesValue.action_completed
       this.errorTarget.hidden = false
     } catch {

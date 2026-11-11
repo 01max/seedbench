@@ -37,9 +37,7 @@
           <div class="work-actions">
             <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "prepare") %>" data-prepare-allowed="<%= @snapshot.payload.present? && %w[unpublished failed].include?(@release.publication_state) && @release.seeding_state == "not_started" %>" data-reprepare-label="<%= t("preparation.reprepare") %>" <%= "disabled" if !@snapshot.payload || !%w[unpublished failed].include?(@release.publication_state) || @release.seeding_state != "not_started" || @release.preparation_state == "running" %>><%= @snapshot.preparation ? t("preparation.reprepare") : t("workbench.actions.prepare") %></button>
             <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "draft") %>"><%= @release.draft_link ? t("drafts.update") : t("drafts.create") %></button>
-            <% %w[publish].each do |kind| %>
-              <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: kind) %>" disabled title="<%= t("workbench.actions.unavailable") %>"><%= t("workbench.actions.#{kind}") %></button>
-            <% end %>
+            <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "publish") %>" data-publish-action <%= "disabled" unless %w[unpublished failed].include?(@release.publication_state) %>><%= t("workbench.actions.publish") %></button>
             <button class="work-button" type="submit" form="release-editor"><%= t("workbench.actions.save") %></button>
             <button class="work-button primary" type="button" data-action="editor#next" <%= "disabled" unless @queue.next_id %>><%= t("workbench.actions.save_next") %></button>
           </div>

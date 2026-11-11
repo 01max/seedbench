@@ -1,5 +1,5 @@
 <%= turbo_frame_tag dom_id(@release, :status), data: { controller: "checklist", status_poll_target: "frame" } do %>
-  <div class="status-content" data-status-sequence="<%= @snapshot.events.first&.sequence || 0 %>" data-active-operations="<%= @workflow_active || false %>">
+  <div class="status-content" data-publication-state="<%= @release.publication_state %>" data-status-sequence="<%= @snapshot.events.first&.sequence || 0 %>" data-active-operations="<%= @workflow_active || false %>">
   <% preparation_operation = @snapshot.operations.find { |operation| operation.kind == "preparation" && operation.state == "succeeded" && operation.result["preparation_id"] == @snapshot.preparation&.id } %>
   <span hidden data-preparation-state="<%= @release.preparation_state %>" data-has-preparation="<%= @snapshot.preparation.present? %>" data-preparation-approved-revision="<%= preparation_operation&.input_revision %>" data-preparation-completed-revision="<%= preparation_operation&.input_revision&.+(1) %>" data-preparation-observed-revision="<%= @release.input_revision %>"></span>
   <% if @check_error %>
@@ -26,12 +26,27 @@
     <% { "inspection" => @release.inspection_state, "preparation" => @release.preparation_state, "draft" => @release.draft_state, "publication" => @release.publication_state, "seeding" => @release.seeding_state }.each do |key, state| %><p><%= t("workbench.status.dimension", label: t("workbench.checklist.#{key}.label"), state: workflow_label(state)) %></p><% end %>
   </details>
   <% if @release.publication_state == "published" && @release.draft_link && !@snapshot.snapshots["draft"]&.remote_deleted %><p role="alert" class="work-alert"><%= t("drafts.leftover") %></p><% end %>
+  <% publication_result = @snapshot.operations.find { |operation| operation.kind == "publish" }&.result %>
+  <% if publication_result&.dig("errors").present? %>
+    <p role="alert" class="work-alert"><%= publication_result["errors"].map { |code| t("publication.errors.#{code}", default: t("publication.failure", code: code)) }.join(" ") %></p>
+  <% end %>
+  <% if @publication_error %><p role="alert" class="work-alert"><%= @publication_error %></p><% end %>
+  <% if @publication_notice %><p role="status"><%= @publication_notice %></p><% end %>
+  <% if @release.publication_state == "outcome_unknown" %>
+    <%= button_to t("publication.reconcile"), release_publication_path(@release), class: "work-button",
+          form: { data: { turbo_frame: dom_id(@release, :status) } } %>
+  <% end %>
   <% @snapshot.snapshots.each do |kind, snapshot| %><p class="remote-identity"><%= t("workbench.status.remote", kind: t("workbench.status.#{kind == 'draft' ? 'draft' : 'submission'}"), id: snapshot.remote_id) %><%= t("workbench.status.absent") if snapshot.remote_deleted %></p><% end %>
   <% @snapshot.operations.each do |operation| %>
     <details class="operation-state" data-detail-key="operation_<%= operation.id %>">
       <summary><%= t("workbench.status.operation", id: operation.id, state: workflow_label(operation.state)) %></summary>
       <p><%= t("workbench.status.phase", phase: operation_phase_label(operation.phase)) %></p>
       <% if operation.kind == "preparation" && (operation.result["error_code"] || operation.error_code) %><p class="work-warning"><%= t("preparation.errors.#{operation.result['error_code'] || operation.error_code}", default: t("preparation.errors.operation_expired")) %></p><% end %>
+      <% if operation.kind == "initial_seed" && operation.result["error_code"] %>
+        <% code = operation.result["error_code"] %>
+        <p class="work-warning"><%= t("seeding.errors.#{code}", default: t("seeding.failure", code: code)) %></p>
+        <% if operation.result["progress"] %><p><%= t("seeding.progress", value: operation.result["progress"]) %></p><% end %>
+      <% end %>
       <% if operation.error_code %><p><%= t("workbench.status.diagnostic", code: operation.error_code) %></p><% end %>
       <% if operation.external_reference.present? %><p><%= t("workbench.status.external_identity") %></p><pre><%= JSON.pretty_generate(operation.external_reference) %></pre><% end %>
     </details>

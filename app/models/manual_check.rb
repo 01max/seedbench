@@ -26,4 +26,8 @@ class ManualCheck < ApplicationRecord
   attr_readonly :release_id, :key, :number, :checked, :input_revision, :actor
   validates :key, inclusion: { in: %w[edition_review text_review] }
   validates :number, numericality: { only_integer: true, greater_than: 0 }
+
+  def checked_at_revision?(revision)
+    checked? && input_revision == revision
+  end
 end
