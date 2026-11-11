@@ -8,8 +8,9 @@ RSpec.describe Drafts::DeleteRequest do
     release = imported_draft
     release.update!(publication_state: 'published')
     expect(Drafts::AfterPublication.call(release_id: release.id)).to be(true)
-    expect { described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1', confirmed: false) }.to raise_error(Drafts::Failure)
-    operation = described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1', confirmed: true)
+    snapshot = release.remote_snapshots.last
+    expect { described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1', snapshot_id: snapshot.id, confirmed: false) }.to raise_error(Drafts::Failure)
+    operation = described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1', snapshot_id: snapshot.id, confirmed: true)
     deleted = stub_request(:delete, 'https://c411.org/api/user/drafts/draft-1').to_return do
       stub_request(:get, 'https://c411.org/api/user/drafts/draft-1').to_return(status: 404)
       { body: { success: true }.to_json }
@@ -20,10 +21,27 @@ RSpec.describe Drafts::DeleteRequest do
     expect(release.reload.publication_state).to eq('published')
   end
 
+  it 'rejects cleanup if sync records an edit after the displayed snapshot' do
+    release = imported_draft
+    release.update!(publication_state: 'published')
+    shown = release.remote_snapshots.last
+    revision = release.input_revision
+    stub_draft_account(draft_data(description: 'Edited after the cleanup form was opened'))
+    Drafts::Sync.call(link: release.draft_link)
+    expect(release.reload.input_revision).to eq(revision)
+
+    operation = described_class.call(release_id: release.id, expected_revision: revision, remote_id: 'draft-1', snapshot_id: shown.id, confirmed: true)
+    Workflows::Execute.call(operation_id: operation.id)
+
+    expect(operation.draft_write.reload).to have_attributes(state: 'failed', error_code: 'observation_changed')
+    expect(WebMock).not_to have_requested(:delete, 'https://c411.org/api/user/drafts/draft-1')
+  end
+
   it 'reconciles a deletion timeout by reading absence without sending delete twice' do
     release = imported_draft
     release.update!(publication_state: 'published')
-    operation = described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1', confirmed: true)
+    operation = described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1',
+      snapshot_id: release.remote_snapshots.last.id, confirmed: true)
     sent = stub_request(:delete, 'https://c411.org/api/user/drafts/draft-1').to_timeout
     Workflows::Execute.call(operation_id: operation.id)
     write = operation.reload.draft_write

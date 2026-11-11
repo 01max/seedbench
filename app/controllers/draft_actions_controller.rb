@@ -45,7 +45,7 @@ class DraftActionsController < ApplicationController
     raise Drafts::Failure.new(:confirmation_required) unless attributes[:confirmed] == '1'
     arguments = { release_id: @release.id, expected_revision: Integer(attributes[:expected_revision], exception: false) }
     if attributes[:kind] == 'delete'
-      Drafts::DeleteRequest.call(**arguments, remote_id: attributes[:remote_id], confirmed: attributes[:confirmed] == '1')
+      Drafts::DeleteRequest.call(**arguments, remote_id: attributes[:remote_id], snapshot_id: attributes[:snapshot_id], confirmed: attributes[:confirmed] == '1')
     else
       Drafts::Request.call(**arguments, recreate_confirmed: attributes[:confirmed] == '1')
     end

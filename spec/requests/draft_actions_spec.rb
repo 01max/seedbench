@@ -59,6 +59,24 @@ RSpec.describe 'C411 draft actions' do
     expect(release.draft_writes).to be_empty
   end
 
+  it 'requires the displayed snapshot to confirm cleanup' do
+    release = imported_draft
+    release.update!(publication_state: 'published')
+    sign_in_operator
+    get release_draft_action_path(release)
+    expect(response.body).to include('name="draft[snapshot_id]"')
+
+    parameters = { kind: 'delete', expected_revision: release.input_revision, remote_id: 'draft-1', confirmed: '1' }
+    post release_draft_action_path(release), params: { draft: parameters }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(release.draft_writes).to be_empty
+
+    snapshot = release.remote_snapshots.last
+    post release_draft_action_path(release), params: { draft: parameters.merge(snapshot_id: snapshot.id) }
+    expect(response).to have_http_status(:ok)
+    expect(release.draft_writes.sole.request).to include('snapshot_id' => snapshot.id, 'remote_content' => snapshot.remote_content)
+  end
+
   it 'explains an interrupted accepted write instead of returning an unexpected error or sending again' do
     release = imported_draft
     operation = Drafts::Request.call(release_id: release.id, expected_revision: release.input_revision)
