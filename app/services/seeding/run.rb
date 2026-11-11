@@ -35,7 +35,7 @@ module Seeding
 
     def observe(assigned, progress)
       phase('seed_observing')
-      @release.update!(seeding_state: 'seeding')
+      @release.with_lock { @release.update!(seeding_state: 'seeding') }
       assigned.observe
       phase('seed_accepted', tracker_accepted: true)
       { 'status' => 'succeeded', 'progress' => progress, 'tracker_accepted' => true }

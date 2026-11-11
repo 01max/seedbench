@@ -114,6 +114,9 @@ export default class extends Controller {
 
   evidenceLoaded(event) {
     const frame = event.target
+    const publication = frame.querySelector("[data-publication-state]")
+    const publish = this.element.querySelector("[data-publish-action]")
+    if (publication && publish) publish.disabled = !["unpublished", "failed"].includes(publication.dataset.publicationState)
     const preparation = frame.querySelector("[data-preparation-state]")
     if (preparation) {
       this.refreshPreparation(frame, preparation)

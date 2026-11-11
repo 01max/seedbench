@@ -37,7 +37,7 @@ module Publications
       preparation = @release.preparation_revisions.find(@operation.parameters.fetch('preparation_id'))
       started_at = Time.iso8601(reference.fetch('sending_at'))
       detail.name == preparation.release_name && detail.size == preparation.payload_size_bytes &&
-        detail.created_at.between?(started_at - 2.seconds, Time.current + 5.seconds)
+        detail.created_at.between?(2.seconds.before(started_at), 5.seconds.from_now)
     end
 
     def confirm(receipt)

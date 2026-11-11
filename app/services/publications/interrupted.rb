@@ -5,7 +5,7 @@ module Publications
     class << self
       def call(operation:)
         return unless operation.state == 'outcome_unknown'
-        return if operation.release.publication_state == 'published'
+        return confirm_recorded_acceptance(operation) if operation.phase == 'publication_accepted'
 
         if operation.phase == SENDING
           operation.release.update!(publication_state: 'outcome_unknown')
@@ -29,6 +29,13 @@ module Publications
           end
           release.publication_state
         end
+      end
+
+      private
+
+      def confirm_recorded_acceptance(operation)
+        operation.update!(state: 'succeeded', phase: 'reconciled', finished_at: Time.current, error_code: nil,
+          result: { 'status' => 'accepted', 'draft_observation' => 'unavailable' })
       end
     end
   end

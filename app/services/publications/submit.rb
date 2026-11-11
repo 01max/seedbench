@@ -16,14 +16,7 @@ module Publications
       torrent = torrent_bytes(preparation)
       cover_and_content = reviewed_content
       category = Providers::C411::DraftCategory.call(connection: @connection, format: preparation.payload_revision.format)
-      client = Providers::C411::Publications.new(@connection)
-      raise Failure.new(:existing_submission) if client.read(preparation.torrent_info_hash)
-
-      check = Review.refresh(@operation)
-      verify_payload!(preparation)
-      intent!(preparation, cover_and_content, check)
-      receipt = client.submit(fields: fields(preparation, cover_and_content, category),
-        torrent: torrent, nfo: cover_and_content.nfo, name: preparation.release_name)
+      receipt = submit(preparation, cover_and_content, category, torrent)
       Receipt.call(operation: @operation, receipt: receipt)
       { 'status' => 'accepted', 'draft_observation' => DraftObservation.call(release: @release) }
     rescue Failure, Preparation::Failure, Providers::Failure, Covers::Failure, Drafts::Failure, Duplicates::Failure, Releases::RevisionConflict => error
@@ -31,6 +24,17 @@ module Publications
     end
 
     private
+
+    def submit(preparation, content, category, torrent)
+      client = Providers::C411::Publications.new(@connection)
+      raise Failure.new(:existing_submission) if client.read(preparation.torrent_info_hash)
+
+      check = Review.refresh(@operation)
+      verify_payload!(preparation)
+      intent!(preparation, content, check)
+      client.submit(fields: fields(preparation, content, category),
+        torrent: torrent, nfo: content.nfo, name: preparation.release_name)
+    end
 
     def connection
       assigned = @release.provider_assignments.find_by(role: 'publishing')&.provider_connection
@@ -60,6 +64,9 @@ module Publications
 
     def reviewed_content
       Covers::Host.call(operation_id: @operation.id, attempt_token: @attempt)
+      reasons = Gate.call(release: @release.reload, before_send: true)
+      raise Failure.new(reasons) if reasons.any?
+
       Content::ReviewedAction.call(operation_id: @operation.id, attempt_token: @attempt)
     end
 

@@ -278,6 +278,15 @@ fr:
       discarded: "Ancien résultat écarté"
       retry_pending: "Reprise en attente"
       accepted: "Acceptation observée"
+      publication_sending: "Soumission à C411"
+      publication_accepted: "Soumission acceptée"
+      publication_rejected: "Soumission refusée"
+      reconciled: "Soumission vérifiée"
+      seed_importing: "Import dans Deluge"
+      seed_rechecking: "Vérification des données"
+      seed_resuming: "Démarrage du partage"
+      seed_observing: "Vérification du tracker"
+      seed_accepted: "Partage initial confirmé"
       other: "Étape enregistrée"
     events:
       fact:

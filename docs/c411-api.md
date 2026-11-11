@@ -101,8 +101,8 @@ The original draft remained readable and its revision stayed unchanged.
 `GET /api/torrents/{infoHash}` returned the submission's ID, name, status,
 size, and creation time in a top-level JSON object. The detail response
 reported `isOwner: false` even for the account that submitted it by API.
-A missing or inaccessible detail cannot rule out acceptance of an interrupted
-request. The authenticated guide says uploads can enter Team Pending. The
+A nonexistent info hash returned HTTP 404. A missing or inaccessible detail
+cannot rule out acceptance of an interrupted request. The authenticated guide says uploads can enter Team Pending. The
 test did not exercise that state.
 
 The Torznab download URL was established from an authenticated search

@@ -62,9 +62,9 @@ module Seeding
     end
 
     def c411_tracker?(url)
-      return false unless url.is_a?(String) && url.bytesize.between?(1, 2048)
+      return false unless url.to_s.bytesize <= 2048
 
-      uri = URI.parse(url)
+      uri = URI.parse(url.to_s)
       uri.is_a?(URI::HTTP) && uri.userinfo.nil? && uri.fragment.nil? && uri.path.present? && c411_host?(uri.host)
     rescue URI::InvalidURIError
       false

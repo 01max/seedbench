@@ -12,6 +12,7 @@ module Publications
       @release.with_lock do
         @operation.reload
         return if @release.publication_state == 'published'
+        raise Failure.new(:reconcile_unconfirmed) unless accepting?
 
         reference = { submission_id: receipt.id, info_hash: receipt.info_hash, submission_status: receipt.status }
         persist(reference, receipt.id)
@@ -20,6 +21,11 @@ module Publications
     end
 
     private
+
+    def accepting?
+      @operation.phase == Interrupted::SENDING && %w[running outcome_unknown].include?(@operation.state) &&
+        %w[submitting outcome_unknown].include?(@release.publication_state)
+    end
 
     def persist(reference, id)
       Workflows::RecordOutcome.call(operation_id: @operation.id, attempt_token: @operation.attempt_token,

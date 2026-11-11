@@ -80,7 +80,7 @@ The authenticated [API guide](https://c411.org/user/integrations/guide) document
 | Description | Guide: at least 20 characters; live standard editor displays 15,000 maximum. Server-side maximum was not probed. |
 | Moderator note | Live form displays 500 characters maximum. |
 | Publication attachments | Guide: torrent maximum 10 Mo; NFO maximum 3 Mo. The upload-byte boundary was not tested. |
-| Draft attachments | Guide: base64 in JSON; observed object fields are `name` and `data`. Attachment round trips remain unverified. |
+| Draft attachments | Guide: base64 in JSON; observed object fields are `name` and `data`. Base64 attachment round trips were verified. |
 
 A tag list does not establish every nesting, escaping, or renderer rule. Literal
 bracket escaping and malformed-tag handling remain unverified. Local preview
