@@ -40,6 +40,21 @@ RSpec.describe Publications::Submit do
     expect(sent).not_to have_been_requested
   end
 
+  it 'requires a new manual review after a mechanically valid NFO edit' do
+    sent = stub_publication(preparation)
+    nfo = release.content_revisions.where(kind: 'nfo').last.body
+    Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { nfo: "#{nfo}\nNote ajoutée.\n" })
+
+    expect(Content::Status.call(release: release.reload).kinds.fetch('nfo').fetch(:state)).to eq('ready')
+    expect { request_publication(release) }.to raise_error(Publications::Failure) { |error| expect(error.codes).to include('text_review') }
+    expect(sent).not_to have_been_requested
+
+    Releases::MarkCheck::KEYS.each do |key|
+      Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: release.input_revision)
+    end
+    expect(publish.result).to include('status' => 'accepted')
+  end
+
   it 'rejects changed canonical bytes even when the operator originally passed all gates' do
     sent = stub_publication(preparation)
     operation = request_publication(release)

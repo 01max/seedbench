@@ -36,7 +36,9 @@ module Publications
 
     def review_reasons
       checklist = Releases::Snapshot.call(release: @release).findings
-      reasons = Releases::MarkCheck::KEYS.reject { |key| @release.manual_checks.where(key: key).order(:id).last&.checked }
+      reasons = Releases::MarkCheck::KEYS.reject do |key|
+        @release.manual_checks.where(key: key).order(:id).last&.checked_at_revision?(@release.input_revision)
+      end
       reasons << 'mechanical_failure' if checklist.any? { |finding| finding.severity == 'failure' }
       reasons << 'acknowledgements' if checklist.any? { |finding| unacknowledged?(finding) }
       reasons

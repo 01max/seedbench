@@ -181,7 +181,7 @@ fr:
         label: "Édition relue"
       text_review:
         label: "Texte relu"
-      manual_note: "Marque de relecture réversible"
+      manual_note: "Marque de relecture de la révision enregistrée"
       inspection:
         label: "Inspection"
         failed: "Échec vérifiable à résoudre"
