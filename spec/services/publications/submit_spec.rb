@@ -162,6 +162,16 @@ RSpec.describe Publications::Submit do
     expect(sent).to have_been_requested.once
   end
 
+  it 'waits past a cached tracker success and handles the fresh rejection' do
+    stub_publication(preparation)
+    stub_personalized_download(preparation)
+    requests = stub_seed_daemon(preparation, existing: true, cached_tracker_status: 'Announce OK', tracker_status: 'Error: synthetic rejection')
+    publish
+
+    expect(seed.result).to include('status' => 'failed', 'error_code' => 'tracker_rejected')
+    expect(requests.map(&:first)).to include('core.pause_torrent')
+  end
+
   it 'rejects the local preparation torrent in place of a personalized download' do
     stub_publication(preparation)
     local = Preparation::Paths.new.path(preparation.torrent_locator, kind: :state).binread

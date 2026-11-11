@@ -57,9 +57,10 @@ module PublicationFixtures
   class DelugeSession
     attr_reader :requests
 
-    def initialize(preparation, progress:, tracker_status:, existing:)
+    def initialize(preparation, progress:, tracker_status:, existing:, cached_tracker_status:)
       @preparation, @progress, @tracker_status, @existing = preparation, progress, tracker_status, existing
-      @requests = []
+      @cached_tracker_status = cached_tracker_status
+      @requests, @events = [], []
       @state, @move_completed = 'Paused', true
     end
 
@@ -79,7 +80,7 @@ module PublicationFixtures
       when 'web.get_hosts' then [ [ 'seed-daemon' ] ]
       when 'core.get_session_state' then @existing ? [ @preparation.torrent_info_hash ] : []
       when 'core.get_torrent_status' then status
-      when 'web.get_events' then events
+      when 'web.get_events' then @events.shift(@events.size)
       else mutate(method, params)
       end
     end
@@ -88,25 +89,45 @@ module PublicationFixtures
       case method
       when 'core.add_torrent_file' then @preparation.torrent_info_hash
       when 'core.set_torrent_options' then @move_completed = params.last.fetch('move_completed')
-      when 'core.force_recheck' then @rechecked = true
-      when 'core.resume_torrent' then @state = 'Seeding'
+      when 'core.force_recheck' then recheck
+      when 'core.resume_torrent' then resume
       when 'core.pause_torrent' then @state = 'Paused'
       end
+    end
+
+    def recheck
+      @rechecked = true
+      @events << [ 'TorrentStateChangedEvent', [ @preparation.torrent_info_hash, 'Paused' ] ]
+    end
+
+    def resume
+      @state = 'Seeding'
+      record_tracker unless @cached_tracker_status
     end
 
     def status
       { name: @preparation.payload_name, download_location: LOCATION, state: @state, move_completed: @move_completed,
         is_finished: @rechecked && @progress == 100, progress: @rechecked ? @progress : 100,
-        tracker_status: @state == 'Seeding' ? @tracker_status : '', trackers: [ { url: TRACKER } ] }
+        tracker_status: tracker_status, trackers: [ { url: TRACKER } ] }
     end
 
-    def events
-      @rechecked ? [ [ 'TorrentStateChangedEvent', [ @preparation.torrent_info_hash, 'Paused' ] ] ] : []
+    def tracker_status
+      return @cached_tracker_status.to_s unless @state == 'Seeding'
+      return @tracker_status unless @cached_tracker_status
+
+      cached = @cached_tracker_status
+      @cached_tracker_status = nil
+      record_tracker
+      cached
+    end
+
+    def record_tracker
+      @events << [ 'TorrentTrackerStatusEvent', [ @preparation.torrent_info_hash, @tracker_status ] ]
     end
   end
 
-  def stub_seed_daemon(preparation, progress: 100, tracker_status: 'Announce OK', existing: false)
-    session = DelugeSession.new(preparation, progress: progress, tracker_status: tracker_status, existing: existing)
+  def stub_seed_daemon(preparation, progress: 100, tracker_status: 'Announce OK', existing: false, cached_tracker_status: nil)
+    session = DelugeSession.new(preparation, progress: progress, tracker_status: tracker_status, existing: existing, cached_tracker_status: cached_tracker_status)
     stub_request(:post, DELUGE).to_return { |request| session.response(request) }
     session.requests
   end

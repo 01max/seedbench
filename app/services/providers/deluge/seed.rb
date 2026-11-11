@@ -4,6 +4,9 @@ module Providers
   class Deluge
     class Seed
       STATUS_FIELDS = %w[name state progress is_finished download_location move_completed tracker_status trackers].freeze
+      TRACKER_EVENT = 'TorrentTrackerStatusEvent'.freeze
+      TRACKER_ERROR = /(?:\A|: )Error(?:\b|:)/i
+      ANNOUNCE_OK = /(?:\A|: )Announce OK\b/i
 
       def initialize(connection:, info_hash:)
         @client, @info_hash = Deluge.new(connection), info_hash
@@ -40,31 +43,45 @@ module Providers
       end
 
       def observe
-        return if Seeding::Wait.call(seconds: 60) { accepted?(status) }
+        confirmed = Seeding::Wait.call(seconds: 60) do
+          read_events
+          accepted?(status)
+        end
 
-        raise Seeding::Failure.new(:tracker_timeout)
+        raise Seeding::Failure.new(:tracker_timeout) unless confirmed
       end
 
       private
 
       def accepted?(current)
-        tracker = current['tracker_status'].to_s
-        if current['state'] == 'Error' || tracker.match?(/(?:\A|: )Error(?:\b|:)/i)
+        if current['state'] == 'Error' || TRACKER_ERROR.match?(@tracker_observation)
           ensure_paused!
           raise Seeding::Failure.new(:tracker_rejected)
         end
 
-        current['state'] == 'Seeding' && tracker.match?(/(?:\A|: )Announce OK\b/i)
+        current['state'] == 'Seeding' && ANNOUNCE_OK.match?(@tracker_observation) && ANNOUNCE_OK.match?(current['tracker_status'].to_s)
       end
 
       def start_recheck
         @client.rpc('web.register_event_listener', [ 'TorrentStateChangedEvent' ])
+        @client.rpc('web.register_event_listener', [ TRACKER_EVENT ])
         @client.rpc('web.get_events')
+        @tracker_observation = nil
         @client.rpc('core.force_recheck', [ [ @info_hash ] ])
       end
 
       def returned_to_paused?
-        Array(@client.rpc('web.get_events')).include?([ 'TorrentStateChangedEvent', [ @info_hash, 'Paused' ] ])
+        read_events.include?([ 'TorrentStateChangedEvent', [ @info_hash, 'Paused' ] ])
+      end
+
+      def read_events
+        events = Array(@client.rpc('web.get_events'))
+        events.each do |name, arguments|
+          next unless name == TRACKER_EVENT && arguments.is_a?(Array) && arguments.first == @info_hash
+
+          @tracker_observation = arguments[1].to_s
+        end
+        events
       end
 
       def ensure_paused!
