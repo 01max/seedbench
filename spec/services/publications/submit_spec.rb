@@ -128,6 +128,17 @@ RSpec.describe Publications::Submit do
     expect { Workflows::Execute.call(operation_id: operation.id) }.not_to change(requests, :size)
   end
 
+  it 'runs the accepted seed handoff after an unrelated local save' do
+    stub_publication(preparation)
+    stub_personalized_download(preparation)
+    stub_seed_daemon(preparation)
+    publish
+    Releases::Save.call(release_id: release.id, expected_revision: release.reload.input_revision, changes: { notes: 'Notes après publication' })
+
+    expect(seed.result).to include('status' => 'succeeded')
+    expect(release.reload.seeding_state).to eq('succeeded')
+  end
+
   it 'retains a measured 99 percent result and leaves the existing torrent paused' do
     stub_publication(preparation)
     stub_personalized_download(preparation)
