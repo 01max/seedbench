@@ -16,7 +16,9 @@ module Publications
 
         reference = { submission_id: receipt.id, info_hash: receipt.info_hash, submission_status: receipt.status }
         persist(reference, receipt.id)
-        Seeding::Request.call(operation: @operation, receipt: receipt)
+        seed_operation = Seeding::Request.call(operation: @operation, receipt: receipt)
+        Interrupted.call(operation: @operation.reload) if @operation.state == 'outcome_unknown'
+        seed_operation
       end
     end
 

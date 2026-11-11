@@ -144,6 +144,23 @@ RSpec.describe Publications::Submit do
     expect(release.workflow_operations.where(kind: 'initial_seed')).to be_empty
   end
 
+  it 'finalizes an acknowledged publication after its sending lease was recovered' do
+    stub_publication(preparation)
+    operation = request_publication(release)
+    sent = stub_request(:post, 'https://c411.org/api/torrents').to_return do
+      operation.reload.update!(lease_expires_at: 1.second.ago)
+      Workflows::Lease.expire(operation_id: operation.id)
+      { body: { success: true, data: { id: 42, infoHash: preparation.torrent_info_hash, status: 'approved' } }.to_json }
+    end
+
+    2.times { Workflows::Execute.call(operation_id: operation.id) }
+
+    expect(operation.reload).to have_attributes(state: 'succeeded', result: { 'status' => 'accepted', 'draft_observation' => 'unlinked' })
+    expect(release.reload.publication_state).to eq('published')
+    expect(release.workflow_operations.where(kind: 'initial_seed').count).to eq(1)
+    expect(sent).to have_been_requested.once
+  end
+
   it 'uses the site-issued torrent, sets only per-torrent options and stops after tracker acceptance' do
     stub_publication(preparation)
     stub_personalized_download(preparation)

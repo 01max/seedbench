@@ -18,12 +18,18 @@ module Publications
       category = Providers::C411::DraftCategory.call(connection: @connection, format: preparation.payload_revision.format)
       receipt = submit(preparation, cover_and_content, category, torrent)
       Receipt.call(operation: @operation, receipt: receipt)
-      { 'status' => 'accepted', 'draft_observation' => DraftObservation.call(release: @release) }
+      accepted_result
     rescue Failure, Preparation::Failure, Providers::Failure, Covers::Failure, Drafts::Failure, Duplicates::Failure, Releases::RevisionConflict => error
       record_failure(error)
     end
 
     private
+
+    def accepted_result
+      result = { 'status' => 'accepted', 'draft_observation' => DraftObservation.call(release: @release) }
+      @operation.update!(result: @operation.result.merge(result)) if @operation.state == 'succeeded'
+      result
+    end
 
     def submit(preparation, content, category, torrent)
       client = Providers::C411::Publications.new(@connection)
