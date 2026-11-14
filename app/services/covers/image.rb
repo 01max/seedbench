@@ -2,6 +2,8 @@ require 'tempfile'
 require 'timeout'
 
 module Covers
+  # Runs a bounded image probe to read dimensions, media type and verification data from cover
+  # bytes.
   class Image
     class << self
       def call(bytes:)

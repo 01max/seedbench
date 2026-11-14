@@ -1,4 +1,5 @@
 module Ai
+  # Marks unfinished AI runs stale when the workflow discards their inputs.
   class Cancel
     def self.call(operation:)
       run = operation.release.ai_runs.find_by(workflow_operation_id: operation.id)

@@ -1,4 +1,6 @@
 module Covers
+  # Uploads or reuses the reviewed cover during an explicit remote write and records hosting
+  # verification.
   class Host
     def self.call(operation_id:, attempt_token:)
       raise Failure.new(:transaction_open) if ApplicationRecord.connection.transaction_open?

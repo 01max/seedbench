@@ -1,4 +1,5 @@
 module Ebooks
+  # Turns ebook metadata and sampled ISBN mentions into source-linked candidates for edition review.
   class Candidates
     ISBN_PATTERN = /(?<![[:alnum:]])(?:97[89](?:[ -]*\d){10}|\d(?:[ -]*\d){8}[ -]*[\dXx])(?![[:alnum:]])/
 

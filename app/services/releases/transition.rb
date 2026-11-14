@@ -1,4 +1,6 @@
 module Releases
+  # Applies an allowed release state transition after checking the expected revision and records it
+  # in history.
   class Transition
     class NotAllowed < StandardError
       attr_reader :dimension, :from, :to

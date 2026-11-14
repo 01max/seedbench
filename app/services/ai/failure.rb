@@ -1,4 +1,5 @@
 module Ai
+  # Carries a localized error and stable code for failures callers can handle in the AI workflow.
   class Failure < StandardError
     attr_reader :code
 

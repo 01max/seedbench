@@ -1,4 +1,6 @@
 module Releases
+  # Updates a release's title or author with an optimistic revision check and refreshes its search
+  # text.
   class Revise
     class InvalidChanges < StandardError; end
     EDITABLE = %w[title author].freeze

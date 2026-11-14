@@ -1,4 +1,6 @@
 module Releases
+  # Saves current editor changes before dispatching an explicit naming, preparation, draft or
+  # publish action.
   class ReviewAction
     class UnknownAction < StandardError; end
     KINDS = %w[suggest_name prepare draft publish].freeze

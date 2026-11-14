@@ -1,4 +1,5 @@
 module Workflows
+  # Delivers persisted dispatch intents to Solid Queue and recovers interrupted deliveries.
   class Dispatch
     PROCESS_FAILURES = %w[SolidQueue::Processes::ProcessPrunedError SolidQueue::Processes::ProcessExitError SolidQueue::Processes::ProcessMissingError].freeze
 

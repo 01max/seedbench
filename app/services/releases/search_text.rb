@@ -1,4 +1,5 @@
 module Releases
+  # Builds the normalized title and author text stored for release searches.
   class SearchText
     def self.call(title:, author: nil)
       [ title, author ].compact.join(' ').encode(Encoding::UTF_8, invalid: :replace, undef: :replace)

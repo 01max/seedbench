@@ -1,4 +1,6 @@
 module Drafts
+  # Imports existing drafts when a C411 connection becomes usable and records any import failure on
+  # the connection.
   class Connect
     def self.call(connection:)
       return unless connection.provider == 'c411' && !connection.configuration_incomplete?

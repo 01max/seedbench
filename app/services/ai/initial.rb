@@ -1,4 +1,6 @@
 module Ai
+  # Queues the first assessment and prose requests after inspection when the release has automatic
+  # AI enabled.
   class Initial
     class << self
       def call(release:)

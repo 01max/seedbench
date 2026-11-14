@@ -1,4 +1,5 @@
 module Ebooks
+  # Recomputes edition and inspection findings from the evidence available for a release's payload.
   class Findings
     CODES = %w[inspection_failure sampled_pages edition_conflict edition_medium invalid_reviewed_isbn].freeze
 

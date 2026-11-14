@@ -1,4 +1,5 @@
 module Duplicates
+  # Records operator decisions on duplicate candidates or a reasoned manual-search exception.
   class Review
     class << self
       def call(release_id:, expected_revision:, check_id:, candidate_key:, decision:, reason: '')

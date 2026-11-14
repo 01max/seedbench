@@ -1,4 +1,5 @@
 module Preparation
+  # Reserves a canonical destination and records source and mount identity before a payload move.
   class Reserve
     def self.call(operation:, payload:, destination:, paths: Paths.new)
       existing = PayloadMove.find_by(workflow_operation_id: operation.id)

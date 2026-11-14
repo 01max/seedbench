@@ -1,4 +1,5 @@
 module Covers
+  # Reads a selected cover from inspection evidence, an edition record, an upload or a supplied URL.
   class Source
     Result = Data.define(:bytes, :provenance)
 

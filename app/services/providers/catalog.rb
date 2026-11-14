@@ -1,4 +1,5 @@
 module Providers
+  # Maps provider roles to their configuration requirements and connection-check adapters.
   class Catalog
     Definition = Data.define(:provider, :name, :title, :endpoint, :secret)
     ROLES = {

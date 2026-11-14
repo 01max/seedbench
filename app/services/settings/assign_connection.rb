@@ -1,4 +1,5 @@
 module Settings
+  # Assigns a provider connection to an unconfigured release role after checking its revision.
   class AssignConnection
     class AlreadyAssigned < StandardError; end
 

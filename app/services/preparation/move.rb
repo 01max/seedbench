@@ -1,4 +1,5 @@
 module Preparation
+  # Locks a payload and performs its journaled canonical rename using the verified source identity.
   class Move
     def self.call(operation:, names:, paths: Paths.new)
       paths.synchronize(payload_id: operation.parameters.fetch('payload_revision_id')) do

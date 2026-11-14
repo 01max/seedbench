@@ -1,4 +1,5 @@
 module Drafts
+  # Reads a linked C411 draft and records its observed text or absence without sending any changes.
   class Sync
     Observation = Data.define(:snapshot, :data)
 

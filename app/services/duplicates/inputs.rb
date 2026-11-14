@@ -1,6 +1,7 @@
 require 'digest'
 
 module Duplicates
+  # Builds duplicate-search queries and fingerprints the edition values they describe.
   class Inputs
     class << self
       def call(release:)

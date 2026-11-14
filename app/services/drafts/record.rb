@@ -1,4 +1,6 @@
 module Drafts
+  # Records the result of a draft workflow attempt in release history and returns its persisted
+  # summary.
   class Record
     def self.call(operation:, result:)
       raise Failure.new(:invalid_response) unless result['write_id'] == operation.draft_write.id

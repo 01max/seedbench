@@ -1,4 +1,5 @@
 module Ai
+  # Turns a cited AI assessment candidate into reviewed edition evidence after operator acceptance.
   class AcceptFact
     def self.call(release_id:, run_id:, candidate_index:, expected_revision:)
       release = Release.find(release_id)

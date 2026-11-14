@@ -2,6 +2,8 @@ require 'base64'
 
 module Providers
   class Deluge
+    # Imports or reuses a torrent in Deluge, rechecks the mapped data and observes the initial
+    # tracker result.
     class Seed
       STATUS_FIELDS = %w[name state progress is_finished download_location move_completed tracker_status trackers].freeze
       TRACKER_EVENT = 'TorrentTrackerStatusEvent'.freeze

@@ -1,4 +1,5 @@
 module Ebooks
+  # Stores a cover extracted during inspection so it can be reviewed and selected later.
   class CoverAsset
     class << self
       def call(release:, evidence_id:, sha256:)

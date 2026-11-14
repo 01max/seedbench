@@ -1,5 +1,6 @@
 module Providers
   class C411
+    # Parses a C411 Torznab feed into duplicate candidates and pagination or completeness data.
     class SearchFeed
       Result = Data.define(:candidates, :count, :total, :incomplete)
       NAMESPACE = 'http://torznab.com/schemas/2015/feed'.freeze

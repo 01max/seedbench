@@ -1,4 +1,5 @@
 module Providers
+  # Authenticates a Deluge Web connection and forwards RPC calls to its selected daemon.
   class Deluge
     def self.check(connection:)
       client = new(connection)

@@ -1,4 +1,5 @@
 module Covers
+  # Routes cover form submissions to edition lookup or selection of the operator's chosen image.
   class Action
     def self.call(release_id:, expected_revision:, attributes:)
       if attributes['kind'] == 'lookup'

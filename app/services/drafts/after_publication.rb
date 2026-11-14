@@ -1,4 +1,5 @@
 module Drafts
+  # Checks for a linked draft after publication and records when C411 leaves it in place.
   class AfterPublication
     class << self
       def call(release_id:)

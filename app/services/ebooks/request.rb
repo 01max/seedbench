@@ -1,4 +1,5 @@
 module Ebooks
+  # Queues inspection or OCR for the current payload and records the requested inspection state.
   class Request
     class << self
       def call(release:, ocr: false, automatic: false)

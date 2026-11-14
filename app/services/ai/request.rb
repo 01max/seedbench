@@ -1,4 +1,6 @@
 module Ai
+  # Queues an assessment or prose request and records the evidence and configuration needed to run
+  # it.
   class Request
     def self.call(release_id:, expected_revision:, purpose:, scope: {}, initial: false)
       raise Failure.new(:invalid_action) unless %w[assessment prose].include?(purpose)

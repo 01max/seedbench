@@ -1,4 +1,6 @@
 module Publications
+  # Confirms an ambiguous C411 submission against the saved attempt and provider detail without
+  # resubmitting.
   class Reconcile
     def self.call(release_id:)
       new(Release.find(release_id)).call

@@ -1,4 +1,6 @@
 module Drafts
+  # Records a missing draft once per observed transition and updates the linked release's draft
+  # state.
   class Missing
     class << self
       def call(link:, expected_snapshot_id: nil)

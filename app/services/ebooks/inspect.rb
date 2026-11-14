@@ -1,4 +1,5 @@
 module Ebooks
+  # Runs inspection for the payload revision named in a queued workflow operation.
   class Inspect
     def self.call(operation:)
       release = operation.release

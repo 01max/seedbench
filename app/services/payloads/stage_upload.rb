@@ -1,6 +1,7 @@
 require 'digest'
 
 module Payloads
+  # Validates and stages an accepted ebook upload on the payload mount for release intake.
   class StageUpload
     class InvalidUpload < StandardError; end
     class StorageFailure < StandardError; end

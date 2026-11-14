@@ -1,6 +1,8 @@
 require 'digest'
 
 module Preparation
+  # Verifies a payload's file type, size and SHA-256 while checking that the file remains stable
+  # during the read.
   class Identity
     class << self
       def call(path:, payload:)

@@ -1,4 +1,6 @@
 module Preparation
+  # Recovers or retires an interrupted payload move by comparing journaled identities with the
+  # filesystem.
   class Reconcile
     class << self
       def call(operation:)

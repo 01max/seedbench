@@ -2,6 +2,8 @@ require 'base64'
 
 module Providers
   class C411
+    # Encodes C411 draft attachments for writes and decodes or compares attachment data returned by
+    # reads.
     class DraftAttachment
       class << self
         def nfo(data)

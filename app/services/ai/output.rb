@@ -1,4 +1,6 @@
 module Ai
+  # Validates generated assessments and prose against the request schema, source citations and
+  # content rules.
   class Output
     MARKUP = %r{https?://|<[/!a-z]|\[/?[a-z]}i
     TECHNICAL = /\b(?:ISBN|EPUB|MOBI|PDF|NFO|BBCode)\b|\d\s*(?:pages?|octets?|[MG]io?|[MG]B)\b/i

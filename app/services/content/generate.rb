@@ -1,4 +1,5 @@
 module Content
+  # Builds candidate BBCode and NFO with their expected values, dependencies and review issues.
   class Generate
     Draft = Data.define(:bodies, :dependencies, :expected, :issues)
     Policy = Providers::C411::EbookContent

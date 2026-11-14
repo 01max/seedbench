@@ -1,4 +1,5 @@
 module Content
+  # Records the current editor values as reviewed edition facts when the operator confirms them.
   class ReviewFacts
     def self.call(release_id:, expected_revision:)
       release = Release.find(release_id)

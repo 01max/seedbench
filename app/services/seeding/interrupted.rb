@@ -1,4 +1,5 @@
 module Seeding
+  # Marks initial seeding uncertain when an interrupted attempt has no terminal outcome.
   class Interrupted
     def self.call(operation:)
       release = operation.release

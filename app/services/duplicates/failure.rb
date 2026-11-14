@@ -1,4 +1,5 @@
 module Duplicates
+  # Carries a localized error and stable code for failures in duplicate search or review.
   class Failure < StandardError
     attr_reader :code
 

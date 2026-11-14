@@ -1,4 +1,5 @@
 module Content
+  # Captures the reviewed BBCode and NFO for an active draft write or publication attempt.
   class ReviewedAction
     Snapshot = Data.define(:input_revision, :cover_hosting_id, :bbcode_id, :nfo_id, :bbcode, :nfo)
 

@@ -1,6 +1,8 @@
 require 'digest'
 
 module Ai
+  # Lists bounded, source-linked facts and excerpts available for an AI request after successful
+  # inspection.
   class EvidenceCatalog
     MAX_TEXT_BYTES = 1800
 

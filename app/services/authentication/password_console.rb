@@ -1,6 +1,7 @@
 require 'io/console'
 
 module Authentication
+  # Sets or resets the operator password from an interactive terminal with echo disabled.
   class PasswordConsole
     class InputError < StandardError; end
 

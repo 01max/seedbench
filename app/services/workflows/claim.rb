@@ -1,4 +1,5 @@
 module Workflows
+  # Claims a pending operation and issues an attempt token for the worker that can execute it.
   class Claim
     class << self
       def call(operation_id:)

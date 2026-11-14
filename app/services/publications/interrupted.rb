@@ -1,4 +1,6 @@
 module Publications
+  # Updates publication state after an interrupted attempt using the send phase and any recorded
+  # receipt.
   class Interrupted
     SENDING = 'publication_sending'.freeze
 

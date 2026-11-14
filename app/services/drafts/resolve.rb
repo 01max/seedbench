@@ -1,4 +1,6 @@
 module Drafts
+  # Applies the operator's local or remote text choice after verifying the displayed conflict is
+  # still current.
   class Resolve
     def self.call(release_id:, expected_revision:, snapshot_id:, choice:)
       raise Failure.new(:invalid_choice) unless %w[local remote].include?(choice)

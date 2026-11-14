@@ -1,4 +1,5 @@
 module Ai
+  # Loads the schema for an AI task and restricts citation IDs to the supplied evidence pack.
   class Schemas
     SCHEMAS = %w[assessment prose].index_with { |purpose| Rails.root.join('config/ai', "#{purpose}.schema.json").read }.freeze
 

@@ -1,4 +1,6 @@
 module Preparation
+  # Persists a preparation result, completing the move journal when the verified torrent is
+  # recorded.
   class Record
     def self.call(operation:, result:)
       new(operation, result).call

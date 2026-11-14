@@ -1,4 +1,5 @@
 module Preparation
+  # Invalidates prepared output when the operator changes a proposed name that can still be edited.
   class Invalidate
     def self.call(release:, changes:)
       return unless changes.key?('proposed_name')

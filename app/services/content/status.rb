@@ -1,4 +1,5 @@
 module Content
+  # Reports whether saved BBCode and NFO are missing, stale or valid against current release inputs.
   class Status
     State = Data.define(:kinds, :issues)
     SOURCE_ERRORS = %w[inspection_required french_required invalid_isbn].freeze

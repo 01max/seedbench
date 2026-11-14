@@ -1,4 +1,5 @@
 module Settings
+  # Runs the selected provider's connection check and stores its reported scope and result.
   class TestConnection
     class << self
       def call(connection_id:)

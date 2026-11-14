@@ -1,4 +1,6 @@
 module Settings
+  # Validates and normalizes the provider-specific endpoint, credentials and options for a
+  # connection.
   class ConnectionConfig
     class Invalid < StandardError; end
 

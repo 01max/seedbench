@@ -1,6 +1,7 @@
 require 'strscan'
 
 module Content
+  # Parses release BBCode into a bounded tree and collects markup errors for validation and preview.
   class Bbcode
     Node = Data.define(:tag, :argument, :children)
     Result = Data.define(:nodes, :errors)

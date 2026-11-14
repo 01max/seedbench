@@ -1,4 +1,5 @@
 module Ebooks
+  # Validates ISBN checksums and normalizes ISBN forms for comparison across evidence sources.
   class Isbn
     class << self
       def normalize(value)

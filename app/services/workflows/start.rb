@@ -1,4 +1,6 @@
 module Workflows
+  # Persists revision-checked workflow intent and schedules dispatch after the database transaction
+  # commits.
   class Start
     class IdempotencyConflict < StandardError; end
     class UnresolvedEffect < StandardError; end

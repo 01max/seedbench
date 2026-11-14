@@ -2,6 +2,7 @@ require 'digest'
 require 'json'
 require 'tempfile'
 
+# Probes shared storage as the service user before the operator enables publication.
 class DeploymentStorage
   ROOT_KEYS = %w[SEEDBENCH_STATE_ROOT SEEDBENCH_SCRATCH_ROOT SEEDBENCH_PAYLOAD_ROOT].freeze
 

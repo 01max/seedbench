@@ -1,5 +1,6 @@
 module Providers
   class Openai
+    # Sends an evidence-backed request to the OpenAI Responses API and returns validated output.
     class Generate
       def self.call(connection:, model:, purpose:, pack:, max_output_tokens: 2500)
         prompt = Ai::Prompts.call(purpose: purpose)

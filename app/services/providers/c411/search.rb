@@ -1,5 +1,7 @@
 module Providers
   class C411
+    # Runs bounded Torznab searches for a C411 connection and reports whether the candidate set is
+    # complete.
     class Search
       PAGE_SIZE = 100
       MAX_PAGES = 2

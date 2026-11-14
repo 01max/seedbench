@@ -1,4 +1,5 @@
 module Ebooks
+  # Looks up an ISBN in Open Library and returns source-linked edition evidence for review.
   class EditionRecord
     class InvalidIsbn < StandardError; end
     class InvalidRecord < StandardError; end

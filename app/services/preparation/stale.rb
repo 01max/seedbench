@@ -1,4 +1,6 @@
 module Preparation
+  # Marks preparation stale after an input change and closes a journal entry when its move already
+  # happened.
   class Stale
     def self.call(operation:)
       operation.release.update!(preparation_state: 'stale')

@@ -1,4 +1,5 @@
 module Releases
+  # Checks that release-event and workflow metadata have a safe shape and omit sensitive fields.
   class EventMetadata
     class Unsafe < StandardError; end
     SENSITIVE_KEY = /password|token|secret|api[_-]?key|passkey|credential/i

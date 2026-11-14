@@ -1,4 +1,6 @@
 module Preparation
+  # Checks the preparation attempt, release revision and payload before the workflow can act on a
+  # file.
   class Guard
     class << self
       def call(operation:, attempt:)

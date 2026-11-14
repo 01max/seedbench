@@ -1,4 +1,6 @@
 module Drafts
+  # Transfers a draft link from an imported shell to a payload release after the operator chooses
+  # which text to keep.
   class Link
     def self.call(release_id:, payload_release_id:, expected_revision:, payload_revision:, confirmed:, choice:, allowed_operation_id: nil, replacing_remote_id: nil)
       raise Failure.new(:confirmation_required) unless confirmed == true && %w[local remote].include?(choice)

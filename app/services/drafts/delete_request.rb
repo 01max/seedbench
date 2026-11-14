@@ -1,4 +1,6 @@
 module Drafts
+  # Queues explicit deletion of a draft after publication when the operator confirms the observed
+  # snapshot.
   class DeleteRequest
     def self.call(release_id:, expected_revision:, remote_id:, snapshot_id:, confirmed:)
       raise Failure.new(:confirmation_required) unless confirmed == true

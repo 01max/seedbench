@@ -4,6 +4,7 @@ require 'timeout'
 require 'zlib'
 
 module Providers
+  # Makes bounded HTTP requests for provider adapters and translates transport and response errors.
   class Http
     Response = Data.define(:body, :cookies)
     MAX_BYTES = 1_048_576

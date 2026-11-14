@@ -1,4 +1,5 @@
 module Ai
+  # Checks AI response values against the subset of JSON Schema used by the bundled schemas.
   class SchemaValidation
     TYPES = { 'object' => Hash, 'array' => Array, 'string' => String, 'null' => NilClass }.freeze
 

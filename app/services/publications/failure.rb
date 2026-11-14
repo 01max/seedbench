@@ -1,4 +1,5 @@
 module Publications
+  # Carries the localized reasons a publication is blocked or could not be completed.
   class Failure < StandardError
     attr_reader :codes
 

@@ -1,4 +1,5 @@
 module Drafts
+  # Lists a C411 account's drafts and creates local release shells for drafts that lack a link.
   class Import
     def self.call(connection:)
       client = Providers::C411::Drafts.new(connection)

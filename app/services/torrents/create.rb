@@ -2,6 +2,7 @@ require 'tmpdir'
 require 'timeout'
 
 module Torrents
+  # Builds a private single-file torrent from a canonical payload with an inert announce URL.
   class Create
     INERT_ANNOUNCE = 'https://tracker.invalid/announce'.freeze
 

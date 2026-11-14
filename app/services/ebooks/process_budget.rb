@@ -1,4 +1,5 @@
 module Ebooks
+  # Watches an ebook tooling subprocess and raises when its time or scratch-space budget is exceeded.
   class ProcessBudget
     class Exceeded < StandardError; end
 

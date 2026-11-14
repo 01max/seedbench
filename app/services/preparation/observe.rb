@@ -1,4 +1,6 @@
 module Preparation
+  # Revalidates a prepared release and marks it stale if the saved torrent, bytes or mount no longer
+  # match.
   class Observe
     def self.call(release:)
       return unless release.preparation_state == 'prepared'

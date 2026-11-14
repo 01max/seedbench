@@ -1,4 +1,6 @@
 module Releases
+  # Stages and registers ebook uploads as independent releases, retaining successful files when
+  # another upload fails.
   class Intake
     class InvalidBatch < StandardError; end
     Result = Data.define(:releases, :errors)

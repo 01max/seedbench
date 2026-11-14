@@ -1,4 +1,6 @@
 module Seeding
+  # Downloads the C411 torrent, checks the mapped payload in Deluge and observes initial tracker
+  # acceptance.
   class Run
     def self.call(operation:)
       new(operation).call

@@ -1,4 +1,6 @@
 module Settings
+  # Adds credentials and required settings to an incomplete connection after the operator confirms
+  # its identity.
   class CompleteConnection
     class << self
       def call(connection_id:, expected_version:, confirm_identity:, credentials:, endpoint: nil, options: {})

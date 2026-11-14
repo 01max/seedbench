@@ -1,4 +1,6 @@
 module Publications
+  # Queues direct publication after checking eligibility and recording the publishing and seed
+  # configuration.
   class Request
     class << self
       def call(release_id:, expected_revision:)

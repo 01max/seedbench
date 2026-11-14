@@ -1,5 +1,6 @@
 require 'json'
 
+# Checks payloads and remote state for `bin/reconcile-state` before allowing a restored stack to start.
 class DeploymentRecovery
   def initialize
     @paths = Preparation::Paths.new

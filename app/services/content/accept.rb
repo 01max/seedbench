@@ -1,4 +1,6 @@
 module Content
+  # Applies a content proposal after verifying that its saved base and dependencies still match the
+  # release.
   class Accept
     class StaleProposal < StandardError; end
 

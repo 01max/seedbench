@@ -1,6 +1,7 @@
 require 'digest'
 
 module Torrents
+  # Validates torrent metadata and piece hashes against the expected single canonical payload.
   class Verify
     def self.call(torrent:, payload_path:, payload:, name:)
       new(torrent, payload_path, payload, name).call

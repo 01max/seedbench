@@ -1,4 +1,6 @@
 module Content
+  # Loads the release evidence, reviewed facts and selected assets used to assemble or check
+  # content.
   class Inputs
     BOOK_FIELDS = %w[title author publisher publication_year language edition isbn isbn_kind].freeze
     attr_reader :release, :payload, :facts, :contents, :cover, :hosting, :preparation, :inspection

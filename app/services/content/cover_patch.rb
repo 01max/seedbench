@@ -1,4 +1,5 @@
 module Content
+  # Proposes replacing only the cover image in saved BBCode with the verified hosted cover URL.
   class CoverPatch
     class Unavailable < StandardError; end
 

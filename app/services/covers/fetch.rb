@@ -2,6 +2,8 @@ require 'net/http'
 require 'timeout'
 
 module Covers
+  # Fetches a bounded HTTPS image or hosting page while checking allowed hosts and redirect
+  # destinations.
   class Fetch
     Result = Data.define(:bytes, :media_type, :url)
     MAX_BYTES = 8 * 1024 * 1024

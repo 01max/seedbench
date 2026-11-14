@@ -1,4 +1,6 @@
 module Drafts
+  # Compares fresh remote draft text with the saved base and records a sync or conflict for the
+  # linked release.
   class Observe
     class << self
       def call(link:, content:, remote_revision:, expected_snapshot_id: nil)

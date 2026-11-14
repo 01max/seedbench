@@ -1,4 +1,6 @@
 module Preparation
+  # Resolves safe paths within the configured storage roots and provides per-payload filesystem
+  # locking.
   class Paths
     def initialize(storage: Rails.application.config.x.storage)
       @storage = storage
