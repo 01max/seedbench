@@ -8,11 +8,17 @@ neither requires Deluge's configuration, a Docker socket, or privileged mode.
 
 ## Choose mounts and service ownership
 
-Copy `compose.env.example` to `compose.env`. If using bind mounts, set the
-three existing host directories in that file and select the override:
+Copy `compose.env.example` to `compose.env` and select it for both managed volumes and bind mounts:
 
 ```sh
+cp compose.env.example compose.env
 export SEEDBENCH_COMPOSE_ENV=compose.env
+```
+
+For bind mounts, set the three existing host directories in `compose.env` and
+select the override:
+
+```sh
 export COMPOSE_FILE=compose.yaml:compose.binds.yaml
 ```
 
