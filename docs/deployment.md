@@ -79,3 +79,57 @@ or interface, verify the web port is unreachable. On the Docker host, check
 the worker has no published ports. Check the router and any existing proxy
 for public forwards to the app. A single successful request does not
 establish the denied paths.
+
+## Initialize and start
+
+Keep the same Compose project name and state mount for every command. Run
+these from the deployment checkout with the environment and overrides
+selected above:
+
+```sh
+bin/setup
+bin/operator-password
+bin/compose up -d --no-build --wait
+```
+
+The first run initializes the application and queue databases and generates the
+application signing key and provider encryption key in the state directory.
+Keep that directory private to the service account and back up both keys with
+it. If supplying `SECRET_KEY_BASE` or `SEEDBENCH_ENCRYPTION_KEY` externally,
+store those original values in the deployment's protected secret store as
+well. Keep passwords and secrets out of command arguments, Git, and build
+contexts. The password command reads twice from a terminal with input echo
+disabled. Run it again on the deployment host to reset the password and
+invalidate previous logins. [Operator access](operator-access.md)
+
+Sign in once from a private client. In **Réglages**, configure and test the
+C411, Deluge, and Postimages connections if using them. OpenAI is optional.
+Review each default before uploading. Existing releases retain their pinned
+connections. [Provider settings](provider-settings.md)
+
+On the home LAN, plain HTTP sends login and session traffic without TLS.
+Use it only on the trusted LAN. Tailscale protects traffic in transit between
+its peers. For a TLS-terminating private proxy, keep the backend private and
+set `FORCE_SSL=1` and `ASSUME_SSL=1` when the proxy forwards HTTP. With
+end-to-end HTTPS, use `FORCE_SSL=1` and leave `ASSUME_SSL=0`.
+
+## Upgrade or roll back
+
+1. Finish or reconcile in-flight publication and draft writes, then stop both
+   services and back up state. Record the running image ID, source revision,
+   and effective Compose settings without copying credentials into notes.
+2. Tag the current application image with a local rollback tag before building
+   the new image. Select a new `SEEDBENCH_IMAGE_TAG` in `compose.env`. Keep
+   the same state and payload mounts and the same encryption keys.
+3. Update the checkout, run `bin/setup` to build and migrate, then run
+   `bin/compose up -d --no-build --wait`. Check login, the queue, and a
+   saved release before resuming operation.
+4. Roll back to the previous image only if its code is compatible with the
+   current database schema. Stop both services first, select the previous
+   image tag, and start with `--no-build`. For an incompatible schema,
+   use the recovery procedure below with the matching image and backup.
+   Review remote activity after the backup before resuming.
+
+An image rollback preserves the databases and canonical files. A state restore
+cannot reverse C411 publication, draft changes, or Deluge state. Do not remove
+the deployment's volumes or move seeded payloads during rollback.

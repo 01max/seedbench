@@ -16,29 +16,31 @@ abort "TMPDIR must be an existing writable absolute directory without a symlink"
   ENV.fetch("TMPDIR").start_with?("/") && File.directory?(ENV.fetch("TMPDIR")) &&
     !File.symlink?(ENV.fetch("TMPDIR")) && File.writable?(ENV.fetch("TMPDIR"))
 
-unless ENV["SECRET_KEY_BASE"] || ENV["SECRET_KEY_BASE_DUMMY"]
+if ENV["SECRET_KEY_BASE"].to_s.empty? && !ENV["SECRET_KEY_BASE_DUMMY"]
   key_path = File.join(ENV.fetch("SEEDBENCH_STATE_ROOT"), "secret_key_base")
-  begin
-    File.open(key_path, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
-      file.write(SecureRandom.hex(64))
+  File.open(key_path, File::RDWR | File::CREAT | File::NOFOLLOW, 0o600) do |file|
+    file.flock(File::LOCK_EX)
+    key = file.read.strip
+    if key.empty?
+      key = SecureRandom.hex(64)
+      file.rewind
+      file.write(key)
+      file.fsync
     end
-  rescue Errno::EEXIST
-    # Another service can initialize the shared key first.
+    ENV["SECRET_KEY_BASE"] = key
   end
-  ENV["SECRET_KEY_BASE"] = File.read(key_path).strip
-  abort "The persisted application key is empty" if ENV["SECRET_KEY_BASE"].empty?
 end
 
 if ENV["SEEDBENCH_ENCRYPTION_KEY"].to_s.empty?
   key_path = File.join(ENV.fetch("SEEDBENCH_STATE_ROOT"), "provider_encryption_key")
-  File.open(key_path, File::RDWR | File::CREAT, 0o600) do |file|
+  File.open(key_path, File::RDWR | File::CREAT | File::NOFOLLOW, 0o600) do |file|
     file.flock(File::LOCK_EX)
     key = file.read.strip
     if key.empty?
       key = SecureRandom.hex(32)
       file.rewind
       file.write(key)
-      file.flush
+      file.fsync
     end
     ENV["SEEDBENCH_ENCRYPTION_KEY"] = key
   end

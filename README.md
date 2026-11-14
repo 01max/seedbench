@@ -39,7 +39,7 @@ light themes, compact desktop review, and narrower screens.
 > Cover hosting is implemented at the remote-operation boundary.
 > Optional evidence assessment and French prose suggestions are available.
 > Optional C411 draft import, conflict review, and explicit create/update are available.
-> Publication and seeding are still being built. Publish remains disabled.
+> Explicit publication to C411 and initial Deluge seeding are available after review.
 
 ## Features
 
@@ -202,6 +202,7 @@ services. No host Ruby, Node, browser driver, or ebook-tool installation is need
 | Upload limits, review, keyboard controls, and draft recovery | [Ebook workbench](docs/workbench.md) |
 | Naming, canonical moves, private torrents, and interruption recovery | [Payload preparation](docs/payload-preparation.md) |
 | Host mounts, path mapping, permissions, and scratch capacity | [Storage configuration](docs/storage-configuration.md) |
+| Private deployment, upgrades, and recovery | [Deployment guide](docs/deployment.md) |
 | Login, password reset, sessions, and HTTPS settings | [Operator access](docs/operator-access.md) |
 | Credentials, defaults, and connection-check scope | [Provider settings](docs/provider-settings.md) |
 | Service ownership and application boundaries | [Architecture](docs/architecture.md) |
