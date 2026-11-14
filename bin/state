@@ -11,7 +11,8 @@ case "$operation:$archive" in
   backup:/*|restore:/*) ;;
   *) echo 'Choose backup or restore and supply an absolute archive path.' >&2; exit 64 ;;
 esac
-if [ -n "$(bin/compose ps --status running -q)" ]; then
+running=$(bin/compose ps --status running -q)
+if [ -n "$running" ]; then
   echo 'Stop the deployment web and worker before backing up or restoring state.' >&2
   exit 1
 fi
@@ -20,6 +21,10 @@ if [ "$operation" = restore ]; then
   exec bin/compose run --rm --no-deps -T --entrypoint python3 web -I script/deployment/state.py restore < "$archive"
 fi
 
+if [ -e "$archive" ] || [ -L "$archive" ]; then
+  echo 'Choose a new path for the state archive.' >&2
+  exit 1
+fi
 umask 077
 temporary=$(mktemp "${archive}.partial.XXXXXX")
 trap 'rm -f "$temporary"' EXIT

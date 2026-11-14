@@ -48,7 +48,7 @@ docker exec --user "$DELUGE_UID:$DELUGE_GID" "$DELUGE_CONTAINER" \
 bin/compose run --rm --no-deps -T --entrypoint ruby web script/deployment/storage.rb cleanup "$probe_id"
 ```
 
-Check all three hashes match before enabling publication. The probe only
+Check that the reported hashes match before enabling publication. The probe only
 creates and removes its own synthetic files. The client mapping check uses
 Deluge's actual filesystem view, without adding a torrent or changing settings.
 
