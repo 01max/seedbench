@@ -65,9 +65,9 @@ reachability, or real tracker policy. The [portable filesystem check](storage-co
 separately verifies configurable mount identities using synthetic data. Actual
 host and client acceptance still require the selected deployment.
 
-C411 publication, personalized site-issued torrent retrieval, and the complete
-publish-to-seed workflow remain unverified under the current authorization.
-No publication request was made.
+The later [production publication check](c411-api.md#direct-publication-and-personalized-download)
+verified personalized torrent retrieval, paused import, a 100% recheck, and
+tracker acceptance on the operator’s Deluge client.
 
 References: [Deluge web JSON-RPC API](https://deluge.readthedocs.io/en/deluge-2.2.0/reference/webapi.html),
 [Deluge core API](https://deluge.readthedocs.io/en/deluge-2.2.0/reference/api.html),

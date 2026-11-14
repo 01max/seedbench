@@ -27,6 +27,7 @@ module Drafts
         validate_recreation!(release, recreate_confirmed)
         validate_payload!(release)
         raise Failure.new(:published_locked) unless %w[unpublished failed].include?(release.publication_state)
+        raise Failure.new(:operation_active) if release.workflow_operations.exists?(kind: 'publish', state: %w[pending running outcome_unknown])
       end
 
       def validate_recreation!(release, confirmed)

@@ -47,8 +47,9 @@ export default class extends Controller {
     }
     this.attempts += 1
     this.element.dataset.statusPollCount = this.attempts
-    if (this.frameTarget.src) this.frameTarget.reload()
-    else this.frameTarget.src = this.urlValue
+    const statusUrl = new URL(this.urlValue, document.baseURI).href
+    if (this.frameTarget.src === statusUrl) this.frameTarget.reload()
+    else this.frameTarget.src = statusUrl
   }
 
   loaded() {

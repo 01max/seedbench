@@ -7,13 +7,20 @@ module Workflows
         release.with_lock do
           operation.reload
           return unless operation.state == 'pending'
-          return reject_stale(operation) if operation.input_revision != release.input_revision && !Definitions.fetch(operation.kind).recoverable
+          return reject_stale(operation) if stale?(operation, release)
 
           activate(operation)
         end
       end
 
       private
+
+      def stale?(operation, release)
+        return false if operation.input_revision == release.input_revision
+
+        definition = Definitions.fetch(operation.kind)
+        !definition.recoverable && !definition.claim_stale
+      end
 
       def activate(operation)
         token = SecureRandom.uuid

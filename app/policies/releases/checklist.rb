@@ -26,7 +26,7 @@ module Releases
     end
 
     def manual(key)
-      checked = @marks[key]&.checked || false
+      checked = @marks[key]&.checked_at_revision?(@release.input_revision) || false
       item(key, state: checked ? 'done' : 'pending', checked: checked, owner: :operator, note: I18n.t('workbench.checklist.manual_note'))
     end
 

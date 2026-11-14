@@ -1,8 +1,8 @@
 # C411 API observations
 
-Verified on 2026-11-07 using the configured production key. The operator permits
-inspection and draft tests and explicitly forbids publication. These results do
-not establish a working publication or seeding integration.
+Draft discovery began on 2026-11-07 using the configured production key.
+Publication and initial seeding were verified on 2026-11-11 with an existing
+ebook draft authorized for that production test.
 
 ## Authentication and read access
 
@@ -83,7 +83,7 @@ That comparison can detect an earlier remote edit, but another client may edit
 between the refresh and the write. Do not claim an atomic remote compare-and-set
 contract or infer one from `updatedAt` alone.
 
-## Publication documentation and unverified contracts
+## Direct publication and personalized download
 
 The authenticated guide documents direct `POST /api/torrents` using multipart
 form data. It lists required torrent (maximum 10 MB), NFO (maximum 3 MB), title
@@ -91,10 +91,28 @@ form data. It lists required torrent (maximum 10 MB), NFO (maximum 3 MB), title
 subcategory. Options are encoded as JSON. The standard description format uses
 BBCode; raw HTML requires an additional permission.
 
-No request was sent to that endpoint. Personalized torrent retrieval,
-submission-state reads, post-publication draft behavior, publication-time
-validation, and tracker acceptance remain unverified. The guide's profile
-endpoint is account information, not submission-state evidence.
+The production test submitted the saved title, torrent, NFO, categories and
+options through that endpoint without a draft identifier. The API rejected
+raw HTML with HTTP 403. A standard BBCode submission of the same reviewed
+content succeeded with HTTP 200 and a `data` object containing the numeric
+`id`, `infoHash`, and `status`. The response status was `approved`.
+The original draft remained readable and its revision stayed unchanged.
+
+`GET /api/torrents/{infoHash}` returned the submission's ID, name, status,
+size, and creation time in a top-level JSON object. The detail response
+reported `isOwner: false` even for the account that submitted it by API.
+A nonexistent info hash returned HTTP 404. A missing or inaccessible detail
+cannot rule out acceptance of an interrupted request. The authenticated guide says uploads can enter Team Pending. The
+test did not exercise that state.
+
+The Torznab download URL was established from an authenticated search
+enclosure. `GET /api?t=get&id={infoHash}&apikey={key}` returned HTTP 200 and
+`application/x-bittorrent` for the approved submission. Its info dictionary
+matched the submitted torrent. C411 added its personalized announce URL.
+The draft torrent had no announce URL. The production Deluge client imported
+the site-issued torrent paused, rechecked the mapped EPUB at 100%, resumed it,
+and reported Seeding and tracker acceptance. Private request evidence and the
+personalized torrent are stored outside Git.
 
 ## Current ebook policy review
 

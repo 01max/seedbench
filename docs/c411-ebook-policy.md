@@ -2,7 +2,7 @@
 
 Authenticated documentation and the ebook upload form were reviewed on
 2026-11-08 and rechecked through the authenticated browser on 2026-11-09. This records published rules and observed form behavior; it does
-not establish publication acceptance. Production publication remains forbidden.
+not establish publication acceptance on its own.
 See [API observations](c411-api.md) for verified draft fields, attachment shape,
 slot limits, responses, and the remote concurrency limitation.
 
@@ -80,7 +80,7 @@ The authenticated [API guide](https://c411.org/user/integrations/guide) document
 | Description | Guide: at least 20 characters; live standard editor displays 15,000 maximum. Server-side maximum was not probed. |
 | Moderator note | Live form displays 500 characters maximum. |
 | Publication attachments | Guide: torrent maximum 10 Mo; NFO maximum 3 Mo. The upload-byte boundary was not tested. |
-| Draft attachments | Guide: base64 in JSON; observed object fields are `name` and `data`. Attachment round trips remain unverified. |
+| Draft attachments | Guide: base64 in JSON; observed object fields are `name` and `data`. Base64 attachment round trips were verified. |
 
 A tag list does not establish every nesting, escaping, or renderer rule. Literal
 bracket escaping and malformed-tag handling remain unverified. Local preview
@@ -145,6 +145,8 @@ sequence. Whether the API accepts a pending submission before seeding, and the
 actual timing permitted before validation, remain untested. Documentation alone
 does not resolve that integration dependency.
 
-No publication or seeding was started during this review. Direct publication,
-submission-state reads, personalized torrent download, and post-publication
-draft behavior remain unverified under the production-key restriction.
+A later authorized production test verified an approved submission followed
+by personalized download and initial seed. Prepare the canonical payload
+on the Deluge filesystem before submission so that it can be rechecked and
+shared immediately after acceptance. The test did not exercise Team Pending.
+See the [API observations](c411-api.md#direct-publication-and-personalized-download).

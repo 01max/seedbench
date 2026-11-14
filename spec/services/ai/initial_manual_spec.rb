@@ -39,7 +39,6 @@ RSpec.describe Ai::Initial do
     Preparation::SuggestName.call(release: release.reload)
     operation = Preparation::Request.call(release_id: release.id, expected_revision: release.reload.input_revision)
     Workflows::Execute.call(operation_id: operation.id)
-    %w[edition_review text_review].each { |key| Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: release.reload.input_revision) }
     %w[bbcode nfo].each do |kind|
       proposal = Content::Propose.call(release_id: release.id, expected_revision: release.reload.input_revision, kind: kind)
       Content::Accept.call(release_id: release.id, proposal_id: proposal.id, expected_revision: release.input_revision)
@@ -66,6 +65,9 @@ RSpec.describe Ai::Initial do
       optional_ai(release, enabled)
       prepare_and_review(release)
       snapshot = validate_explicit_boundary(release)
+      Releases::MarkCheck::KEYS.each do |key|
+        Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: release.reload.input_revision)
+      end
       expect(snapshot.bbcode).to include('Présentation rédigée et relue manuellement')
       states = Releases::Checklist.call(release: release.reload).index_by(&:key)
       expect(states.values_at('inspection', 'preparation', 'cover', 'content', 'duplicates', 'edition_review', 'text_review').map(&:state)).to all(eq('done'))

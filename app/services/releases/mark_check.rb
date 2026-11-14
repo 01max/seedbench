@@ -20,7 +20,7 @@ module Releases
 
       def append(release, key, checked)
         previous = release.manual_checks.where(key: key).order(number: :desc).first
-        return previous if (previous&.checked || false) == checked
+        return previous if !!previous&.checked_at_revision?(release.input_revision) == checked
 
         mark = release.manual_checks.create!(key: key, number: (previous&.number || 0) + 1,
           checked: checked, input_revision: release.input_revision, actor: 'operator')

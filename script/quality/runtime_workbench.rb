@@ -14,7 +14,8 @@ module RuntimeWorkbench
     values = Releases::EditorValues.call(release: release)
     expected = { 'bbcode' => 'Preserved human content', 'nfo' => "Preserved full NFO\nSecond line", 'presentation' => 'Preserved presentation' }
     abort 'Full editor text changed across recreation' unless values.slice(*expected.keys) == expected
-    abort 'Manual review changed across recreation' unless release.manual_checks.sole.checked
+    mark = release.manual_checks.sole
+    abort 'Manual review history changed across recreation' unless mark.checked && mark.input_revision == 1
     abort 'Uncertainty acknowledgement lost' unless release.finding_acknowledgements.sole.acknowledged
     verify_browser(release, expected)
     puts 'Full editor text, reversible review history and uncertainty acknowledgements survived container recreation.'
@@ -28,6 +29,7 @@ module RuntimeWorkbench
     expected.each do |kind, body|
       abort "Reopened editor lost #{kind}" unless document.at_css("#edit_#{kind}").text == body
     end
-    abort 'Reopened manual mark was unchecked' unless document.at_css('#mark-text_review[checked]')
+    pending = document.at_css('[data-check-key="text_review"][data-check-state="pending"] #mark-text_review:not([checked])')
+    abort 'Reopened workbench applied a manual mark from an older revision' unless pending
   end
 end
