@@ -1,4 +1,5 @@
 module Seeding
+  # Validates the configured Deluge-visible root used to address canonical payload files.
   class Mapping
     def self.client_root
       raw = Rails.application.config.x.storage[:deluge_payload]

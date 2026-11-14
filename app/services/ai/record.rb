@@ -1,4 +1,6 @@
 module Ai
+  # Persists an AI workflow result and marks output stale if the release or connection changed
+  # during generation.
   class Record
     class << self
       def call(operation:, result:)

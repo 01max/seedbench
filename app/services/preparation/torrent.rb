@@ -2,6 +2,7 @@ require 'tempfile'
 require 'tmpdir'
 
 module Preparation
+  # Creates and verifies the private single-file torrent kept in state for a prepared payload.
   class Torrent
     Result = Data.define(:locator, :info_hash)
 

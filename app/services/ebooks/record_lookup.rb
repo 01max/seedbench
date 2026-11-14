@@ -1,4 +1,6 @@
 module Ebooks
+  # Stores an ISBN lookup result as edition evidence and recomputes findings for the inspected
+  # payload.
   class RecordLookup
     def self.call(operation:, result:)
       result['candidates'] = Candidates.call(report: result)

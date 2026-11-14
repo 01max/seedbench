@@ -1,5 +1,6 @@
 module Providers
   class C411
+    # Wraps authenticated C411 draft listing, reads and mutations for a publishing connection.
     class Drafts
       Listing = Data.define(:ids, :count, :maximum)
       PATH = '/api/user/drafts'.freeze

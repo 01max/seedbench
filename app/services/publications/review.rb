@@ -1,4 +1,6 @@
 module Publications
+  # Refreshes duplicate review before submission and verifies that any operator exception still
+  # applies.
   class Review
     class << self
       def refresh(operation)

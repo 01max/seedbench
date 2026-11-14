@@ -1,4 +1,5 @@
 module Duplicates
+  # Runs a queued C411 duplicate search with the recorded queries and verified connection version.
   class Search
     def self.call(operation:)
       connection = ProviderConnection.find(operation.parameters.fetch('connection_id'))

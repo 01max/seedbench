@@ -1,4 +1,5 @@
 module Drafts
+  # Checks provider evidence to resolve an interrupted draft mutation without repeating the write.
   class Reconcile
     def self.call(release_id:, write_id:, remote_id: nil, confirmed: false)
       write = Release.find(release_id).draft_writes.find(write_id)

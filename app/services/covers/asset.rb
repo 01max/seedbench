@@ -2,6 +2,7 @@ require 'digest'
 require 'tempfile'
 
 module Covers
+  # Stores and reads cover bytes in deployment state, using SHA-256 to verify the stored asset.
   class Asset
     class << self
       def store(bytes:, sha256:)

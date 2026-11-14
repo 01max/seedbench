@@ -1,4 +1,5 @@
 module Seeding
+  # Carries a localized seeding error code and any recheck progress useful to the operator.
   class Failure < StandardError
     attr_reader :code, :progress
 

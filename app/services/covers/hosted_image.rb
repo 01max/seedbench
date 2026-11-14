@@ -1,4 +1,6 @@
 module Covers
+  # Resolves a direct Postimages URL and verifies that the delivered image matches the reviewed
+  # source.
   class HostedImage
     class << self
       def direct_link(page_url:)

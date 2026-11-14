@@ -1,4 +1,6 @@
 module Preparation
+  # Rechecks the prepared torrent and recorded mount identity before a draft, publication or seeding
+  # action.
   class Validate
     class << self
       def call(release:)

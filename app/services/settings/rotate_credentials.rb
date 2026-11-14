@@ -1,4 +1,5 @@
 module Settings
+  # Replaces credentials for a confirmed provider identity using its expected version.
   class RotateCredentials
     class Conflict < StandardError; end
 

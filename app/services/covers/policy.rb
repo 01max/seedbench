@@ -1,6 +1,8 @@
 require 'digest'
 
 module Covers
+  # Checks whether the selected cover still matches the reviewed edition and whether its hosting
+  # proof applies.
   class Policy
     VERSION = 'cover-verification-v1'.freeze
     FACTS = %w[title author isbn isbn_kind edition publisher publication_year language].freeze

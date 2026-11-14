@@ -1,4 +1,6 @@
 module Drafts
+  # Sends a queued C411 draft create, update or delete and records acceptance or an uncertain
+  # outcome.
   class Write
     def self.call(operation:)
       new(operation).call

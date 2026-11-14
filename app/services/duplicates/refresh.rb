@@ -1,4 +1,5 @@
 module Duplicates
+  # Refreshes duplicate search inside an active publication attempt before it can send to C411.
   class Refresh
     def self.call(operation_id:, attempt_token:)
       raise Failure.new(:transaction_open) if ApplicationRecord.connection.transaction_open?

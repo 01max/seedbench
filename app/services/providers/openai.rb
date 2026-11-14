@@ -1,4 +1,5 @@
 module Providers
+  # Checks that the configured OpenAI API connection can read the selected model.
   class Openai
     def self.check(connection:)
       model = connection.options.fetch('model')

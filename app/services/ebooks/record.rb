@@ -1,4 +1,6 @@
 module Ebooks
+  # Stores an inspection report, refreshes release findings and starts optional AI work after a
+  # successful inspection.
   class Record
     class << self
       def call(operation:, result:)

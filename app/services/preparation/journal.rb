@@ -1,4 +1,6 @@
 module Preparation
+  # Checks the source and destination of a reserved move and records the canonical locator after
+  # verifying the moved file.
   class Journal
     def self.call(move:, paths: Paths.new)
       new(move, paths).call

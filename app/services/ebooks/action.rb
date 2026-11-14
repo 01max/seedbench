@@ -1,4 +1,5 @@
 module Ebooks
+  # Dispatches inspection, PDF OCR and ISBN lookup requests after checking the release revision.
   class Action
     class UnknownAction < StandardError; end
 

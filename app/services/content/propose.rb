@@ -1,4 +1,6 @@
 module Content
+  # Stores a generated BBCode or NFO proposal for operator review against the current release
+  # revision.
   class Propose
     class InvalidKind < StandardError; end
 

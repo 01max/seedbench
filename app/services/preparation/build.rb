@@ -1,4 +1,6 @@
 module Preparation
+  # Executes a preparation operation by reconciling a prior move, moving the payload and building
+  # its verified torrent.
   class Build
     def self.call(operation:)
       Reconcile.call(operation: operation)

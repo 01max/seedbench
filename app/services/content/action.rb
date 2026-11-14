@@ -1,4 +1,6 @@
 module Content
+  # Dispatches an operator's content action to the service that reviews, proposes, confirms or
+  # accepts it.
   class Action
     class << self
       def call(release_id:, kind:, expected_revision:, proposal_id: nil)

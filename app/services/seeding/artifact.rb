@@ -1,6 +1,7 @@
 require 'tempfile'
 
 module Seeding
+  # Verifies and stores the personalized torrent issued by C411 for the accepted publication.
   class Artifact
     Result = Data.define(:bytes, :trackers)
 

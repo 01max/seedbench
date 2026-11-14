@@ -1,4 +1,5 @@
 module Providers
+  # Reports the connection-check capability for Postimages without uploading an image.
   class Postimages
     def self.check(**)
       response = Http.call(endpoint: 'https://postimages.org', path: '/')

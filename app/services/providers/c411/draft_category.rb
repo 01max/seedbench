@@ -1,5 +1,7 @@
 module Providers
   class C411
+    # Resolves the C411 ebook category, subcategory and format options used for drafts and
+    # publications.
     class DraftCategory
       def self.call(connection:, format:)
         new(connection).call(format)

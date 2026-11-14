@@ -1,4 +1,5 @@
 module Covers
+  # Carries a localized error and stable code for failures in cover selection or hosting.
   class Failure < StandardError
     attr_reader :code
 

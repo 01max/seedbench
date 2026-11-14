@@ -1,4 +1,5 @@
 module Preparation
+  # Carries a localized error and stable code for failures in payload preparation or verification.
   class Failure < StandardError
     attr_reader :code
 

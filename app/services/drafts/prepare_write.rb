@@ -1,4 +1,6 @@
 module Drafts
+  # Checks prerequisites for a draft mutation, including current content and cover verification when
+  # required.
   class PrepareWrite
     def self.call(write:)
       release = Guard.call(write)

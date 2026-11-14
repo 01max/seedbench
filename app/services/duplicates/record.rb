@@ -1,4 +1,6 @@
 module Duplicates
+  # Persists C411 duplicate search candidates and records the result against the checked release
+  # revision.
   class Record
     class << self
       def call(operation:, result:, parameters: operation.parameters)

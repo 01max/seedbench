@@ -1,4 +1,5 @@
 module Providers
+  # Checks that the publishing connection can read the C411 account's draft listing.
   class C411
     def self.check(connection:)
       response = Http.call(endpoint: connection.endpoint, path: '/api/user/drafts',

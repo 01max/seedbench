@@ -1,4 +1,6 @@
 module Preparation
+  # Checks whether saved preparation still matches the current payload, proposed name and naming
+  # policy.
   class Current
     POLICY = "#{Providers::C411::EbookNaming::VERSION}:local-torrent-v1".freeze
 

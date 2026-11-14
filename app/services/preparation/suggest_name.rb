@@ -1,4 +1,5 @@
 module Preparation
+  # Builds and saves a C411 release name from the current editor values and payload format.
   class SuggestName
     def self.call(release:)
       values = Releases::EditorValues.call(release: release)

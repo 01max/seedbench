@@ -2,6 +2,7 @@ require 'base64'
 
 module Providers
   class Postimages
+    # Uploads reviewed cover bytes to Postimages and returns the validated image page URL.
     class Upload
       PAGE = %r{https://postimg\.cc/[A-Za-z0-9]+}.freeze
 

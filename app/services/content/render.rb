@@ -1,6 +1,7 @@
 require 'cgi'
 
 module Content
+  # Renders safe HTML from BBCode for local preview and reports markup errors to the caller.
   class Render
     Result = Data.define(:html, :errors)
     SIMPLE = { 'b' => 'strong', 'i' => 'em', 'u' => 'u', 's' => 's', 'quote' => 'blockquote', 'table' => 'div',

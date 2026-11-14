@@ -1,4 +1,6 @@
 module Ai
+  # Runs a queued OpenAI request using the recorded evidence, prompt version and provider
+  # configuration.
   class Compute
     def self.call(operation:)
       new(operation).call

@@ -2,6 +2,7 @@ require 'stringio'
 
 module Providers
   class C411
+    # Wraps direct C411 submission, readback by info hash and personalized torrent download.
     class Publications
       Receipt = Data.define(:id, :info_hash, :status)
       Submission = Data.define(:receipt, :name, :size, :created_at)

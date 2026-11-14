@@ -1,4 +1,6 @@
 module Workflows
+  # Records an unexpected attempt failure, retaining uncertainty when an external effect may have
+  # occurred.
   class Fail
     class << self
       def call(operation_id:, attempt_token:)

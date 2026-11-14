@@ -1,4 +1,5 @@
 module Duplicates
+  # Queues a duplicate search with the current edition inputs and publishing connection version.
   class Request
     class << self
       def call(release_id:, expected_revision:)

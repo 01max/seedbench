@@ -1,4 +1,5 @@
 module Torrents
+  # Encodes and decodes bounded bencode data for torrent metadata and info hashes.
   class Bencode
     class Invalid < StandardError; end
     MAX_BYTES = 10 * 1024 * 1024

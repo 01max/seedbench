@@ -1,4 +1,6 @@
 module Covers
+  # Verifies that a current, explicitly authorized draft or publication attempt may host the
+  # reviewed cover.
   class WriteContext
     Snapshot = Data.define(:operation, :cover, :connection)
 

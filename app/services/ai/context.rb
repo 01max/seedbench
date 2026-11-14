@@ -1,6 +1,8 @@
 require 'digest'
 
 module Ai
+  # Fingerprints the edition evidence and reviewed facts used to check whether AI output still
+  # applies.
   class Context
     def self.call(release:)
       payload = release.payload_revisions.order(number: :desc).first

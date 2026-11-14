@@ -1,4 +1,5 @@
 module Covers
+  # Records Postimages upload intent and reuses a known receipt when a workflow resumes.
   class UploadReceipt
     class << self
       def call(context:, bytes:, image:)

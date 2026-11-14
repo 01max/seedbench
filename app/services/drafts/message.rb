@@ -1,4 +1,6 @@
 module Drafts
+  # Turns a stored draft, cover or preparation error code into the localized message shown in the
+  # workbench.
   class Message
     def self.call(code:)
       return if code.blank?

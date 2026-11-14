@@ -1,4 +1,5 @@
 module Releases
+  # Creates a release and pins its initial provider assignments from the selected defaults.
   class Create
     ROLES = %w[publishing torrent_client ai image_host].freeze
 

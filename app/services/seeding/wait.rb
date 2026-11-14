@@ -1,4 +1,5 @@
 module Seeding
+  # Provides the timed delay used between observations during initial seeding.
   class Wait
     def self.call(seconds:)
       deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + seconds

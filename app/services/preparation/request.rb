@@ -1,4 +1,5 @@
 module Preparation
+  # Queues or retries explicit payload preparation after checking the current review and inspection.
   class Request
     class << self
       def call(release_id:, expected_revision:)

@@ -1,4 +1,5 @@
 module Workflows
+  # Maps workflow kinds to their compute and result handlers, effect types and recovery hooks.
   class Definitions
     class UnsupportedKind < StandardError; end
     Definition = Data.define(:compute, :apply, :effect, :stale, :recoverable, :claim_stale, :retain_stale, :interrupted) do

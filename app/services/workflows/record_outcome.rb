@@ -1,4 +1,6 @@
 module Workflows
+  # Records phase changes and external references for the active attempt without replacing known
+  # identities.
   class RecordOutcome
     class Conflict < StandardError; end
 

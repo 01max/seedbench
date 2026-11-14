@@ -1,4 +1,5 @@
 module Workflows
+  # Claims a queued operation, runs its registered handler and applies or records the outcome.
   class Execute
     def self.call(operation_id:)
       operation = WorkflowOperation.find(operation_id)

@@ -1,5 +1,6 @@
 module Providers
   class C411
+    # Builds a C411 draft mutation from reviewed text and attachments and checks provider readback.
     class DraftBody
       class << self
         def call(write:)

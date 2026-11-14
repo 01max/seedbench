@@ -1,6 +1,7 @@
 require 'cgi'
 
 module Content
+  # Checks BBCode and NFO against the publishing template and expected release values.
   class Validation
     Policy = Providers::C411::EbookContent
     NFO_OPTIONAL = %w[publisher publication_year digital_isbn print_isbn edition pages documents release_name].freeze

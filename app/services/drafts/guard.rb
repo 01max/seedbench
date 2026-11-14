@@ -1,4 +1,6 @@
 module Drafts
+  # Revalidates the draft write's active attempt, release revision and provider assignment before it
+  # can send.
   class Guard
     class << self
       def call(write)

@@ -1,4 +1,6 @@
 module Drafts
+  # Imports new drafts and synchronizes known links, collecting failures while continuing with other
+  # drafts.
   class Refresh
     class << self
       def call(connection: nil)

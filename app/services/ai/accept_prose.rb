@@ -1,4 +1,5 @@
 module Ai
+  # Saves an explicitly accepted AI presentation or notes suggestion as a new content revision.
   class AcceptProse
     def self.call(release_id:, run_id:, field:, expected_revision:)
       new(release_id, run_id, field, expected_revision).call

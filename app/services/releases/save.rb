@@ -1,4 +1,6 @@
 module Releases
+  # Persists workbench editor changes as a new revision and updates affected facts, content and
+  # preparation state.
   class Save
     class InvalidChanges < StandardError
       attr_reader :errors

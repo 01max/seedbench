@@ -1,4 +1,5 @@
 module Workflows
+  # Applies a workflow result only for the active attempt and records its completion.
   class Complete
     class << self
       def call(operation_id:, attempt_token:, result:, apply:)

@@ -1,4 +1,5 @@
 module Settings
+  # Updates the operator's default connections and automatic AI preference in one transaction.
   class SetDefaults
     class Invalid < StandardError; end
     class Conflict < StandardError; end

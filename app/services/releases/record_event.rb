@@ -1,4 +1,5 @@
 module Releases
+  # Validates and appends an audit event to a release's history.
   class RecordEvent
     def self.call(release_id:, name:, actor: 'system', data: {})
       EventMetadata.validate!(data)

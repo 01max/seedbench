@@ -1,4 +1,5 @@
 module Content
+  # Checks parsed BBCode attributes and nesting before validation or safe rendering.
   class Attributes
     Policy = Providers::C411::EbookContent
     FONTS = %w[Arial Verdana Georgia monospace serif sans-serif].freeze

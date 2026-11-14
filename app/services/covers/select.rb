@@ -1,4 +1,6 @@
 module Covers
+  # Verifies the operator's chosen cover and records its source and edition review before any
+  # hosting attempt.
   class Select
     def self.call(release_id:, expected_revision:, kind:, attributes:, review:)
       new(release_id, expected_revision, kind, attributes.stringify_keys, review.stringify_keys).call

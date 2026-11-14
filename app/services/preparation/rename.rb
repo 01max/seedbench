@@ -1,6 +1,7 @@
 require 'timeout'
 
 module Preparation
+  # Runs the storage helper for an atomic rename that never replaces an existing destination.
   class Rename
     class << self
       def call(source:, destination:)

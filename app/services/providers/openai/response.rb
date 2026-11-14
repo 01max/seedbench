@@ -1,5 +1,7 @@
 module Providers
   class Openai
+    # Extracts structured output and usage from an OpenAI response and verifies it against the
+    # request evidence.
     class Response
       class << self
         def call(data:, purpose:, pack:)

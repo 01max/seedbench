@@ -1,6 +1,7 @@
 require 'digest'
 
 module Content
+  # Fingerprints the facts, assets and preparation details a BBCode or NFO revision depends on.
   class Dependencies
     def self.call(inputs:, values:, kind:)
       new(inputs, values, kind).call

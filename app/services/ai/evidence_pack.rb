@@ -1,4 +1,6 @@
 module Ai
+  # Builds the bounded evidence sent to OpenAI from the routine scope or an explicit operator
+  # selection.
   class EvidencePack
     VERSION = 'focused-evidence-v1'.freeze
     MAX_BYTES = 32_768

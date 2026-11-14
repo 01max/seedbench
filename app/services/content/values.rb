@@ -1,4 +1,5 @@
 module Content
+  # Formats reviewed edition facts, prose and technical details for the release templates.
   class Values
     attr_reader :inputs
 

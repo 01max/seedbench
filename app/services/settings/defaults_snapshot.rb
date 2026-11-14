@@ -1,4 +1,5 @@
 module Settings
+  # Captures the global default provider assignments and automatic AI preference for new releases.
   class DefaultsSnapshot
     Snapshot = Data.define(:automatic_ai, :revision, :connection_ids)
 

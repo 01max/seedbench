@@ -1,4 +1,5 @@
 module Workflows
+  # Sweeps expired leases and pending delivery intents so interrupted workflow dispatch can recover.
   class RecoverDispatches
     class << self
       def call(limit: 100)

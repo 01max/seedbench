@@ -1,4 +1,5 @@
 module Settings
+  # Updates provider options on an existing connection using its expected configuration version.
   class ConfigureConnection
     class << self
       def call(connection_id:, expected_version:, options:)

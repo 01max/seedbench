@@ -1,6 +1,7 @@
 require 'tempfile'
 
 module Preparation
+  # Verifies payload identity and tests rename support before a canonical destination is reserved.
   class Preflight
     Result = Data.define(:source, :destination, :identity, :root_identity)
 

@@ -1,4 +1,5 @@
 module Ebooks
+  # Finds discrepancies among edition evidence and reviewed values for the current payload.
   class EditionComparison
     class << self
       def call(release:, payload:)

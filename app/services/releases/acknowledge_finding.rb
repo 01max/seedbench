@@ -1,4 +1,5 @@
 module Releases
+  # Records the operator's acknowledgement of the current version of an uncertain finding.
   class AcknowledgeFinding
     class NotUncertain < StandardError; end
     class StaleFinding < StandardError; end

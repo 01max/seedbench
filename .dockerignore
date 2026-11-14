@@ -26,6 +26,11 @@
 !spec/**
 !script/
 !script/operator_password.rb
+!script/deployment/
+!script/deployment/*.rb
+!script/deployment/state.py
+!script/storage/
+!script/storage/rename.py
 !script/quality/
 !script/quality/**
 !script/ebooks/

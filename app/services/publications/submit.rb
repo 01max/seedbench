@@ -1,4 +1,6 @@
 module Publications
+  # Revalidates the reviewed release and sends its prepared torrent to C411 within an explicit
+  # publication attempt.
   class Submit
     def self.call(operation:)
       new(operation).call

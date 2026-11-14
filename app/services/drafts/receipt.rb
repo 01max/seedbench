@@ -1,4 +1,6 @@
 module Drafts
+  # Records an accepted C411 draft identity, establishes its local link and seeds the initial
+  # snapshot.
   class Receipt
     class << self
       def call(write:, remote_id:)

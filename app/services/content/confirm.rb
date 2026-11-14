@@ -1,4 +1,5 @@
 module Content
+  # Reconfirms existing BBCode or NFO against current inputs while preserving the reviewed text.
   class Confirm
     class InvalidContent < StandardError; end
 

@@ -1,4 +1,5 @@
 module Publications
+  # Records C411 acceptance and queues initial seeding for the accepted submission.
   class Receipt
     def self.call(operation:, receipt:)
       new(operation).call(receipt)

@@ -65,9 +65,7 @@ RSpec.describe Ai::Initial do
       optional_ai(release, enabled)
       prepare_and_review(release)
       snapshot = validate_explicit_boundary(release)
-      Releases::MarkCheck::KEYS.each do |key|
-        Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: release.reload.input_revision)
-      end
+      mark_reviewed(release)
       expect(snapshot.bbcode).to include('Présentation rédigée et relue manuellement')
       states = Releases::Checklist.call(release: release.reload).index_by(&:key)
       expect(states.values_at('inspection', 'preparation', 'cover', 'content', 'duplicates', 'edition_review', 'text_review').map(&:state)).to all(eq('done'))
@@ -75,5 +73,40 @@ RSpec.describe Ai::Initial do
       expect(WebMock).not_to have_requested(:post, %r{c411.org})
       expect(release.publication_state).to eq('unpublished')
     end
+  end
+
+  it 'publishes and verifies initial seeding after automatic assistance fails' do
+    release = manual_release
+    assign_connections(release)
+    assign_deluge(release)
+    optional_ai(release, true)
+    prepare_and_review(release)
+    host_reviewed_cover(release)
+    stub_duplicate_search(body: '<rss><channel/></rss>')
+    search_duplicates(release)
+    mark_reviewed(release)
+    run_publication_and_seed(release)
+
+    expect(release.ai_runs.pluck(:status)).not_to include('succeeded')
+    expect(release.reload).to have_attributes(publication_state: 'published', seeding_state: 'succeeded')
+    expect(release.draft_link).to be_nil
+  end
+
+  def mark_reviewed(release)
+    Releases::MarkCheck::KEYS.each do |key|
+      Releases::MarkCheck.call(release_id: release.id, key: key, checked: true, expected_revision: release.reload.input_revision)
+    end
+  end
+
+  def run_publication_and_seed(release)
+    preparation = release.preparation_revisions.sole
+    stub_publication(preparation)
+    connection = release.provider_assignments.find_by!(role: 'publishing').provider_connection
+    stub_request(:get, 'https://c411.org/api').with(query: {
+      t: 'get', id: preparation.torrent_info_hash, apikey: connection.credentials.fetch('api_key')
+    }).to_return(body: personalized_torrent(preparation))
+    stub_seed_daemon(preparation)
+    Workflows::Execute.call(operation_id: request_publication(release).id)
+    Workflows::Execute.call(operation_id: release.workflow_operations.find_by!(kind: 'initial_seed').id)
   end
 end

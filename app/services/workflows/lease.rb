@@ -1,4 +1,5 @@
 module Workflows
+  # Renews live workflow leases and recovers expired attempts according to each operation's effect.
   class Lease
     DURATION = 5.minutes
 

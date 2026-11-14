@@ -1,4 +1,6 @@
 module Drafts
+  # Queues an explicit draft create or update against the current revision and its publishing
+  # connection.
   class Request
     def self.call(release_id:, expected_revision:, recreate_confirmed: false)
       release = Release.find(release_id)

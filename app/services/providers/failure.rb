@@ -1,4 +1,5 @@
 module Providers
+  # Carries a sanitized provider error and stable code for workflow callers.
   class Failure < StandardError
     attr_reader :code
 

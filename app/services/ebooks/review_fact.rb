@@ -1,4 +1,6 @@
 module Ebooks
+  # Records an operator's selected evidence candidate as a reviewed edition fact and refreshes
+  # related findings.
   class ReviewFact
     class InvalidCandidate < StandardError; end
     FIELDS = %w[title author isbn edition language publisher publication_year].freeze

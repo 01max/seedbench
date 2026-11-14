@@ -1,4 +1,5 @@
 module Ebooks
+  # Queues an ISBN lookup against the release's current payload revision.
   class RequestLookup
     def self.call(release:, isbn:)
       raise EditionRecord::InvalidIsbn, I18n.t('ebooks.review.invalid_isbn') unless Isbn.valid?(isbn)

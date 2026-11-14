@@ -1,4 +1,5 @@
 module Drafts
+  # Normalizes C411 draft fields and maps them to the local editor for comparison or adoption.
   class Content
     FIELDS = { 'name' => 'proposed_name', 'title' => 'title', 'description' => 'bbcode', 'nfo' => 'nfo' }.freeze
 

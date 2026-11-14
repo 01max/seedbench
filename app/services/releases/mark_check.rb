@@ -1,4 +1,5 @@
 module Releases
+  # Records an operator's manual edition or text review mark against the current release revision.
   class MarkCheck
     class NotManual < StandardError; end
     KEYS = %w[edition_review text_review].freeze

@@ -1,4 +1,6 @@
 module Seeding
+  # Captures the Deluge mapping and queues initial seeding with the accepted C411 submission
+  # identity.
   class Request
     class << self
       def parameters(release)

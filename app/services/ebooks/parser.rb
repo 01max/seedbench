@@ -3,6 +3,7 @@ require 'tmpdir'
 require 'tempfile'
 
 module Ebooks
+  # Runs the ebook inspection tools in scratch space and returns the bounded inspection report.
   class Parser
     class UnsafePayload < StandardError; end
     MAX_OUTPUT = 256.kilobytes

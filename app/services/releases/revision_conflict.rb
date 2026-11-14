@@ -1,4 +1,5 @@
 module Releases
+  # Reports the expected and current release revisions when a submitted edit is stale.
   class RevisionConflict < StandardError
     attr_reader :expected_revision, :actual_revision
 
