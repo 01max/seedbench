@@ -51,3 +51,31 @@ bin/compose run --rm --no-deps -T --entrypoint ruby web script/deployment/storag
 Check all three hashes match before enabling publication. The probe only
 creates and removes its own synthetic files. The client mapping check uses
 Deluge's actual filesystem view, without adding a torrent or changing settings.
+
+## Limit network access
+
+Set `SEEDBENCH_LAN_ADDRESS` and `SEEDBENCH_TAILSCALE_ADDRESS` in
+`compose.env` to the literal IPv4 addresses assigned to the Docker host.
+Append `compose.private.yaml` to `COMPOSE_FILE`. For example, with bind mounts:
+
+```sh
+export COMPOSE_FILE=compose.yaml:compose.binds.yaml:compose.private.yaml
+bin/compose config --quiet
+```
+
+The private override replaces the default loopback publication with bindings
+for those two host addresses. Use a current Docker Engine and verify the
+effective firewall policy for both addresses. On a routed LAN, enforce any
+required ingress restrictions at the Docker host. Restrict Tailscale access
+to the intended tailnet clients. Leave public forwarding, Tailscale Funnel,
+and public reverse-proxy routes disabled. If using a single private interface,
+set `SEEDBENCH_BIND_ADDRESS` in the base configuration instead.
+[Docker port publishing](https://docs.docker.com/engine/network/port-publishing/)
+
+After starting the stack, verify the bindings with `bin/compose ps`. From
+a LAN client and a separate connected tailnet client, request `/up` and
+open the login page at the respective address. From an unintended network
+or interface, verify the web port is unreachable. On the Docker host, check
+the worker has no published ports. Check the router and any existing proxy
+for public forwards to the app. A single successful request does not
+establish the denied paths.
