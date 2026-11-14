@@ -60,27 +60,24 @@ Deluge's actual filesystem view, without adding a torrent or changing settings.
 
 ## Limit network access
 
-Set `SEEDBENCH_LAN_ADDRESS` and `SEEDBENCH_TAILSCALE_ADDRESS` in
-`compose.env` to the literal IPv4 addresses assigned to the Docker host.
-Append `compose.private.yaml` to `COMPOSE_FILE`. For example, with bind mounts:
-
-```sh
-export COMPOSE_FILE=compose.yaml:compose.binds.yaml:compose.private.yaml
-bin/compose config --quiet
-```
-
-The private override replaces the default loopback publication with bindings
-for those two host addresses. Use a current Docker Engine and verify the
-effective firewall policy for both addresses. On a routed LAN, enforce any
-required ingress restrictions at the Docker host. Restrict Tailscale access
-to the intended tailnet clients. Leave public forwarding, Tailscale Funnel,
-and public reverse-proxy routes disabled. If using a single private interface,
-set `SEEDBENCH_BIND_ADDRESS` in the base configuration instead.
+Seedbench publishes one HTTP endpoint. The default `SEEDBENCH_BIND_ADDRESS`
+of `127.0.0.1` makes it available to the Docker host and a private proxy running
+there. For direct LAN access, set `SEEDBENCH_BIND_ADDRESS` in `compose.env` to
+the Docker host's LAN address. Use a current Docker Engine and verify the
+effective firewall policy for the published port, especially on a routed LAN.
 [Docker port publishing](https://docs.docker.com/engine/network/port-publishing/)
 
-After starting the stack, verify the bindings with `bin/compose ps`. From
-a LAN client and a separate connected tailnet client, request `/up` and
-open the login page at the respective address. From an unintended network
+For tailnet access, use an existing Tailscale subnet route to the LAN endpoint
+or a host-managed private proxy that forwards to Seedbench. Tailscale Serve can
+forward to the loopback endpoint. The host's routing and access rules determine
+which clients can connect. Leave public forwarding, Tailscale Funnel, and public
+reverse-proxy routes disabled.
+[Tailscale Serve](https://tailscale.com/docs/features/tailscale-serve)
+and [subnet routers](https://tailscale.com/docs/features/subnet-routers).
+
+After starting the stack, verify the published port with `bin/compose ps`.
+Request `/up` and open the login page from each intended network. For George,
+test from a LAN client and a separate tailnet client. From an unintended network
 or interface, verify the web port is unreachable. On the Docker host, check
 the worker has no published ports. Check the router and any existing proxy
 for public forwards to the app. A single successful request does not
