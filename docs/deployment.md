@@ -191,3 +191,30 @@ bin/compose up -d --no-build --wait
 Verify the queue and a representative release after startup. The remote
 history review is essential because a snapshot cannot contain IDs created
 after it was taken.
+
+## Deployment acceptance
+
+Record the application revision, Docker Engine and Compose versions, and the
+result of each host check. Keep host paths, credentials, personalized tracker
+URLs, and private release identifiers in the deployment's own records.
+
+| Check | Evidence to record |
+| --- | --- |
+| Storage and permissions | Web and worker ran as the chosen UID/GID. Their probe hash matched the host bind and the hash Deluge read as its daemon user. Staging rename preserved the inode. |
+| Private network | The LAN and tailnet login pages and `/up` loaded from their intended clients. The port was unreachable from an unintended interface, and no public forwarding or public proxy route exists. |
+| Access and restart | Operator login worked from a private client. Both services recovered after a restart with the same state and payload mounts. |
+| Recovery | A matching image restored a protected archive into empty disposable state. The expected keys, edited content, queue and artifacts were usable, and reconciliation held the stack offline on a mismatch. |
+
+The automated acceptance tests use disposable ebook bytes and stubbed external
+write requests. They cover independent batch intake, same-file preparation and
+single-team naming, deferred cover hosting, preservation of edits during AI
+and draft sync, confirmed duplicate blocking and override, direct publication,
+initial Deluge seeding, and persistent provider assignments. The manual path
+test goes from ebook inspection through publication and initial seeding with
+OpenAI returning an error. Run the complete set with `bin/ci`.
+
+The [production C411 and Deluge result](c411-api.md#direct-publication-and-personalized-download)
+covers an authorized existing draft approved by C411 and accepted by the tracker.
+Use that result for the provider protocol check. Validate the actual Seedbench
+container mount and private ingress on the deployment host. A repeat live
+publication is unnecessary for those host checks.
