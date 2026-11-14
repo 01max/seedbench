@@ -46,6 +46,8 @@ bin/state restore "$archive"
 if bin/compose run --rm --no-deps -T web bin/jobs; then exit 1; fi
 if bin/state restore "$archive"; then exit 1; fi
 bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb verify
+if bin/reconcile-state --reviewed-remote-history; then exit 1; fi
+bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb clear_draft_write
 bin/reconcile-state
 bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb mismatch
 if bin/reconcile-state --reviewed-remote-history; then exit 1; fi

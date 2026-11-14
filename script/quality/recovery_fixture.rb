@@ -11,6 +11,7 @@ module RecoveryFixture
       release.content_revisions.create!(kind: 'bbcode', number: 1, body: 'Reviewed after upload', origin: 'human', input_revision: 0)
       assign_provider(release)
       queue_inspection(release, revision)
+      record_unknown_draft_write(release)
       artifact.dirname.mkpath
       artifact.write('Generated artifact')
       artifact.dirname.dirname.join('operator-sentinel').write('Unrelated file')
@@ -22,12 +23,18 @@ module RecoveryFixture
       connection = release.provider_assignments.find_by!(role: 'publishing').provider_connection
       abort 'Provider identity or key missing' unless connection.credentials.fetch('api_key') == SECRET
       abort 'Release history missing' unless release.release_events.exists?
-      abort 'Pending operation missing' unless release.workflow_operations.sole.state == 'pending'
+      abort 'Pending operation missing' unless release.workflow_operations.find_by!(kind: 'inspection').state == 'pending'
       abort 'Queue job missing' unless SolidQueue::Job.exists?(class_name: 'WorkflowOperationJob')
+      draft_write = release.draft_writes.sole
+      abort 'Unresolved draft outcome missing' unless draft_write.state == 'unknown' && draft_write.workflow_operation.state == 'succeeded'
       abort 'State artifact missing' unless artifact.read == 'Generated artifact'
       abort 'Unrelated file entered the backup' if artifact.dirname.dirname.join('operator-sentinel').exist?
 
       puts 'Backup retained keys, queue and application records, history, assignments, and artifacts.'
+    end
+
+    def clear_draft_write
+      DraftWrite.find_by!(state: 'unknown').update!(state: 'failed')
     end
 
     def mismatch
@@ -53,6 +60,14 @@ module RecoveryFixture
       WorkflowOperationJob.set(wait: 1.hour).perform_later(operation.id)
     end
 
+    def record_unknown_draft_write(release)
+      operation = release.workflow_operations.create!(kind: 'draft_write', effect: 'remote', request_key: 'recovery-draft',
+        input_revision: 0, state: 'succeeded', phase: 'completed')
+      connection = release.provider_assignments.find_by!(role: 'publishing').provider_connection
+      release.draft_writes.create!(workflow_operation: operation, provider_connection: connection, action: 'create',
+        state: 'unknown', error_code: 'network_error', body: { 'description' => 'Synthetic draft' })
+    end
+
     def payload
       Preparation::Paths.new.root.join('restore-probe.bin')
     end
@@ -65,5 +80,5 @@ end
 
 abort 'Use only disposable runtime fixtures' unless ENV['SEEDBENCH_RUNTIME_VERIFICATION'] == '1'
 command = ARGV.fetch(0)
-abort 'Unknown recovery fixture command' unless %w[prepare verify mismatch repair].include?(command)
+abort 'Unknown recovery fixture command' unless %w[prepare verify clear_draft_write mismatch repair].include?(command)
 RecoveryFixture.public_send(command)

@@ -79,8 +79,9 @@ class DeploymentRecovery
   end
 
   def verify_external_operations
-    active = WorkflowOperation.where(state: %w[pending running outcome_unknown])
-    active.where(effect: 'remote').or(active.where(effect: 'filesystem')).find_each do |operation|
+    active = WorkflowOperation.where(state: %w[pending running outcome_unknown], effect: %w[remote filesystem])
+    unresolved_drafts = DraftWrite.where(state: %w[pending sending unknown]).select(:workflow_operation_id)
+    active.or(WorkflowOperation.where(id: unresolved_drafts)).find_each do |operation|
       @issues << "Release #{operation.release_id}: external operation #{operation.id} requires reconciliation before it can be resumed."
     end
   end
