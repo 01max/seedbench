@@ -39,6 +39,19 @@ trap cleanup EXIT INT TERM
 bin/compose build web
 bin/compose run --rm --no-deps -T web bin/rails db:prepare
 bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb prepare
+bin/compose up -d --no-build --wait web
+bin/compose pause web
+backup_status=0
+reconcile_status=0
+backup_output=$(bin/state backup "$archive" 2>&1) || backup_status=$?
+reconcile_output=$(bin/reconcile-state 2>&1) || reconcile_status=$?
+bin/compose unpause web
+bin/compose stop web
+test "$backup_status" -eq 1
+printf '%s\n' "$backup_output" | grep -Fx 'Stop the deployment web and worker before backing up or restoring state.'
+test ! -e "$archive"
+test "$reconcile_status" -eq 1
+printf '%s\n' "$reconcile_output" | grep -Fx 'Stop web and worker before reconciling restored state.'
 bin/state backup "$archive"
 
 export COMPOSE_FILE="$initial_files:$temporary/restore.yaml" COMPOSE_PROJECT_NAME="$project-restore"

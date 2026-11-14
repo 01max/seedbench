@@ -8,8 +8,8 @@ elif [ "$#" -ne 0 ]; then
   echo 'Usage: bin/reconcile-state [--reviewed-remote-history]' >&2
   exit 64
 fi
-running=$(bin/compose ps --status running -q)
-if [ -n "$running" ]; then
+active=$(bin/compose ps --status running --status paused --status restarting -q)
+if [ -n "$active" ]; then
   echo 'Stop web and worker before reconciling restored state.' >&2
   exit 1
 fi

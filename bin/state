@@ -11,8 +11,8 @@ case "$operation:$archive" in
   backup:/*|restore:/*) ;;
   *) echo 'Choose backup or restore and supply an absolute archive path.' >&2; exit 64 ;;
 esac
-running=$(bin/compose ps --status running -q)
-if [ -n "$running" ]; then
+active=$(bin/compose ps --status running --status paused --status restarting -q)
+if [ -n "$active" ]; then
   echo 'Stop the deployment web and worker before backing up or restoring state.' >&2
   exit 1
 fi
