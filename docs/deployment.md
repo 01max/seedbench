@@ -133,3 +133,61 @@ end-to-end HTTPS, use `FORCE_SSL=1` and leave `ASSUME_SSL=0`.
 An image rollback preserves the databases and canonical files. A state restore
 cannot reverse C411 publication, draft changes, or Deluge state. Do not remove
 the deployment's volumes or move seeded payloads during rollback.
+
+## Back up and restore state
+
+Finish remote writes and initial seeding, then stop both containers to
+quiesce the separate application and queue databases at the same point.
+Keep a copy of the selected image tag, checkout revision and Compose settings.
+Use the state commands with the deployment's project and environment selected:
+
+```sh
+bin/compose stop
+bin/state backup /absolute/protected/path/seedbench-state.tar.gz
+bin/compose up -d --no-build --wait
+```
+
+The archive includes both SQLite databases, any SQLite sidecars, generated
+state artifacts, and both effective recovery keys. Store it on separate
+protected storage with restricted permissions and encryption at rest. The
+archive can decrypt the contained provider credentials. The scratch mount
+and canonical file mount are separate. Protect your payload share with your
+normal storage snapshots or backups. Seedbench does not retain a second
+working copy of an ebook.
+
+Restore with the backup's matching image and Rails environment. Stop both
+services, retain the current state mount, and point the deployment at a new
+empty state directory or named volume. Keep the **same payload mapping and
+files**. When keys are supplied externally, the configured values must match
+the archive. Do not run `bin/setup` on the empty recovery volume first.
+
+```sh
+bin/state restore /absolute/protected/path/seedbench-state.tar.gz
+bin/reconcile-state
+```
+
+The restore refuses nonempty destinations. An interrupted import can leave
+the target volume incomplete. Keep it offline and restore again into a fresh
+empty volume. Startup is suspended after restore. The reconciliation command
+checks the current payloads and prepared torrent identities, then reads
+known C411 drafts and submissions to compare them with saved records. It
+reports release IDs that need attention. It blocks operation replay if the
+backup captured a pending or ambiguous remote write or filesystem move. Local queued jobs are
+retained.
+
+Before restarting, verify the Deluge mapping with the storage probe. Review
+C411 account history and Deluge for effects after the archive timestamp,
+including new submissions and draft changes missing from the restored
+database. If checks report differences or a remote operation is unresolved,
+keep the recovered copy offline. Recover from a later consistent archive or
+reconcile the affected records from the retained state and provider evidence
+before proceeding. Once the checks pass and you have reviewed that history:
+
+```sh
+bin/reconcile-state --reviewed-remote-history
+bin/compose up -d --no-build --wait
+```
+
+Verify the queue and a representative release after startup. The remote
+history review is essential because a snapshot cannot contain IDs created
+after it was taken.

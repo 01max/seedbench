@@ -1,0 +1,54 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/../.."
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/seedbench-recovery.XXXXXX")
+project="seedbench-recovery-$(date +%s)-$$"
+archive="$temporary/state.tar.gz"
+export SEEDBENCH_COMPOSE_ENV=config/compose.defaults.env
+export SEEDBENCH_UID=1000 SEEDBENCH_GID=1000
+export SEEDBENCH_STATE_ROOT=/state SEEDBENCH_SCRATCH_ROOT=/scratch SEEDBENCH_PAYLOAD_ROOT=/payloads
+export COMPOSE_PROJECT_NAME="$project"
+export COMPOSE_FILE="compose.yaml:compose.smoke.yaml:$temporary/image.yaml"
+initial_files="$COMPOSE_FILE"
+cat > "$temporary/image.yaml" <<YAML
+services:
+  web:
+    image: seedbench:$project
+  worker:
+    image: seedbench:$project
+YAML
+cat > "$temporary/restore.yaml" <<YAML
+volumes:
+  payloads:
+    name: ${project}_payloads
+    external: true
+YAML
+
+cleanup() {
+  status=$?
+  trap - EXIT INT TERM
+  COMPOSE_FILE="$initial_files:$temporary/restore.yaml" COMPOSE_PROJECT_NAME="$project-restore" bin/compose down --volumes
+  COMPOSE_FILE="$initial_files" COMPOSE_PROJECT_NAME="$project" bin/compose down --volumes
+  docker image rm "seedbench:$project" >/dev/null 2>&1 || true
+  rm -f "$temporary/image.yaml" "$temporary/restore.yaml" "$archive"
+  rmdir "$temporary"
+  exit "$status"
+}
+trap cleanup EXIT INT TERM
+
+bin/compose build web
+bin/compose run --rm --no-deps -T web bin/rails db:prepare
+bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb prepare
+bin/state backup "$archive"
+
+export COMPOSE_FILE="$initial_files:$temporary/restore.yaml" COMPOSE_PROJECT_NAME="$project-restore"
+bin/state restore "$archive"
+if bin/compose run --rm --no-deps -T web bin/jobs; then exit 1; fi
+if bin/state restore "$archive"; then exit 1; fi
+bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb verify
+bin/reconcile-state
+bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb mismatch
+if bin/reconcile-state --reviewed-remote-history; then exit 1; fi
+bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb repair
+bin/reconcile-state --reviewed-remote-history
+bin/compose up -d --no-build --wait

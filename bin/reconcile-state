@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+mode=check
+if [ "$#" -eq 1 ] && [ "$1" = --reviewed-remote-history ]; then
+  mode=finish
+elif [ "$#" -ne 0 ]; then
+  echo 'Usage: bin/reconcile-state [--reviewed-remote-history]' >&2
+  exit 64
+fi
+if [ -n "$(bin/compose ps --status running -q)" ]; then
+  echo 'Stop web and worker before reconciling restored state.' >&2
+  exit 1
+fi
+exec bin/compose run --rm --no-deps -T -e SEEDBENCH_RECOVERY_MODE="$mode" web bin/rails runner script/deployment/reconcile.rb

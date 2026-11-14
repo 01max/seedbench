@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+if [ "$#" -ne 2 ]; then
+  echo 'Usage: bin/state backup|restore /absolute/path/to/state.tar.gz' >&2
+  exit 64
+fi
+operation=$1
+archive=$2
+case "$operation:$archive" in
+  backup:/*|restore:/*) ;;
+  *) echo 'Choose backup or restore and supply an absolute archive path.' >&2; exit 64 ;;
+esac
+if [ -n "$(bin/compose ps --status running -q)" ]; then
+  echo 'Stop the deployment web and worker before backing up or restoring state.' >&2
+  exit 1
+fi
+
+if [ "$operation" = restore ]; then
+  exec bin/compose run --rm --no-deps -T --entrypoint python3 web -I script/deployment/state.py restore < "$archive"
+fi
+
+umask 077
+temporary=$(mktemp "${archive}.partial.XXXXXX")
+trap 'rm -f "$temporary"' EXIT
+trap 'exit 1' HUP INT TERM
+bin/compose run --rm --no-deps -T --entrypoint python3 web -I script/deployment/state.py backup > "$temporary"
+ln "$temporary" "$archive"

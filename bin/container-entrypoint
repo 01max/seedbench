@@ -10,6 +10,12 @@ FileUtils.mkdir_p(%w[/tmp/rails-home /tmp/rails-tmp /tmp/rails-log])
     path.start_with?("/") && File.directory?(path) && File.writable?(path)
 end
 
+restore_marker = File.join(ENV.fetch("SEEDBENCH_STATE_ROOT"), ".seedbench-restored")
+starts_service = ARGV.first == "bin/jobs" || ARGV.take(2) == %w[bin/rails server]
+if starts_service && (File.exist?(restore_marker) || File.symlink?(restore_marker))
+  abort "Restored state requires reconciliation. See the deployment recovery guide."
+end
+
 ENV["TMPDIR"] ||= File.join(ENV.fetch("SEEDBENCH_SCRATCH_ROOT"), "request-uploads")
 FileUtils.mkdir_p(ENV.fetch("TMPDIR"), mode: 0o700)
 abort "TMPDIR must be an existing writable absolute directory without a symlink" unless
