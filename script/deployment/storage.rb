@@ -1,6 +1,5 @@
 require 'digest'
 require 'json'
-require 'pathname'
 require 'tempfile'
 
 class DeploymentStorage
@@ -11,7 +10,7 @@ class DeploymentStorage
     abort 'Expected a 32-character hexadecimal probe identifier' unless identifier&.match?(/\A[0-9a-f]{32}\z/)
 
     roots = ROOT_KEYS.map { |key| configured_root(key) }
-    abort 'State, scratch, and payload roots must be separate' if roots.permutation(2).any? { |a, b| a == b || a.to_s.start_with?("#{b}/") }
+    abort 'State, scratch, and payload roots must be separate' unless separate?(roots)
 
     @state, @scratch, @payload = roots
     @identifier = identifier
@@ -44,6 +43,11 @@ class DeploymentStorage
   end
 
   private
+
+  def separate?(roots)
+    identities = roots.map { |root| [ root.stat.dev, root.stat.ino ] }
+    identities.uniq.size == roots.size && roots.permutation(2).none? { |a, b| a.to_s.start_with?("#{b}/") }
+  end
 
   def configured_root(key)
     path = Pathname.new(ENV.fetch(key))
