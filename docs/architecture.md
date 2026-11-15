@@ -6,12 +6,13 @@ text keep code conventions distinct from operator presentation.
 
 | Layer | Owns | Delegates |
 | --- | --- | --- |
-| Controllers | Authentication, permitted input, service calls, expected-error translation, HTML/Turbo responses | Decisions, transactions, provider transport, filesystem changes |
+| Controllers | Authentication, authorization calls, permitted input, service calls, expected-error translation, HTML/Turbo responses | Permission decisions, transactions, provider transport, filesystem changes |
 | Jobs | Serialized identifiers, scheduling, bounded retries, service calls | Workflow decisions and state transitions |
 | Models | Associations, declarative validation, enums, encryption/password declarations, simple scopes | Business callbacks, external I/O, workflow methods, enqueueing |
 | Services | Use cases, transactions, locking, revision checks, idempotency, state transitions, event recording | HTTP/session response concerns and provider wire formats |
-| Policies and queries | Eligibility reasons, naming/content policy, derived checks, focused database reads | Rendering and transport |
-| Provider adapters | Authentication, serialization, provider errors and protocol translation | Local workflow state and eligibility |
+| Authorization policies | Which actions an actor may perform and which records they may access | Workflow readiness and state transitions |
+| Queries | Focused reads, derived checklists and workflow readiness reasons | Rendering and transport |
+| Provider adapters | Authentication, serialization, provider errors, protocol translation and provider-specific rules | Local workflow state and eligibility |
 
 ## Interfaces and namespaces
 
@@ -21,9 +22,9 @@ operation summary. A service hides a coherent operation; a trivial persistence
 call does not automatically need its own service. Services can be invoked from
 HTTP, Active Job, or Rails runner without a controller or session.
 
-Use `app/services` for orchestration, `app/policies` for decisions,
-`app/queries` for focused reads, and `app/adapters/providers` for provider
-transport. Namespaces follow the responsibility:
+Use `app/services` for orchestration and workflow rules, `app/queries` for
+reads and derived status, and `app/services/providers` for provider adapters
+and their naming and content rules. Namespaces follow the responsibility:
 
 | Namespace | Responsibility |
 | --- | --- |
@@ -32,13 +33,24 @@ transport. Namespaces follow the responsibility:
 | `Preparation` | Naming, path validation, canonical moves and torrent verification |
 | `Content` | BBCode/NFO assembly, validation and sanitized preview |
 | `Covers`, `Duplicates`, `Ai` | Assistance and review workflows |
-| `Drafts`, `Publication`, `Seeding` | Explicit remote operations and reconciliation |
+| `Drafts`, `Publications`, `Seeding` | Explicit remote operations and reconciliation |
 | `Providers` | Publishing, torrent client, AI and image-host adapters; C411 policy |
 | `Authentication`, `Settings` | Operator access and provider configuration |
 
 These directories establish ownership for subsequent features. They do not
 claim those workflows are implemented. No mandatory `BaseService`, generic
 repository, or result/monad layer is required.
+
+## Authorization and workflow readiness
+
+Devise authenticates the single Seedbench operator. When actions or record
+visibility vary by actor, use Pundit policies in `app/policies`. Use `authorize`
+for actions, `policy_scope` for record visibility, and `pundit_user` to supply
+Devise's `current_operator` to Pundit.
+
+`Publications::Readiness` lists release blockers such as missing review or
+unresolved duplicates. The publication service checks those blockers when
+queuing an operation and the worker checks them again before sending it to C411.
 
 ## Expected failures
 

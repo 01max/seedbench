@@ -1,4 +1,5 @@
 module Releases
+  # Builds the workbench checklist from the current release, findings and operator review marks.
   class Checklist
     Item = Data.define(:key, :label, :required, :owner, :state, :note, :checked, :finding)
 

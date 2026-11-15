@@ -11,7 +11,7 @@ module Publications
           active = release.workflow_operations.find_by(kind: 'publish', state: %w[pending running], input_revision: expected_revision)
           return active if active
 
-          reasons = Gate.call(release: release)
+          reasons = Readiness.call(release: release)
           raise Failure.new(reasons) if reasons.any?
 
           persist(release)

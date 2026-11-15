@@ -72,7 +72,7 @@ module Publications
 
     def reviewed_content
       Covers::Host.call(operation_id: @operation.id, attempt_token: @attempt)
-      reasons = Gate.call(release: @release.reload, before_send: true)
+      reasons = Readiness.call(release: @release.reload, before_send: true)
       raise Failure.new(reasons) if reasons.any?
 
       Content::ReviewedAction.call(operation_id: @operation.id, attempt_token: @attempt)
@@ -93,7 +93,7 @@ module Publications
 
       connection
       verify_seed_configuration!
-      reasons = Gate.call(release: @release, before_send: true)
+      reasons = Readiness.call(release: @release, before_send: true)
       raise Failure.new(reasons) if reasons.any?
 
       Review.verify!(release: @release, refreshed_check: check)
