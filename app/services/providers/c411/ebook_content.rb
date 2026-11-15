@@ -1,5 +1,6 @@
 module Providers
   class C411
+    # Assembles and reads C411's ebook BBCode template and defines its markup and cover rules.
     class EbookContent
       VERSION = 'c411-ebook-2026-11-09-v1'.freeze
       TARGET_COVER_WIDTH = 600

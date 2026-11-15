@@ -1,5 +1,6 @@
 module Providers
   class C411
+    # Builds and validates release, payload and torrent names for C411 ebook preparation.
     class EbookNaming
       class InvalidName < StandardError; end
       Names = Data.define(:release, :payload, :torrent)

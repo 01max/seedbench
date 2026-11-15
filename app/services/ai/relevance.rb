@@ -1,4 +1,5 @@
 module Ai
+  # Checks whether generated suggestions still apply to the release's evidence or saved prose.
   class Relevance
     class << self
       def current?(run:, context:)
