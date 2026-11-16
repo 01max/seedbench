@@ -30,8 +30,16 @@
 #  release_id                               (release_id => releases.id)
 #
 class DraftWrite < ApplicationRecord
+  READBACK_ERROR_CODES = %w[readback_failed readback_mismatch].freeze
+
   belongs_to :release
   belongs_to :workflow_operation, foreign_key: [ :release_id, :workflow_operation_id ], primary_key: [ :release_id, :id ], inverse_of: :draft_write
   belongs_to :provider_connection, foreign_key: [ :provider_role, :provider_connection_id ], primary_key: [ :role, :id ], inverse_of: :draft_writes
   attr_readonly :release_id, :workflow_operation_id, :provider_connection_id, :provider_role, :action, :request
+
+  scope :with_unverified_readback, -> { where(state: 'accepted', error_code: READBACK_ERROR_CODES) }
+
+  def unverified_readback?
+    state == 'accepted' && READBACK_ERROR_CODES.include?(error_code)
+  end
 end

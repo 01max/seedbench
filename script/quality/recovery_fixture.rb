@@ -11,7 +11,9 @@ module RecoveryFixture
       release.content_revisions.create!(kind: 'bbcode', number: 1, body: 'Reviewed after upload', origin: 'human', input_revision: 0)
       assign_provider(release)
       queue_inspection(release, revision)
-      record_unknown_draft_write(release)
+      record_draft_write(release, state: 'unknown', error_code: 'network_error')
+      record_draft_write(release, state: 'accepted', error_code: 'readback_failed')
+      record_draft_write(release, state: 'accepted', error_code: 'readback_mismatch')
       artifact.dirname.mkpath
       artifact.write('Generated artifact')
       artifact.dirname.dirname.join('operator-sentinel').write('Unrelated file')
@@ -25,8 +27,9 @@ module RecoveryFixture
       abort 'Release history missing' unless release.release_events.exists?
       abort 'Pending operation missing' unless release.workflow_operations.find_by!(kind: 'inspection').state == 'pending'
       abort 'Queue job missing' unless SolidQueue::Job.exists?(class_name: 'WorkflowOperationJob')
-      draft_write = release.draft_writes.sole
-      abort 'Unresolved draft outcome missing' unless draft_write.state == 'unknown' && draft_write.workflow_operation.state == 'succeeded'
+      writes = release.draft_writes.joins(:workflow_operation).where(workflow_operations: { state: 'succeeded' })
+      expected = [ %w[unknown network_error], %w[accepted readback_failed], %w[accepted readback_mismatch] ]
+      abort 'Unresolved draft outcomes missing' unless writes.order(:id).pluck(:state, :error_code) == expected
       abort 'State artifact missing' unless artifact.read == 'Generated artifact'
       abort 'Unrelated file entered the backup' if artifact.dirname.dirname.join('operator-sentinel').exist?
 
@@ -35,6 +38,10 @@ module RecoveryFixture
 
     def clear_draft_write
       DraftWrite.find_by!(state: 'unknown').update!(state: 'failed')
+    end
+
+    def clear_draft_readback
+      DraftWrite.where(state: 'accepted').find_each { |write| write.update!(error_code: nil) }
     end
 
     def mismatch
@@ -60,12 +67,12 @@ module RecoveryFixture
       WorkflowOperationJob.set(wait: 1.hour).perform_later(operation.id)
     end
 
-    def record_unknown_draft_write(release)
-      operation = release.workflow_operations.create!(kind: 'draft_write', effect: 'remote', request_key: 'recovery-draft',
+    def record_draft_write(release, state:, error_code:)
+      operation = release.workflow_operations.create!(kind: 'draft_write', effect: 'remote', request_key: "recovery-#{error_code}",
         input_revision: 0, state: 'succeeded', phase: 'completed')
       connection = release.provider_assignments.find_by!(role: 'publishing').provider_connection
       release.draft_writes.create!(workflow_operation: operation, provider_connection: connection, action: 'create',
-        state: 'unknown', error_code: 'network_error', body: { 'description' => 'Synthetic draft' })
+        state: state, error_code: error_code, body: { 'description' => 'Synthetic draft' })
     end
 
     def payload
@@ -80,5 +87,5 @@ end
 
 abort 'Use only disposable runtime fixtures' unless ENV['SEEDBENCH_RUNTIME_VERIFICATION'] == '1'
 command = ARGV.fetch(0)
-abort 'Unknown recovery fixture command' unless %w[prepare verify clear_draft_write mismatch repair].include?(command)
+abort 'Unknown recovery fixture command' unless %w[prepare verify clear_draft_write clear_draft_readback mismatch repair].include?(command)
 RecoveryFixture.public_send(command)
