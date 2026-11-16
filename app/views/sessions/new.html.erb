@@ -1,5 +1,8 @@
 <main class="mx-auto max-w-md px-6 py-20">
-  <p class="text-sm font-semibold uppercase tracking-widest text-[var(--accent)]"><%= t("application.name") %></p>
+  <p class="flex items-center gap-3 text-sm font-semibold uppercase tracking-widest text-[var(--accent)]">
+    <%= image_tag 'seedbench-logo.svg', size: '36', alt: '' %>
+    <%= t('application.name') %>
+  </p>
   <h1 class="mt-4 text-2xl font-bold"><%= t("workbench.login.title") %></h1>
   <p class="mt-3"><%= t("workbench.login.intro") %></p>
   <%= form_with url: operator_session_path, scope: :operator, class: "mt-6 grid gap-4" do |form| %>

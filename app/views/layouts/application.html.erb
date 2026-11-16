@@ -6,6 +6,7 @@
     <meta name="turbo-cache-control" content="no-cache">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= favicon_link_tag 'seedbench-logo.svg', type: 'image/svg+xml' %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -13,7 +14,10 @@
   <body data-controller="appearance">
     <% if current_operator %>
       <nav aria-label="<%= t("workbench.navigation.label") %>" class="app-nav">
-        <%= link_to root_path, class: "app-brand" do %><span class="brand-mark" aria-hidden="true"><%= t("workbench.brand_mark") %></span> <%= t("application.name") %><% end %>
+        <%= link_to root_path, class: 'app-brand' do %>
+          <%= image_tag 'seedbench-logo.svg', size: '24', alt: '' %>
+          <%= t('application.name') %>
+        <% end %>
         <span class="nav-context"><%= t("workbench.navigation.context") %></span>
         <div class="app-nav-actions">
           <%= yield :toolbar %>

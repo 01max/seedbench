@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="app/assets/images/seedbench-logo.svg" width="96" height="96" alt="">
+</p>
+
 <h1 align="center">Seedbench</h1>
 
 <p align="center">
