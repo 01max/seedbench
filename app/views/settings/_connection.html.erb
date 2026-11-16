@@ -1,6 +1,6 @@
 <% incomplete = connection.configuration_incomplete? %>
 <% status = incomplete ? 'incomplete' : connection.check_status %>
-<article class="settings-body" id="<%= dom_id(connection) %>" aria-label="<%= connection.label %>">
+<article class="settings-body" id="<%= dom_id(connection) %>" aria-label="<%= connection.label %>" tabindex="-1">
   <div class="settings-connection-heading">
     <h3><%= connection.label %></h3>
     <span class="settings-status" data-status="<%= status %>"><%= t("settings.connection.status.#{status}") %></span>
@@ -20,7 +20,8 @@
   <% if incomplete %>
     <%= render 'provider_connections/completion', connection: connection, definition: definition %>
   <% else %>
-    <%= button_to t('settings.connection.check', name: connection.label), check_provider_connection_path(connection), class: 'work-button' %>
+    <%= button_to t('settings.connection.check', name: connection.label), check_provider_connection_path(connection),
+          class: 'work-button', form: { data: { turbo: false } } %>
     <% if role == 'ai' %>
       <details class="settings-disclosure">
         <summary><%= t('settings.connection.change_model') %></summary>

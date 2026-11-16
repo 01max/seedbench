@@ -20,6 +20,17 @@ RSpec.describe 'Provider settings', type: :system do
     expect(page.evaluate_script('document.documentElement.scrollWidth === document.documentElement.clientWidth')).to be(true)
   end
 
+  it 'returns to the tested connection and shows its result' do
+    sign_in_browser
+    connection = create_connection
+    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [] }.to_json)
+    visit settings_path
+    click_button "Tester #{connection.label}"
+
+    expect(page).to have_css('.settings-status', text: 'Test réussi')
+    expect(page.evaluate_script('location.hash')).to eq("#provider_connection_#{connection.id}")
+  end
+
   it 'completes a legacy AI connection with its secret and model together' do
     sign_in_browser
     connection = ProviderConnection.create!(role: 'ai', provider: 'openai', identity_key: 'legacy-project', label: 'Legacy AI')
