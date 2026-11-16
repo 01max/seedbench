@@ -25,8 +25,10 @@ RSpec.describe 'Provider settings', type: :system do
     visit settings_provider_path('publishing')
     click_button "Tester #{connection.label}"
 
-    expect(page).to have_css('.settings-status', text: 'Test réussi')
-    expect(page.evaluate_script('location.hash')).to eq("#provider_connection_#{connection.id}")
+    anchor = "provider_connection_#{connection.id}"
+    location = settings_provider_path('publishing', anchor: anchor)
+    expect(page).to have_current_path(/#{Regexp.escape(location)}\z/, url: true)
+    expect(page).to have_css(%(##{anchor} .settings-status[data-status="passed"]), text: 'Test réussi')
   end
 
   it 'completes a legacy AI connection with its secret and model together' do
