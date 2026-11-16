@@ -1,8 +1,8 @@
 class ReleaseArchivesController < ApplicationController
   def create
     release = change_archive(archived: true)
-    criteria = params.permit(:q, :state).to_h.symbolize_keys
-    criteria.delete(:state) if criteria[:state] == 'archived'
+    criteria = params.permit(:q, :state, :page).to_h.symbolize_keys
+    criteria.except!(:state, :page) if criteria[:state] == 'archived'
     redirect_to root_path(**criteria), notice: t('workbench.archive.archived', title: release.title.presence || t('workbench.untitled')),
       status: :see_other
   end
