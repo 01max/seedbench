@@ -1,7 +1,14 @@
 #!/bin/sh
 set -eu
 cd "$(dirname "$0")/.."
-bin/quality script/quality/ci
+
+case "${1:-all}" in
+  all) bin/quality script/quality/ci ;;
+  rspec|rubocop|rails) exec bin/quality script/quality/ci "$1" ;;
+  runtime) ;;
+  *) echo 'Usage: bin/ci [rspec|rubocop|rails|runtime]' >&2; exit 2 ;;
+esac
+
 script/quality/verify_compose
 script/quality/verify_compose --named-overrides
 script/quality/verify_compose --binds

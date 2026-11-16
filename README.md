@@ -193,9 +193,10 @@ synthetic fixtures, no operator mounts, and no external network.
 | `bin/ci` | Check tests, coverage/lint enforcement, migrations, annotations, assets, tools, and actual container recovery. |
 | `bin/annotate` | Refresh model schema comments with AnnotateRb after model or migration changes. |
 
-GitHub Actions runs `bin/ci` on pull requests and pushes to `main`. Runtime checks
-cover default named volumes, alternate roots and UID/GID, and bind paths
-containing spaces. See [quality checks](docs/testing.md) and
+GitHub Actions runs four independent jobs on pull requests and pushes to `main`.
+Run an individual job locally with `bin/ci rspec`, `bin/ci rubocop`, `bin/ci rails`,
+or `bin/ci runtime`. Runtime checks cover default named volumes, alternate roots
+and UID/GID, and bind paths containing spaces. See [quality checks](docs/testing.md) and
 [supported runtime](docs/runtime.md) for the verification details and tool versions.
 
 Source changes require an image rebuild; `bin/dev` rebuilds and starts both
