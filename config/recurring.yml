@@ -1,7 +1,7 @@
 development: &recovery
   recover_workflow_dispatch:
     class: WorkflowDispatchRecoveryJob
-    schedule: every 10 seconds
+    schedule: every minute
 
 test: {}
 

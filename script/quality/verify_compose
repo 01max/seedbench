@@ -59,17 +59,19 @@ else
 fi
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb verify_gap
 compose up -d --no-build --no-deps worker
+# Allow one full recovery interval plus time for the worker to start and execute.
+recovery_wait=90
 wait_for_sql() {
   query=$1
   database=${2:-production.sqlite3}
-  remaining=60
+  remaining=${3:-60}
   until compose exec -T web sh -c 'test "$(sqlite3 -readonly "$SEEDBENCH_STATE_ROOT/$2" "$1")" = 1' sh "$query" "$database" >/dev/null 2>&1; do
     remaining=$((remaining - 1))
     [ "$remaining" -gt 0 ] || exit 1
     sleep 1
   done
 }
-wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-dispatch' AND state = 'succeeded'"
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-dispatch' AND state = 'succeeded'" production.sqlite3 "$recovery_wait"
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb queue_duplicates
 wait_for_sql "SELECT COUNT(*) = 0 FROM solid_queue_jobs WHERE class_name = 'WorkflowOperationJob' AND finished_at IS NULL" production_queue.sqlite3
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb start_stale
@@ -83,7 +85,7 @@ compose kill -s SIGKILL worker
 compose rm -f worker
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/runtime_workflows.rb recover_crash
 compose up -d --no-build --no-deps worker
-wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-compute' AND state = 'succeeded'"
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-compute' AND state = 'succeeded'" production.sqlite3 "$recovery_wait"
 compose stop worker
 compose rm -f worker
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/preparation_probe.rb start
@@ -94,6 +96,6 @@ compose kill -s SIGKILL worker
 compose rm -f worker
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/preparation_probe.rb recover
 compose up -d --no-build --no-deps worker
-wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-preparation' AND state = 'succeeded'"
+wait_for_sql "SELECT COUNT(*) FROM workflow_operations WHERE request_key = 'interrupted-preparation' AND state = 'succeeded'" production.sqlite3 "$recovery_wait"
 compose up -d --no-build --no-deps --force-recreate --wait web
 compose exec -T web bin/container-entrypoint bin/rails runner script/quality/check_runtime.rb
