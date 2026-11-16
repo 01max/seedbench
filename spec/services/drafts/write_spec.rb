@@ -56,6 +56,20 @@ RSpec.describe Drafts::Write do
     expect(Drafts::Content.local(release.reload)['description']).to eq('Reviewed local description')
   end
 
+  it 'keeps the readback warning until the accepted update is verified without resending' do
+    release = writable_shell
+    sent = stub_request(:patch, 'https://c411.org/api/user/drafts/draft-1').to_return(body: { success: true }.to_json)
+    write = execute(release)
+    reconcile = -> { Drafts::Reconcile.call(release_id: release.id, write_id: write.id) }
+
+    expect(&reconcile).to raise_error(Drafts::Failure, /relecture/)
+    expect(write.reload.error_code).to eq('readback_mismatch')
+    apply_draft_body(remote, write.body)
+    expect(reconcile.call).to have_attributes(state: 'accepted', error_code: nil)
+    expect(release.remote_snapshots.last.remote_content['description']).to eq('Reviewed local description')
+    expect(sent).to have_been_requested.once
+  end
+
   it 'blocks blind resubmission after timeout and reconciles a matching read without another patch' do
     release = writable_shell
     sent = stub_request(:patch, 'https://c411.org/api/user/drafts/draft-1').to_timeout

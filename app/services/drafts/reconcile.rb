@@ -15,6 +15,8 @@ module Drafts
       validate!
       return interrupt_before_send if @write.state == 'pending' && @write.body.nil?
       return reconcile_delete if @write.action == 'delete'
+      return reconcile_readback if @write.unverified_readback?
+
       id = verified_identity
       link = Receipt.call(write: @write, remote_id: id)
       Sync.call(link: link)
@@ -23,6 +25,21 @@ module Drafts
     end
 
     private
+
+    def reconcile_readback
+      link = @write.release.draft_link
+      unless link && link.remote_id == @write.remote_id && link.provider_connection_id == @write.provider_connection_id && @write.body
+        raise Failure.new(:invalid_link)
+      end
+
+      Sync.call(link: link, expected_body: @write.body)
+      @write.transaction do
+        @write.update!(error_code: nil)
+        @operation.update!(state: 'succeeded', phase: 'reconciled', lease_expires_at: nil, finished_at: Time.current)
+        Releases::RecordEvent.call(release_id: @write.release_id, name: 'draft.reconciled', actor: 'operator', data: { write_id: @write.id })
+      end
+      @write
+    end
 
     def reconcile_delete
       snapshot = Sync.call(link: @write.release.draft_link)

@@ -68,6 +68,12 @@ if bin/state restore "$archive"; then exit 1; fi
 bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb verify
 if bin/reconcile-state --reviewed-remote-history; then exit 1; fi
 bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb clear_draft_write
+reconcile_status=0
+reconcile_output=$(bin/reconcile-state --reviewed-remote-history 2>&1) || reconcile_status=$?
+test "$reconcile_status" -eq 1
+blocked=$(printf '%s\n' "$reconcile_output" | grep -Ec '^Release [0-9]+: external operation [0-9]+ requires reconciliation before it can be resumed\.$')
+test "$blocked" -eq 2
+bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb clear_draft_readback
 bin/reconcile-state
 bin/compose run --rm --no-deps -T web bin/rails runner script/quality/recovery_fixture.rb mismatch
 if bin/reconcile-state --reviewed-remote-history; then exit 1; fi

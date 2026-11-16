@@ -175,8 +175,20 @@ empty volume. Startup is suspended after restore. The reconciliation command
 checks the current payloads and prepared torrent identities, then reads
 known C411 drafts and submissions to compare them with saved records. It
 reports release IDs that need attention. It blocks operation replay if the
-backup captured a pending or ambiguous remote write or filesystem move. Local queued jobs are
-retained.
+backup captured a pending or ambiguous remote write or filesystem move, or if
+C411 acknowledged a draft write whose readback failed or differed. Local queued
+jobs are retained.
+
+To retry readback for an acknowledged draft write while the recovered stack is
+offline, substitute the reported operation ID in this command:
+
+```sh
+bin/compose run --rm --no-deps -T web bin/rails runner \
+  'write = WorkflowOperation.find(OPERATION_ID).draft_write; Drafts::Reconcile.call(release_id: write.release_id, write_id: write.id)'
+```
+
+The readback must confirm the sent fields and attachments before it clears the
+warning.
 
 Before restarting, verify the Deluge mapping with the storage probe. Review
 C411 account history and Deluge for effects after the archive timestamp,
