@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 
-require_relative "../config/environment"
-require "solid_queue/cli"
+restore_marker = File.join(ENV.fetch('SEEDBENCH_STATE_ROOT'), '.seedbench-restored')
+if File.exist?(restore_marker) || File.symlink?(restore_marker)
+  abort 'Restored state requires reconciliation. See the deployment recovery guide.'
+end
+
+require_relative '../config/environment'
+require 'solid_queue/cli'
 
 SolidQueue::Cli.start(ARGV)
