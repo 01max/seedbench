@@ -1,4 +1,5 @@
 module Releases
+  # Defines the permitted state changes checked by Releases::Transition.
   class WorkflowTransitions
     NEXT_STATES = {
       'inspection' => { 'pending' => %w[running], 'running' => %w[succeeded failed], 'succeeded' => %w[running], 'failed' => %w[running] },

@@ -1,5 +1,6 @@
 module Publications
-  class Gate
+  # Lists release blockers when queuing publication and rechecks them before sending to C411.
+  class Readiness
     def self.call(release:, before_send: false)
       new(release, before_send).call
     end

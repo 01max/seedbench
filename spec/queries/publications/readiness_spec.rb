@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Publications::Gate do
+RSpec.describe Publications::Readiness do
   it 'lists missing publication requirements on the server' do
     release = Releases::Create.call
 

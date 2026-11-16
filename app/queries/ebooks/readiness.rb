@@ -1,4 +1,5 @@
 module Ebooks
+  # Lists inspection findings and unacknowledged uncertainties that still need attention.
   class Readiness
     def self.call(release:)
       snapshot = Releases::Snapshot.call(release: release)
