@@ -22,7 +22,7 @@
         <div class="app-nav-actions">
           <%= yield :toolbar %>
           <%= render 'shared/theme_toggle' %>
-          <%= link_to t('workbench.navigation.settings'), settings_path, aria: { current: ('page' if current_page?(settings_path)) } %>
+          <%= link_to t('workbench.navigation.settings'), settings_path, aria: { current: ('location' if controller_name == 'settings') } %>
           <%= button_to t("workbench.navigation.sign_out"), destroy_operator_session_path, method: :delete %>
         </div>
       </nav>

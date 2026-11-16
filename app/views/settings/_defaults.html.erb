@@ -7,7 +7,7 @@
     <%= form.hidden_field :expected_revision, value: @defaults.revision %>
     <label class="settings-checkbox">
       <%= form.check_box :automatic_ai, checked: @defaults.automatic_ai %>
-      <%= t('settings.defaults.automatic_ai') %>
+      <span><%= render 'shared/ai_icon' %> <%= t('settings.defaults.automatic_ai') %></span>
     </label>
     <div class="settings-fields">
       <% Providers::Catalog::ROLES.each do |role, definition| %>

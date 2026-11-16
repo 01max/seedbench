@@ -1,12 +1,12 @@
 fr:
   settings:
     title: "Réglages"
-    intro: "Choisissez les connexions et les réglages appliqués aux nouveaux livres. Les tests de connexion n’effectuent ni publication, ni envoi de fichier, ni démarrage de torrent."
+    back: "Retour à l’atelier"
     sections: "Sections des réglages"
     roles:
       publishing: "Site de publication"
       torrent_client: "Client torrent"
-      ai: "Assistance IA"
+      ai: "API Assistance IA"
       image_host: "Hébergement d’images"
     defaults:
       navigation: "Choix par défaut"
@@ -17,6 +17,7 @@ fr:
       unconfigured: "Non configuré"
       save: "Enregistrer les choix par défaut"
     connection:
+      test_scope: "Les tests de connexion n’effectuent ni publication, ni envoi de fichier, ni démarrage de torrent."
       empty: "Aucune connexion configurée."
       identity: "Identité"
       endpoint: "Adresse"

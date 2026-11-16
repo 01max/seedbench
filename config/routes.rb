@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     delete 'session', to: 'sessions#destroy', as: :destroy_operator_session
   end
   resource :settings, only: %i[show update]
+  get 'settings/providers/:role', to: 'settings#provider', as: :settings_provider
   resources :uploads, only: :create
   resources :releases, only: %i[index show update] do
     resource :archive, controller: 'release_archives', only: %i[create destroy]

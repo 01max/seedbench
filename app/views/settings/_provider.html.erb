@@ -1,0 +1,12 @@
+<section class="settings-panel" aria-labelledby="role-<%= role %>">
+  <header>
+    <h2 id="role-<%= role %>"><%= t("settings.roles.#{role}") %></h2>
+    <p><%= definition.name %></p>
+    <p><%= t('settings.connection.test_scope') %></p>
+  </header>
+  <%= render partial: 'connection', collection: connections, locals: { role: role, definition: definition } %>
+  <div class="settings-body">
+    <% if connections.empty? %><p class="settings-hint"><%= t('settings.connection.empty') %></p><% end %>
+    <%= render 'new_connection', role: role, definition: definition %>
+  </div>
+</section>

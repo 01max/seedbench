@@ -8,6 +8,15 @@ class SettingsController < ApplicationController
     @defaults = Settings::DefaultsSnapshot.call
   end
 
+  def provider
+    @role = params.expect(:role)
+    @definition = Providers::Catalog::ROLES[@role]
+    return head :not_found unless @definition
+
+    @provider_connections = ProviderConnection.where(role: @role).order(:id)
+    render :show
+  end
+
   def update
     values = params.expect(defaults: [ :automatic_ai, :expected_revision, connection_ids: %i[publishing torrent_client ai image_host] ])
     Settings::SetDefaults.call(automatic_ai: values[:automatic_ai] == '1', connection_ids: values.fetch(:connection_ids, {}).to_h,

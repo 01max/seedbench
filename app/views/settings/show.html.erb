@@ -1,31 +1,26 @@
 <% content_for :title, t('settings.title') %>
 <main class="settings-page">
   <header class="settings-header">
-    <h1><%= t('settings.title') %></h1>
-    <p><%= t('settings.intro') %></p>
+    <div class="settings-heading">
+      <h1><%= t('settings.title') %></h1>
+      <%= link_to t('settings.back'), root_path, class: 'work-button' %>
+    </div>
   </header>
   <div class="settings-layout">
     <nav class="settings-sidebar" aria-label="<%= t('settings.sections') %>">
-      <%= link_to t('settings.defaults.navigation'), '#defaults' %>
-      <% Providers::Catalog::ROLES.each_value do |definition| %>
-        <%= link_to definition.name, "#provider-#{definition.provider}" %>
+      <%= link_to t('settings.defaults.navigation'), settings_path, aria: { current: ('page' unless @role) } %>
+      <% Providers::Catalog::ROLES.each_key do |role| %>
+        <%= link_to settings_provider_path(role), aria: { current: ('page' if @role == role) } do %>
+          <%= render 'shared/ai_icon' if role == 'ai' %>
+          <%= t("settings.roles.#{role}") %>
+        <% end %>
       <% end %>
     </nav>
     <div class="settings-sections">
-      <%= render 'defaults' %>
-      <% Providers::Catalog::ROLES.each do |role, definition| %>
-        <% connections = @connections.fetch(role, []) %>
-        <section class="settings-panel" id="provider-<%= definition.provider %>" aria-labelledby="role-<%= role %>">
-          <header>
-            <h2 id="role-<%= role %>"><%= definition.name %></h2>
-            <p><%= t("settings.roles.#{role}") %></p>
-          </header>
-          <%= render partial: 'connection', collection: connections, locals: { role: role, definition: definition } %>
-          <div class="settings-body">
-            <% if connections.empty? %><p class="settings-hint"><%= t('settings.connection.empty') %></p><% end %>
-            <%= render 'new_connection', role: role, definition: definition %>
-          </div>
-        </section>
+      <% if @role %>
+        <%= render 'provider', role: @role, definition: @definition, connections: @provider_connections %>
+      <% else %>
+        <%= render 'defaults' %>
       <% end %>
     </div>
   </div>

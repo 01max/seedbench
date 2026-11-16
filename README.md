@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/01max/seedbench/actions/workflows/ci.yml"><img src="https://github.com/01max/seedbench/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status on main"></a>
   <a href="#how-it-runs"><img src="https://img.shields.io/badge/deployment-Docker%20Compose-74507d?style=flat-square" alt="Deployment: Docker Compose"></a>
-  <a href="#features"><img src="https://img.shields.io/badge/status-development%20preview-b88632?style=flat-square" alt="Status: development preview"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/status-development%20preview-805809?style=flat-square" alt="Status: development preview"></a>
 </p>
 
 <p align="center">

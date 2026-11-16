@@ -57,6 +57,7 @@ RSpec.describe 'Optional assistance review', type: :system do
     open_assistance
     set_workbench_viewport(320)
     find('summary', text: 'Analyse ciblée avec périmètre explicite').click
+    expect(page).to have_css('#tab-ai .ai-icon, .inspection-actions button .ai-icon, .ai-targeted button .ai-icon', count: 4)
     expect(page).to have_field('Périmètre et raison de l’analyse ciblée')
     expect(page.evaluate_script('document.documentElement.scrollWidth')).to be <= 320
     save_workbench_screenshot('ai-targeted-mobile.png')

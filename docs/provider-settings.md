@@ -1,6 +1,9 @@
 # Provider settings
 
-Sign in and open **Réglages** to configure C411, Deluge, OpenAI, and Postimages.
+Sign in and open **Réglages**. Choose **Site de publication** for C411,
+**Client torrent** for Deluge, **API Assistance IA** for OpenAI, or
+**Hébergement d’images** for Postimages. Set defaults for future books in
+**Choix par défaut**.
 Only these implementations are offered. Creating a connection saves local
 configuration; a separate **Tester** action performs its bounded connection
 check. Settings never publishes, changes torrent options, starts a torrent,

@@ -16,6 +16,7 @@ RSpec.describe 'Dense workbench layout', type: :system do
     page.evaluate_script(<<~JS)
       ({ width: innerWidth, overflow: document.documentElement.scrollWidth,
          queue: document.querySelector('.work-queue').getBoundingClientRect().width,
+         checklist: document.querySelector('.release-checklist').getBoundingClientRect().width,
          row: document.querySelector('.queue-row').getBoundingClientRect().height,
          background: getComputedStyle(document.body).backgroundColor,
          selected: getComputedStyle(document.querySelector('.queue-row[aria-current]')).backgroundColor,
@@ -31,7 +32,7 @@ RSpec.describe 'Dense workbench layout', type: :system do
     measured = dimensions
     save_workbench_screenshot('workbench-dark-desktop.png')
 
-    expect(measured).to include('queue' => 274, 'row' => 28, 'count' => 20, 'background' => 'rgb(29, 27, 37)', 'selected' => 'rgb(64, 48, 73)')
+    expect(measured).to include('queue' => 274, 'checklist' => 274, 'row' => 28, 'count' => 20, 'background' => 'rgb(29, 27, 37)', 'selected' => 'rgb(64, 48, 73)')
     expect(measured.fetch('overflow')).to be <= measured.fetch('width')
     expect(measured.fetch('lastRowBottom')).to be <= measured.fetch('height')
     expect(measured.fetch('footerBottom')).to be <= measured.fetch('height') + 1
@@ -48,12 +49,12 @@ RSpec.describe 'Dense workbench layout', type: :system do
   end
 
   it 'uses the matching light palette without horizontal overflow' do
-    set_workbench_viewport(1024)
+    set_workbench_viewport(900)
     set_workbench_theme('light')
     measured = dimensions
     save_workbench_screenshot('workbench-light-desktop.png')
 
-    expect(measured).to include('background' => 'rgb(241, 238, 245)', 'selected' => 'rgb(233, 221, 239)')
+    expect(measured).to include('queue' => 238, 'checklist' => 238, 'background' => 'rgb(241, 238, 245)', 'selected' => 'rgb(233, 221, 239)')
     expect(measured.fetch('overflow')).to be <= measured.fetch('width')
   end
 

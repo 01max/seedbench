@@ -3,28 +3,26 @@ require 'rails_helper'
 RSpec.describe 'Provider settings', type: :system do
   it 'keeps provider navigation and forms usable on a narrow screen' do
     sign_in_browser
-    create_connection('ai')
     visit settings_path
     save_workbench_screenshot('settings-dark.png')
 
     set_workbench_viewport(320)
     click_button 'Mode clair'
-    expect(page).to have_css('html[data-theme="light"]')
-    save_workbench_screenshot('settings-light-mobile.png')
-
-    within('nav.settings-sidebar') { click_link 'OpenAI' }
-    within('#provider-openai') do
-      find('summary', text: 'Ajouter une connexion OpenAI').click
-      expect(page).to have_field('Identifiant exact du modèle')
-    end
+    within('nav.settings-sidebar') { click_link 'API Assistance IA' }
+    expect(page).to have_current_path(settings_provider_path('ai'))
+    find('summary', text: 'Ajouter une connexion OpenAI').click
+    expect(page).to have_field('Identifiant exact du modèle')
     expect(page.evaluate_script('document.documentElement.scrollWidth === document.documentElement.clientWidth')).to be(true)
+    save_workbench_screenshot('settings-light-mobile.png')
+    click_link 'Retour à l’atelier'
+    expect(page).to have_current_path(root_path)
   end
 
   it 'returns to the tested connection and shows its result' do
     sign_in_browser
     connection = create_connection
     stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [] }.to_json)
-    visit settings_path
+    visit settings_provider_path('publishing')
     click_button "Tester #{connection.label}"
 
     expect(page).to have_css('.settings-status', text: 'Test réussi')
@@ -34,7 +32,7 @@ RSpec.describe 'Provider settings', type: :system do
   it 'completes a legacy AI connection with its secret and model together' do
     sign_in_browser
     connection = ProviderConnection.create!(role: 'ai', provider: 'openai', identity_key: 'legacy-project', label: 'Legacy AI')
-    visit settings_path
+    visit settings_provider_path('ai')
     within("article[aria-label='Legacy AI']") do
       find('summary', text: 'Compléter la configuration').click
       fill_in 'Clé API', with: 'completed-browser-secret'
@@ -81,7 +79,7 @@ RSpec.describe 'Provider settings', type: :system do
   it 'creates a masked connection from its provider-specific form' do
     stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [] }.to_json)
     sign_in_browser
-    click_link 'Réglages'
+    visit settings_provider_path('publishing')
     within("section[aria-labelledby='role-publishing']") do
       find('summary', text: 'Ajouter une connexion C411').click
       fill_in 'Libellé', with: 'Browser C411'

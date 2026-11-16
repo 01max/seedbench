@@ -1,30 +1,30 @@
 class ProviderConnectionsController < ApplicationController
-  rescue_from Settings::ConnectionConfig::Invalid, Settings::RotateCredentials::Conflict do |error|
-    redirect_to settings_path, alert: error.message, status: :see_other
-  end
+  rescue_from Settings::ConnectionConfig::Invalid, Settings::RotateCredentials::Conflict, with: :redirect_with_error
 
   def create
-    connection = Settings::CreateConnection.call(**connection_params)
+    attributes = connection_params
+    @requested_role = attributes[:role]
+    connection = Settings::CreateConnection.call(**attributes)
     Drafts::Connect.call(connection: connection)
-    redirect_to settings_path, notice: t('settings.connection_created'), status: :see_other
+    redirect_to settings_provider_path(connection.role), notice: t('settings.connection_created'), status: :see_other
   end
 
   def rotate
     values = params.expect(rotation: [ :expected_version, :confirm_identity, credentials: %i[api_key password] ])
-    Settings::RotateCredentials.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
+    connection = Settings::RotateCredentials.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
       confirm_identity: values[:confirm_identity] == '1', credentials: values.fetch(:credentials, {}).to_h)
-    redirect_to settings_path, notice: t('settings.secret_rotated'), status: :see_other
+    redirect_to settings_provider_path(connection.role), notice: t('settings.secret_rotated'), status: :see_other
   end
 
   def check
     connection = Settings::TestConnection.call(connection_id: params.expect(:id))
-    redirect_to settings_path(anchor: helpers.dom_id(connection)), status: :see_other
+    redirect_to settings_provider_path(connection.role, anchor: helpers.dom_id(connection)), status: :see_other
   end
 
   def configure
     values = params.expect(configuration: [ :expected_version, options: [ :model ] ])
-    Settings::ConfigureConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false), options: values.fetch(:options, {}).to_h)
-    redirect_to settings_path, notice: t('settings.options_updated'), status: :see_other
+    connection = Settings::ConfigureConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false), options: values.fetch(:options, {}).to_h)
+    redirect_to settings_provider_path(connection.role), notice: t('settings.options_updated'), status: :see_other
   end
 
   def complete
@@ -32,10 +32,16 @@ class ProviderConnectionsController < ApplicationController
     connection = Settings::CompleteConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
       confirm_identity: values[:confirm_identity] == '1', endpoint: values[:endpoint], credentials: values.fetch(:credentials, {}), options: values.fetch(:options, {}))
     Drafts::Connect.call(connection: connection)
-    redirect_to settings_path, notice: t('settings.connection_completed'), status: :see_other
+    redirect_to settings_provider_path(connection.role), notice: t('settings.connection_completed'), status: :see_other
   end
 
   private
+
+  def redirect_with_error(error)
+    role = @requested_role || ProviderConnection.find_by(id: params[:id])&.role
+    location = Providers::Catalog::ROLES.key?(role) ? settings_provider_path(role) : settings_path
+    redirect_to location, alert: error.message, status: :see_other
+  end
 
   def connection_params
     values = params.expect(connection: [ :role, :label, :identity_key, :endpoint, credentials: %i[api_key password], options: [ :model ] ]).to_h.symbolize_keys

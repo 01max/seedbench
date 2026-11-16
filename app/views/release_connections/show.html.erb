@@ -34,7 +34,7 @@
                 <%= form.submit t('settings.assignment.save'), class: 'work-button' %>
               <% end %>
             <% else %>
-              <p><%= link_to t('settings.assignment.provider_settings'), settings_path(anchor: "provider-#{definition.provider}") %></p>
+              <p><%= link_to t('settings.assignment.provider_settings'), settings_provider_path(assignment.role) %></p>
             <% end %>
           <% end %>
         </div>
