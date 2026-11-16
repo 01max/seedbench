@@ -10,10 +10,10 @@ fr:
     navigation:
       label: "Navigation principale"
       context: "Atelier d’ebooks"
-      appearance: "Apparence"
       settings: "Réglages"
       sign_out: "Se déconnecter"
       dark_mode: "Mode sombre"
+      light_mode: "Mode clair"
     login:
       title: "Connexion à l’atelier"
       intro: "Votre espace privé de préparation d’ebooks."
@@ -27,6 +27,11 @@ fr:
       save: "Enregistrer"
       save_next: "Enregistrer et suivant"
       shortcuts: "Alt ↑↓ : livre · Ctrl/⌘ S : enregistrer"
+    archive:
+      action: "Archiver"
+      restore: "Restaurer"
+      archived: "« %{title} » a été archivé. Vous pouvez le retrouver dans le filtre Archives."
+      restored: "« %{title} » a été remis dans la file de travail."
     uploads:
       add: "Importer des ebooks"
       files: "Fichiers EPUB, PDF ou MOBI"
@@ -92,13 +97,15 @@ fr:
       previous_page: "Page précédente"
       next_page: "Page suivante"
       states:
-        all: "Tous les états"
+        all: "Hors archives"
         review: "À vérifier"
         inspection: "À inspecter"
         prepared: "Préparés"
         published: "Publiés"
         duplicate: "Doublons"
+        archived: "Archives"
       labels:
+        archived: "Archivé"
         published: "Publié"
         failed: "Échec"
         running: "Analyse"
@@ -293,6 +300,8 @@ fr:
       release:
         created: "Release créée"
         revised: "Texte enregistré"
+        archived: "Livre archivé"
+        restored: "Livre restauré"
       payload:
         staged: "Fichier déposé"
       operation:

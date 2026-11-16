@@ -3,6 +3,7 @@
 # Table name: releases
 #
 #  id                :integer          not null, primary key
+#  archived_at       :datetime
 #  author            :string
 #  automatic_ai      :boolean          default(TRUE), not null
 #  draft_state       :string           default("unlinked"), not null

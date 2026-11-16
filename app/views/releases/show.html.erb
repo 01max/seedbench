@@ -26,7 +26,10 @@
       <section class="work-main" aria-label="<%= t("workbench.selected_release") %>" data-release-id="<%= @release.id %>">
         <header class="release-heading">
           <div><h1><%= @release.title.presence || t("workbench.untitled") %></h1><p><%= @release.author.presence || t("workbench.unknown_author") %> <span><%= @snapshot.payload&.format&.upcase || t("workbench.no_file") %></span> <span><%= number_to_human_size(@snapshot.payload&.size_bytes || 0) %></span> <span>#<%= @release.id %></span><% if @release.draft_link && !@snapshot.payload %><span><%= t("drafts.unlinked") %></span><% end %></p></div>
-          <span class="save-status" role="status" id="save-status" data-editor-target="status"><%= t("workbench.editor.messages.saved") %></span>
+          <div class="release-heading-status">
+            <% if @release.archived_at? %><span class="archive-badge"><%= t('workbench.queue.labels.archived') %></span><% end %>
+            <span class="save-status" role="status" id="save-status" data-editor-target="status"><%= t("workbench.editor.messages.saved") %></span>
+          </div>
         </header>
         <div class="release-workspace">
           <%= render "editor" %>
@@ -35,6 +38,11 @@
         <footer class="work-footer">
           <span><%= t("workbench.actions.shortcuts") %></span>
           <div class="work-actions">
+            <% if @release.archived_at? %>
+              <%= button_to t('workbench.archive.restore'), release_archive_path(@release), method: :delete, class: 'work-button' %>
+            <% else %>
+              <%= button_to t('workbench.archive.action'), release_archive_path(@release, **@queue.criteria), class: 'work-button' %>
+            <% end %>
             <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "prepare") %>" data-prepare-allowed="<%= @snapshot.payload.present? && %w[unpublished failed].include?(@release.publication_state) && @release.seeding_state == "not_started" %>" data-reprepare-label="<%= t("preparation.reprepare") %>" <%= "disabled" if !@snapshot.payload || !%w[unpublished failed].include?(@release.publication_state) || @release.seeding_state != "not_started" || @release.preparation_state == "running" %>><%= @snapshot.preparation ? t("preparation.reprepare") : t("workbench.actions.prepare") %></button>
             <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "draft") %>"><%= @release.draft_link ? t("drafts.update") : t("drafts.create") %></button>
             <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "publish") %>" data-publish-action <%= "disabled" unless %w[unpublished failed].include?(@release.publication_state) %>><%= t("workbench.actions.publish") %></button>

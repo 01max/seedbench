@@ -1,0 +1,20 @@
+<% if endpoint_required %>
+  <div class="settings-field">
+    <%= form.label :endpoint, t('settings.connection.deluge_endpoint') %>
+    <%= form.url_field :endpoint, required: true %>
+  </div>
+<% end %>
+<%= form.fields_for :credentials do |fields| %>
+  <div class="settings-field">
+    <%= fields.label definition.secret, t("settings.connection.#{definition.secret}") %>
+    <%= fields.password_field definition.secret, required: true, autocomplete: 'new-password' %>
+  </div>
+<% end %>
+<% if role == 'ai' %>
+  <%= form.fields_for :options do |fields| %>
+    <div class="settings-field">
+      <%= fields.label :model, t('settings.connection.model_id') %>
+      <%= fields.text_field :model, value: local_assigns[:model], required: true %>
+    </div>
+  <% end %>
+<% end %>

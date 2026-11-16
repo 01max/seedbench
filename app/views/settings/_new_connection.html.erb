@@ -1,0 +1,18 @@
+<details class="settings-disclosure">
+  <summary><%= t('settings.connection.add', provider: definition.name) %></summary>
+  <%= form_with url: provider_connections_path, scope: :connection, namespace: role, class: 'settings-form' do |form| %>
+    <%= form.hidden_field :role, value: role %>
+    <div class="settings-fields">
+      <div class="settings-field">
+        <%= form.label :label, t('settings.connection.label') %>
+        <%= form.text_field :label, required: true, maxlength: 120 %>
+      </div>
+      <div class="settings-field">
+        <%= form.label :identity_key, t(role == 'torrent_client' ? 'settings.connection.deluge_identity' : 'settings.connection.account_identity') %>
+        <%= form.text_field :identity_key, required: true, maxlength: 120 %>
+      </div>
+      <%= render 'provider_connections/fields', form: form, definition: definition, role: role, endpoint_required: role == 'torrent_client' %>
+    </div>
+    <%= form.submit t('settings.connection.save'), class: 'work-button' %>
+  <% end %>
+</details>

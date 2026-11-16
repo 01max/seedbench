@@ -1,0 +1,15 @@
+<button type="button" class="work-button quiet theme-toggle" data-action="appearance#toggle">
+  <span data-theme-option="light">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>
+    </svg>
+    <%= t('workbench.navigation.light_mode') %>
+  </span>
+  <span data-theme-option="dark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20.8 15.1A9 9 0 0 1 8.9 3.2 9 9 0 1 0 20.8 15.1Z"/>
+    </svg>
+    <%= t('workbench.navigation.dark_mode') %>
+  </span>
+</button>

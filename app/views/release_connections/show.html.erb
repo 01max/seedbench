@@ -1,24 +1,44 @@
-<main class="mx-auto max-w-4xl px-6 py-8">
-  <h1 class="text-2xl font-bold">Connexions du livre</h1>
-  <p class="mt-2"><%= @release.title.presence || "Livre #{@release.id}" %></p>
-  <p class="mt-2 text-sm">Les choix par défaut ne remplacent pas les identités enregistrées. Les rôles non configurés restent utilisables pour le travail local manuel.</p>
-  <% @release.provider_assignments.includes(:provider_connection).order(:role).each do |assignment| %>
-    <% definition = Providers::Catalog.fetch(assignment.role) %>
-    <section class="mt-5 rounded border p-4">
-      <h2 class="font-semibold"><%= definition.title %> · <%= definition.name %></h2>
-      <% if assignment.provider_connection %>
-        <p><%= assignment.provider_connection.label %> · <%= assignment.provider_connection.identity_key %></p>
-      <% else %>
-        <p>Non configuré pour ce livre.</p>
-        <%= form_with url: release_connections_path(@release), method: :patch, scope: :assignment, namespace: assignment.role, id: "#{assignment.role}_assignment", class: "mt-3 flex flex-wrap items-center gap-3" do |form| %>
-          <%= form.hidden_field :role, value: assignment.role %>
-          <%= form.hidden_field :expected_revision, value: @release.input_revision %>
-          <%= form.label :connection_id, "Connexion à affecter" %>
-          <%= form.select :connection_id, @connections.fetch(assignment.role, []).map { |connection| [ connection.label, connection.id ] }, { include_blank: "Choisir une connexion" }, required: true, class: "rounded border p-2" %>
-          <%= form.submit "Affecter à ce livre", class: "rounded border px-3 py-2" %>
-        <% end %>
-      <% end %>
-    </section>
-  <% end %>
-  <%= link_to "Réglages des fournisseurs", settings_path, class: "mt-6 inline-block underline" %>
+<% content_for :title, t('settings.assignment.title') %>
+<main class="settings-page">
+  <header class="settings-header">
+    <%= link_to t('settings.assignment.back'), release_path(@release), class: 'work-button' %>
+    <h1><%= t('settings.assignment.title') %></h1>
+    <p><%= @release.title.presence || t('settings.assignment.untitled', id: @release.id) %></p>
+    <p><%= t('settings.assignment.hint') %></p>
+  </header>
+  <div class="settings-sections">
+    <% @release.provider_assignments.includes(:provider_connection).order(:role).each do |assignment| %>
+      <% definition = Providers::Catalog.fetch(assignment.role) %>
+      <section class="settings-panel" aria-labelledby="assignment-<%= assignment.role %>">
+        <header>
+          <h2 id="assignment-<%= assignment.role %>"><%= definition.name %></h2>
+          <p><%= t("settings.roles.#{assignment.role}") %></p>
+        </header>
+        <div class="settings-body">
+          <% if assignment.provider_connection %>
+            <dl class="settings-facts">
+              <dt><%= t('settings.connection.label') %></dt><dd><%= assignment.provider_connection.label %></dd>
+              <dt><%= t('settings.connection.identity') %></dt><dd><%= assignment.provider_connection.identity_key %></dd>
+            </dl>
+          <% else %>
+            <p class="settings-hint"><%= t('settings.assignment.unconfigured') %></p>
+            <% connections = @connections.fetch(assignment.role, []) %>
+            <% if connections.any? %>
+              <%= form_with url: release_connections_path(@release), method: :patch, scope: :assignment, namespace: assignment.role, id: "#{assignment.role}_assignment", class: 'settings-form' do |form| %>
+                <%= form.hidden_field :role, value: assignment.role %>
+                <%= form.hidden_field :expected_revision, value: @release.input_revision %>
+                <div class="settings-field">
+                  <%= form.label :connection_id, t('settings.assignment.connection') %>
+                  <%= form.select :connection_id, connections.map { |connection| [connection.label, connection.id] }, { include_blank: t('settings.assignment.choose') }, required: true %>
+                </div>
+                <%= form.submit t('settings.assignment.save'), class: 'work-button' %>
+              <% end %>
+            <% else %>
+              <p><%= link_to t('settings.assignment.provider_settings'), settings_path(anchor: "provider-#{definition.provider}") %></p>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
 </main>

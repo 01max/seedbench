@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resource :settings, only: %i[show update]
   resources :uploads, only: :create
   resources :releases, only: %i[index show update] do
+    resource :archive, controller: 'release_archives', only: %i[create destroy]
     resource :publication, only: :create
     resource :draft_action, only: %i[show create]
     resource :ai_action, only: %i[show create]
@@ -37,5 +38,4 @@ Rails.application.routes.draw do
       post :check
     end
   end
-  resource :appearance, only: :show
 end

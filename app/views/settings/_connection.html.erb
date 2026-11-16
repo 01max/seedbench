@@ -1,0 +1,55 @@
+<% incomplete = connection.configuration_incomplete? %>
+<% status = incomplete ? 'incomplete' : connection.check_status %>
+<article class="settings-body" id="<%= dom_id(connection) %>" aria-label="<%= connection.label %>">
+  <div class="settings-connection-heading">
+    <h3><%= connection.label %></h3>
+    <span class="settings-status" data-status="<%= status %>"><%= t("settings.connection.status.#{status}") %></span>
+  </div>
+  <dl class="settings-facts">
+    <dt><%= t('settings.connection.identity') %></dt><dd><%= connection.identity_key %></dd>
+    <% if connection.endpoint %><dt><%= t('settings.connection.endpoint') %></dt><dd><%= connection.endpoint %></dd><% end %>
+    <dt><%= t('settings.connection.secret') %></dt>
+    <dd><%= t(connection.credentials.present? ? 'settings.connection.secret_set' : 'settings.defaults.unconfigured') %></dd>
+    <% if connection.options['model'] %><dt><%= t('settings.connection.model') %></dt><dd><%= connection.options['model'] %></dd><% end %>
+  </dl>
+  <% if connection.checked_at %>
+    <p class="settings-hint">
+      <time datetime="<%= connection.checked_at.iso8601 %>"><%= l(connection.checked_at, format: :short) %></time> · <%= connection.check_message %>
+    </p>
+  <% end %>
+  <% if incomplete %>
+    <%= render 'provider_connections/completion', connection: connection, definition: definition %>
+  <% else %>
+    <%= button_to t('settings.connection.check', name: connection.label), check_provider_connection_path(connection), class: 'work-button' %>
+    <% if role == 'ai' %>
+      <details class="settings-disclosure">
+        <summary><%= t('settings.connection.change_model') %></summary>
+        <%= form_with url: configure_provider_connection_path(connection), method: :patch, scope: :configuration, namespace: "configure_#{connection.id}", class: 'settings-form' do |form| %>
+          <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+          <%= form.fields_for :options do |fields| %>
+            <div class="settings-field">
+              <%= fields.label :model, t('settings.connection.model_id') %>
+              <%= fields.text_field :model, value: connection.options['model'], required: true %>
+            </div>
+          <% end %>
+          <%= form.submit t('settings.connection.save_model'), class: 'work-button' %>
+        <% end %>
+      </details>
+    <% end %>
+    <details class="settings-disclosure">
+      <summary><%= t('settings.connection.rotate_title') %></summary>
+      <p class="settings-hint"><%= t('settings.connection.rotate_hint') %></p>
+      <%= form_with url: rotate_provider_connection_path(connection), method: :patch, scope: :rotation, namespace: "rotate_#{connection.id}", class: 'settings-form' do |form| %>
+        <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+        <%= form.fields_for :credentials do |fields| %>
+          <div class="settings-field">
+            <%= fields.label definition.secret, t('settings.connection.new_secret') %>
+            <%= fields.password_field definition.secret, required: true, autocomplete: 'new-password' %>
+          </div>
+        <% end %>
+        <label class="settings-checkbox"><%= form.check_box :confirm_identity, required: true %> <%= t('settings.connection.confirm_identity') %></label>
+        <%= form.submit t('settings.connection.rotate'), class: 'work-button' %>
+      <% end %>
+    </details>
+  <% end %>
+</article>

@@ -1,7 +1,7 @@
 module Releases
   class Queue
     PAGE_SIZE = 40
-    STATES = %w[all review inspection prepared published duplicate].freeze
+    STATES = %w[all review inspection prepared published duplicate archived].freeze
     Page = Data.define(:records, :selected, :total, :page, :pages, :position, :previous_id, :next_id, :criteria)
 
     def self.call(q: '', state: 'all', page: 1, release_id: nil)
@@ -42,19 +42,22 @@ module Releases
     end
 
     def filter(scope)
+      return scope.where.not(archived_at: nil) if @criteria[:state] == 'archived'
+
+      scope = scope.where(archived_at: nil)
       case @criteria[:state]
       when 'review' then scope.where.not(publication_state: 'published')
       when 'inspection' then scope.where(inspection_state: %w[pending running failed])
       when 'prepared' then scope.where(preparation_state: 'prepared')
       when 'published' then scope.where(publication_state: 'published')
-      when 'duplicate' then scope.where(id: confirmed_duplicate_ids)
+      when 'duplicate' then scope.where(id: confirmed_duplicate_ids(scope))
       else scope
       end
     end
 
-    def confirmed_duplicate_ids
+    def confirmed_duplicate_ids(scope)
       possible = DuplicateDecision.where(decision: 'confirmed').select(:release_id)
-      Release.where(id: possible).select { |release| Duplicates::Assessment.new(release).confirmed? }.map(&:id)
+      scope.where(id: possible).select { |release| Duplicates::Assessment.new(release).confirmed? }.map(&:id)
     end
 
     def neighbor(comparison, order)

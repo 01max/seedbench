@@ -26,4 +26,14 @@ RSpec.describe 'Release provider assignments' do
     expect(response.body).to include('possède déjà une identité')
     expect(release.provider_assignments.find_by!(role: 'publishing').provider_connection_id).to eq(first.id)
   end
+
+  it 'shows stale assignment feedback in French' do
+    release = Releases::Create.call
+    connection = create_connection
+    patch release_connections_path(release), params: { assignment: { role: 'publishing', connection_id: connection.id, expected_revision: 1 } }
+    follow_redirect!
+
+    expect(response.parsed_body.at_css('[role="alert"]').text).to include('Le livre a changé. Rechargez la page avant de réessayer.')
+    expect(release.provider_assignments.find_by!(role: 'publishing').provider_connection_id).to be_nil
+  end
 end

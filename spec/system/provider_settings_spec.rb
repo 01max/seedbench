@@ -1,6 +1,25 @@
 require 'rails_helper'
 
 RSpec.describe 'Provider settings', type: :system do
+  it 'keeps provider navigation and forms usable on a narrow screen' do
+    sign_in_browser
+    create_connection('ai')
+    visit settings_path
+    save_workbench_screenshot('settings-dark.png')
+
+    set_workbench_viewport(320)
+    click_button 'Mode clair'
+    expect(page).to have_css('html[data-theme="light"]')
+    save_workbench_screenshot('settings-light-mobile.png')
+
+    within('nav.settings-sidebar') { click_link 'OpenAI' }
+    within('#provider-openai') do
+      find('summary', text: 'Ajouter une connexion OpenAI').click
+      expect(page).to have_field('Identifiant exact du modèle')
+    end
+    expect(page.evaluate_script('document.documentElement.scrollWidth === document.documentElement.clientWidth')).to be(true)
+  end
+
   it 'completes a legacy AI connection with its secret and model together' do
     sign_in_browser
     connection = ProviderConnection.create!(role: 'ai', provider: 'openai', identity_key: 'legacy-project', label: 'Legacy AI')

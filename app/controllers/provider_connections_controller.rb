@@ -17,8 +17,8 @@ class ProviderConnectionsController < ApplicationController
   end
 
   def check
-    Settings::TestConnection.call(connection_id: params[:id])
-    redirect_to settings_path, status: :see_other
+    connection = Settings::TestConnection.call(connection_id: params.expect(:id))
+    redirect_to settings_path(anchor: helpers.dom_id(connection)), status: :see_other
   end
 
   def configure

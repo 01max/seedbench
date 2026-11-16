@@ -4,11 +4,10 @@ module ReleasesHelper
   end
 
   def release_label(release)
+    return t('workbench.queue.labels.archived') if release.archived_at?
     return t('duplicates.confirmed_tag') if Duplicates::Assessment.new(release).confirmed?
     return t('workbench.queue.labels.published') if release.publication_state == 'published'
-    return t('workbench.queue.labels.failed') if release.inspection_state == 'failed'
-    return t('workbench.queue.labels.running') if release.inspection_state == 'running'
-    return t('workbench.queue.labels.pending') if release.inspection_state == 'pending'
+    return t("workbench.queue.labels.#{release.inspection_state}") if %w[failed running pending].include?(release.inspection_state)
     return t('workbench.queue.labels.prepared') if release.preparation_state == 'prepared'
 
     t('workbench.queue.labels.review')

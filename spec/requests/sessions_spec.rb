@@ -6,7 +6,7 @@ RSpec.describe 'Operator sessions' do
   it 'protects private pages and leaves health checks available' do
     get root_path
     expect(response).to redirect_to(new_operator_session_path)
-    get appearance_path
+    post release_archive_path(release_id: 1)
     expect(response).to redirect_to(new_operator_session_path)
     get rails_health_check_path
     expect(response).to have_http_status(:ok)

@@ -100,6 +100,9 @@ without echo. The default bind is loopback, and the app has one operator account
    explains safe moves, local torrents, and recovery; this makes no remote write.
 4. **Save and move on.** Use **Enregistrer et suivant** to save pending edits
    before selecting the next book. A failed save keeps you on the current one.
+   Use **Archiver** to remove a book from the working queue while keeping its
+   files and history. Find it again with the **Archives** filter and choose
+   **Restaurer** to bring it back.
 
 | Shortcut | Action |
 | :--- | :--- |

@@ -43,9 +43,10 @@ RSpec.describe 'Provider settings' do
     connection = create_connection
     stub_request(:get, 'https://c411.org/api/user/drafts').to_return(status: 403, body: 'private provider payload')
     post check_provider_connection_path(connection)
+    expect(response).to redirect_to(settings_path(anchor: "provider_connection_#{connection.id}"))
     follow_redirect!
 
-    expect(response.body).to include('HTTP 403', 'échec')
+    expect(response.body).to include('HTTP 403', 'Échec du test')
     expect(response.body).not_to include('private provider payload', 'synthetic-private-credential')
   end
 
@@ -57,7 +58,7 @@ RSpec.describe 'Provider settings' do
       follow_redirect!
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Réponse HTTP illisible', 'échec')
+      expect(response.body).to include('Réponse HTTP illisible', 'Échec du test')
       expect(response.body).not_to include('upstream-private-marker', 'synthetic-private-credential')
       expect(connection.reload.check_status).to eq('failed')
       expect(connection.check_code).to eq('invalid_response')

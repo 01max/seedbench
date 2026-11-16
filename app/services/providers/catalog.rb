@@ -1,12 +1,12 @@
 module Providers
   # Maps provider roles to their configuration requirements and connection-check adapters.
   class Catalog
-    Definition = Data.define(:provider, :name, :title, :endpoint, :secret)
+    Definition = Data.define(:provider, :name, :endpoint, :secret)
     ROLES = {
-      'publishing' => Definition.new(provider: 'c411', name: 'C411', title: 'Site de publication', endpoint: 'https://c411.org', secret: 'api_key'),
-      'torrent_client' => Definition.new(provider: 'deluge', name: 'Deluge', title: 'Client torrent', endpoint: nil, secret: 'password'),
-      'ai' => Definition.new(provider: 'openai', name: 'OpenAI', title: 'Assistance IA', endpoint: 'https://api.openai.com', secret: 'api_key'),
-      'image_host' => Definition.new(provider: 'postimages', name: 'Postimages', title: 'Hébergement d’images', endpoint: 'https://api.postimage.org', secret: 'api_key')
+      'publishing' => Definition.new(provider: 'c411', name: 'C411', endpoint: 'https://c411.org', secret: 'api_key'),
+      'torrent_client' => Definition.new(provider: 'deluge', name: 'Deluge', endpoint: nil, secret: 'password'),
+      'ai' => Definition.new(provider: 'openai', name: 'OpenAI', endpoint: 'https://api.openai.com', secret: 'api_key'),
+      'image_host' => Definition.new(provider: 'postimages', name: 'Postimages', endpoint: 'https://api.postimage.org', secret: 'api_key')
     }.freeze
 
     def self.fetch(role)

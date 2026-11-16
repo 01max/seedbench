@@ -6,8 +6,7 @@ RSpec.describe 'Notifications', type: :system do
 
     expect(page).to have_css('.flash-message--success[role="status"]', text: 'Connexion réussie')
     save_workbench_screenshot('notification-dark.png')
-    click_link 'Apparence'
-    click_button 'Mode sombre'
+    click_button 'Mode clair'
     save_workbench_screenshot('notification-light.png')
     set_workbench_viewport(390)
     save_workbench_screenshot('notification-mobile.png')
