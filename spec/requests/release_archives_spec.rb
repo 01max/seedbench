@@ -1,6 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe 'Release archives' do
+  it 'renders archive and restore disabled until the editor initializes' do
+    sign_in_operator
+    release = Releases::Create.call
+    archive_action = 'button[data-editor-target="archiveAction"][disabled]'
+
+    get release_path(release)
+    expect(response.parsed_body.at_css(archive_action).text).to eq('Archiver')
+
+    post release_archive_path(release)
+    get release_path(release)
+    expect(response.parsed_body.at_css(archive_action).text).to eq('Restaurer')
+  end
+
   it 'archives a published record without changing its revision or workflows and only records the transition once' do
     sign_in_operator
     release = Releases::Create.call(title: 'Published book')

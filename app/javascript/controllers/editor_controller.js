@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["form", "status", "error", "conflict", "serverValues"]
+  static targets = ["form", "status", "error", "conflict", "serverValues", "archiveAction"]
   static values = { releaseId: Number, previousUrl: String, nextUrl: String, messages: Object }
 
   connect() {
@@ -11,6 +11,7 @@ export default class extends Controller {
     this.unloadGuard = event => this.beforeUnload(event)
     this.bypassedForms = new WeakSet()
     this.restoreDraft()
+    this.archiveActionTarget.disabled = false
     this.element.dataset.editorReady = "true"
   }
 
