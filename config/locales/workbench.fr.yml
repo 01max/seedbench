@@ -31,7 +31,7 @@ fr:
       action: "Archiver"
       restore: "Restaurer"
       archived: "« %{title} » a été archivé. Vous pouvez le retrouver dans le filtre Archives."
-      restored: "« %{title} » a été remis dans la file de travail."
+      restored: "« %{title} » a été restauré."
     c411:
       badge: "Import C411"
       source: "Brouillon C411 %{id}"
@@ -101,12 +101,13 @@ fr:
       previous_page: "Page précédente"
       next_page: "Page suivante"
       states:
-        all: "Hors archives"
+        all: "File active"
         review: "À vérifier"
         inspection: "À inspecter"
         prepared: "Préparés"
         published: "Publiés"
         duplicate: "Doublons"
+        imported: "Imports C411"
         archived: "Archives"
       labels:
         archived: "Archivé"

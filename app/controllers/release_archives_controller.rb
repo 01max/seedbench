@@ -9,7 +9,8 @@ class ReleaseArchivesController < ApplicationController
 
   def destroy
     release = change_archive(archived: false)
-    redirect_to release_path(release), notice: t('workbench.archive.restored', title: release.title.presence || t('workbench.untitled')),
+    state = 'imported' if release.c411_imported?
+    redirect_to release_path(release, state: state), notice: t('workbench.archive.restored', title: release.title.presence || t('workbench.untitled')),
       status: :see_other
   end
 

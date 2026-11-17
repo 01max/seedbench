@@ -9,6 +9,11 @@ RSpec.describe 'C411 draft review', type: :system do
     click_button 'Brouillon', exact: true
   end
 
+  def filter_queue(label)
+    select label, from: 'Filtrer la file'
+    click_button 'Filtrer'
+  end
+
   before { sign_in_browser }
 
   it 'saves pending BBCode before an explicit update without sending it from navigation' do
@@ -36,19 +41,19 @@ RSpec.describe 'C411 draft review', type: :system do
     expect(WebMock).not_to have_requested(:patch, /c411/)
   end
 
-  it 'labels imported drafts and allows only archiving and restoring them at mobile width' do
+  it 'keeps C411 imports in their own filter and restores them there from Archives' do
     imported = imported_draft
-    visit release_path(imported)
     set_workbench_viewport(320)
+    visit root_path
+    expect(page).to have_no_link('Livre distant')
+    filter_queue('Imports C411')
     expect(page).to have_css('.queue-row[aria-current="page"]', text: 'Import C411')
     expect(page.evaluate_script('document.documentElement.scrollWidth')).to be <= 320
     click_button 'Archiver'
     expect(page).to have_no_link('Livre distant')
-    select 'Archives', from: 'Filtrer la file'
-    click_button 'Filtrer'
+    filter_queue('Archives')
     click_button 'Restaurer'
-    expect(page).to have_current_path(release_path(imported))
-    expect(imported.reload.archived_at).to be_nil
+    expect(page).to have_current_path(release_path(imported, state: 'imported')).and(have_css('.queue-row[aria-current="page"]', text: 'Import C411'))
   ensure
     page.driver.browser.execute_cdp('Emulation.clearDeviceMetricsOverride')
   end

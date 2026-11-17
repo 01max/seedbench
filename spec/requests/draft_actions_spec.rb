@@ -6,7 +6,7 @@ RSpec.describe 'C411 draft actions' do
     stub_draft_account
     sign_in_operator
     post import_drafts_provider_connection_path(connection)
-    get root_path
+    get root_path(state: 'imported')
     expect(response.body).to include('Livre distant', 'Import C411', 'Brouillon C411 draft-1')
     expect(response.parsed_body.css('.work-footer button').map(&:text)).to eq([ 'Archiver' ])
     expect(response.parsed_body.at_css('#release-editor')).to be_nil

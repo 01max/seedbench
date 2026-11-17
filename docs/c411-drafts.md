@@ -1,9 +1,10 @@
 # C411 drafts
 
 Connecting C411 or clicking **Importer les brouillons C411** in publishing
-settings reads the account's draft list. New entries appear in the queue with an
-**Import C411** label and their remote draft ID. Seedbench keeps a title and the
-draft reference for each entry. You can archive or restore these entries locally.
+settings reads the account's draft list. New entries appear under **Imports
+C411** with their remote draft ID. Seedbench keeps a title and the draft reference
+for each entry. Archiving an import moves it to **Archives**, and restoring it
+returns it to **Imports C411**. **File active** contains local releases.
 Opening the workbench and switching filters use the local queue without contacting
 C411. The draft panel on a local release with a linked draft has an explicit
 **Synchroniser maintenant** action.

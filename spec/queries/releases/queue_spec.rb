@@ -43,6 +43,20 @@ RSpec.describe Releases::Queue do
     expect(described_class.call(state: 'review').records).to eq([ book ])
   end
 
+  it 'keeps C411 imports separate while local releases linked to drafts stay active' do
+    imported = imported_draft
+    local = linked_draft(draft_data('local-draft').merge('title' => 'Local book'), connection: imported.draft_link.provider_connection)
+
+    expect(%w[all review inspection].map { |state| described_class.call(state: state).records }).to eq([ [ local ] ] * 3)
+    expect(described_class.call(state: 'imported', q: 'distant').records).to eq([ imported ])
+    expect(described_class.call(state: 'imported', q: 'local').records).to be_empty
+
+    imported.update!(archived_at: Time.current)
+
+    expect(described_class.call(state: 'imported').records).to be_empty
+    expect(described_class.call(state: 'archived').records).to eq([ imported ])
+  end
+
   it 'keeps an explicitly selected book identifiable outside a changed filter' do
     book = Release.create!(title: 'Not matching')
     page = described_class.call(q: 'something else', release_id: book.id, page: 500)

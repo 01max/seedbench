@@ -1,7 +1,7 @@
 module Releases
   class Queue
     PAGE_SIZE = 40
-    STATES = %w[all review inspection prepared published duplicate archived].freeze
+    STATES = %w[all review inspection prepared published duplicate imported archived].freeze
     Page = Data.define(:records, :selected, :total, :page, :pages, :position, :previous_id, :next_id, :criteria)
 
     def self.call(q: '', state: 'all', page: 1, release_id: nil)
@@ -45,9 +45,16 @@ module Releases
       return scope.where.not(archived_at: nil) if @criteria[:state] == 'archived'
 
       scope = scope.where(archived_at: nil)
+      imports = ReleaseEvent.where(name: Release::C411_IMPORT_EVENT).select(:release_id)
+      return scope.where(id: imports) if @criteria[:state] == 'imported'
+
+      filter_active(scope.where.not(id: imports))
+    end
+
+    def filter_active(scope)
       case @criteria[:state]
       when 'review' then scope.where.not(publication_state: 'published')
-      when 'inspection' then scope.where(inspection_state: %w[pending running failed]).where.not(id: ReleaseEvent.where(name: Release::C411_IMPORT_EVENT).select(:release_id))
+      when 'inspection' then scope.where(inspection_state: %w[pending running failed])
       when 'prepared' then scope.where(preparation_state: 'prepared')
       when 'published' then scope.where(publication_state: 'published')
       when 'duplicate' then scope.where(id: confirmed_duplicate_ids(scope))
