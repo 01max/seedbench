@@ -43,7 +43,7 @@ RSpec.describe Settings::TestConnection do
   it 'treats Postimages API errors as failures even when HTTP succeeds' do
     connection = create_connection('image_host')
     stub_request(:post, 'https://api.postimage.org/1/upload')
-      .to_return(body: '<data success="0" status="403"><error>Private API error</error></data>')
+      .to_return(body: '<data success="0" status="403"><url>https://postimg.cc/abc123</url><error>Private API error</error></data>')
     described_class.call(connection_id: connection.id)
 
     expect(connection.reload.check_status).to eq('failed')
