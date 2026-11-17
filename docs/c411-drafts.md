@@ -7,7 +7,7 @@ for each entry. Archiving an import moves it to **Archives**, and restoring it
 returns it to **Imports C411**. **File active** contains local releases.
 Opening the workbench and switching filters use the local queue without contacting
 C411. The draft panel on a local release with a linked draft has an explicit
-**Synchroniser maintenant** action.
+**Synchroniser maintenant** action that reads the linked draft directly.
 
 Synchronization compares local text and remote text with the retained common
 base. Remote-only changes become local revisions; local-only changes stay unsent.

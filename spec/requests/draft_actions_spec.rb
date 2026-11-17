@@ -25,6 +25,34 @@ RSpec.describe 'C411 draft actions' do
     expect(Release.count).to eq(0)
   end
 
+  it 'synchronizes the linked draft even when the account list is rate limited' do
+    release = linked_draft
+    linked_draft(draft_data('draft-2'), connection: release.draft_link.provider_connection)
+    stub_draft_account(draft_data(description: 'Updated C411 description'))
+    account_list = stub_request(:get, 'https://c411.org/api/user/drafts').to_return(status: 429)
+    sign_in_operator
+
+    post release_draft_action_path(release), params: { draft: { kind: 'sync' } }
+
+    expect(response).to have_http_status(:ok)
+    expect(Drafts::Content.local(release.reload).fetch('description')).to eq('Updated C411 description')
+    expect(account_list).not_to have_been_requested
+    expect(WebMock).not_to have_requested(:get, 'https://c411.org/api/user/drafts/draft-2')
+  end
+
+  it 'requires a linked draft to enable or accept synchronization' do
+    release = Releases::Create.call(title: 'Local book', publishing_connection: create_connection)
+    sign_in_operator
+
+    get release_draft_action_path(release)
+    expect(response.parsed_body.at_css('input[value="Synchroniser maintenant"][disabled]')).to be_present
+
+    post release_draft_action_path(release), params: { draft: { kind: 'sync' } }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.parsed_body.at_css('[role="alert"]').text).to include('Associez un brouillon C411')
+    expect(WebMock).not_to have_requested(:get, /c411/)
+  end
+
   it 'forbids the editor and nested actions for legacy C411 imports' do
     release = linked_draft
     Releases::RecordEvent.call(release_id: release.id, name: 'draft.imported', data: { remote_id: 'draft-1' })
