@@ -207,7 +207,12 @@ export default class extends Controller {
     if (!this.dirty && !this.saving) return
     event.preventDefault()
     const submitter = event.submitter
-    if (!(await this.flush()) || !form.isConnected) return
+    const saved = await this.flush()
+    if (!form.isConnected) return
+    if (!saved) {
+      form.dispatchEvent(new CustomEvent("editor:submission-blocked"))
+      return
+    }
     this.bypassedForms.add(form)
     form.requestSubmit(submitter?.isConnected ? submitter : undefined)
   }

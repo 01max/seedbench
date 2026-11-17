@@ -9,7 +9,7 @@
     </div>
   </header>
   <%= form_with url: root_path, method: :get, class: 'queue-search',
-        data: { workbench_queue_target: 'form', turbo_action: 'replace', action: 'turbo:before-fetch-request->workbench-queue#recordFilterRequest' } do |form| %>
+        data: { workbench_queue_target: 'form', turbo_action: 'replace', action: 'turbo:before-fetch-request->workbench-queue#recordFilterRequest editor:submission-blocked->workbench-queue#restoreAppliedFilters' } do |form| %>
     <%= form.search_field :q, value: @queue.criteria[:q], maxlength: 200, placeholder: t('workbench.queue.search_placeholder'), aria: { label: t('workbench.queue.search_label') },
           data: { workbench_queue_target: 'search', action: 'input->workbench-queue#scheduleSearch compositionend->workbench-queue#scheduleSearch' } %>
     <%= form.select :state, Releases::Queue::STATES.map { |value| [t("workbench.queue.states.#{value}"), value] }, { selected: @queue.criteria[:state] },

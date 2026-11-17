@@ -29,6 +29,24 @@ RSpec.describe 'Editing races and recovery', type: :system do
     expect(page).to have_text('Échec réseau synthétique')
     expect(page).to have_field('Présentation', with: 'Preserved despite network failure')
     expect(page).to have_css(".work-main[data-release-id='#{first.id}']")
+    expect(page).to have_field('Rechercher par titre ou auteur', with: '')
+  end
+
+  it 'allows retrying the same queue category when editor saves recover' do
+    release = Releases::Create.call(title: 'Current book')
+    Releases::Create.call(title: 'Archived book').update!(archived_at: Time.current)
+    sign_in_browser
+    open_editor(release)
+    page.execute_script('window.originalWorkbenchFetch = window.fetch')
+    reject_editor_saves
+    fill_in 'Présentation', with: 'Text to save before filtering'
+    select 'Archives', from: 'Filtrer la file'
+
+    expect(page).to have_text('Échec réseau synthétique')
+    expect(page).to have_select('Filtrer la file', selected: 'File active')
+    page.execute_script('window.fetch = window.originalWorkbenchFetch')
+    select 'Archives', from: 'Filtrer la file'
+    expect(page).to have_css('.queue-row[aria-current="page"]', text: 'Archived book')
   end
 
   it 'restores text after reload and requires a choice when the saved revision changed' do

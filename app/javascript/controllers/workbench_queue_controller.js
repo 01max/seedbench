@@ -25,6 +25,11 @@ export default class extends Controller {
     this.formTarget.requestSubmit()
   }
 
+  restoreAppliedFilters() {
+    clearTimeout(this.timer)
+    this.formTarget.reset()
+  }
+
   recordFilterRequest({ detail: { url } }) {
     this.requested = { query: (url.searchParams.get("q") || "").trim(), state: url.searchParams.get("state") }
     if (this.sameFilters(this.formTarget, this.requested)) clearTimeout(this.timer)
