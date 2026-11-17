@@ -1,6 +1,6 @@
 # C411 API observations
 
-Draft discovery began on 2026-11-07 using the configured production key.
+Draft discovery began on 2026-11-07.
 Publication and initial seeding were verified on 2026-11-11 with an existing
 ebook draft authorized for that production test.
 
@@ -13,7 +13,7 @@ User-Agent. Reject redirects rather than forwarding credentials elsewhere.
 | --- | --- |
 | `GET /api/categories` | HTTP 200; category `Ebook` has ID `2`, and its `Livres` subcategory has ID `14`. Resolve IDs dynamically. |
 | `GET /api/categories/14/options` | HTTP 200; required format type `12` includes EPUB `190`, MOBI `192`, PDF `193`; required language type `13` includes French `197`. Optional types include genre `14` and literary style `29`. |
-| `GET /api/user/drafts` | HTTP 200; envelope contains `success`, `data`, `count`, `maxAllowed`. Six existing drafts; maximum 15. |
+| `GET /api/user/drafts` | HTTP 200 with `success`, `data`, `count`, and `maxAllowed`. The observed `maxAllowed` was 15. |
 | `GET /api/user/drafts/{id}` | HTTP 200; envelope contains `success` and the full draft in `data`. |
 | `GET /api/user/profile` | HTTP 403. The guide requires the separate `profile:read` scope; profile access is not necessary for draft operations. |
 
@@ -48,8 +48,8 @@ no publication request was made.
 
 The test created an incomplete draft with `name`, `title`, `description`,
 `categoryId`, `subcategoryId`, `options`, and `isAutosave: false`. It used a
-unique Seedbench test marker, a supplied ebook's filename-derived title, French
-test prose explicitly prohibiting publication, and no invented edition facts.
+unique Seedbench test marker and French test prose explicitly prohibiting
+publication.
 Successful storage does not establish release eligibility.
 
 ## Verified mutation lifecycle
@@ -63,16 +63,14 @@ Successful storage does not establish release eligibility.
 | Patch with category and subcategory `-1` | HTTP 500. This is an observed server failure, not a documented validation response. |
 | `DELETE /api/user/drafts/{id}` | HTTP 200; `success` and `message`. |
 | Read deleted draft | HTTP 404. No recovery mechanism was established. |
-| List after cleanup | Same six original draft identifiers; the isolated test draft was absent. |
+| List after cleanup | The original draft identifiers were unchanged and the isolated test draft was absent. |
 
 Only the newly created test draft was changed. Its marker was checked before
 cleanup. No existing user draft was modified or deleted. Raw evidence and the
 test identifier are stored privately outside Git.
 
-The slot-exhaustion error was not provoked: filling all remaining production
-slots would interfere with the operator. Treat the observed `maxAllowed` as a
-snapshot and handle the actual future failure response without assuming its
-status or shape.
+Treat the observed `maxAllowed` as a snapshot and handle the actual slot-limit
+response. Its status and response shape remain unverified.
 
 ## Concurrency limitation
 
@@ -122,8 +120,8 @@ eligibility, names, description/NFO requirements, the standard editor's limits,
 manual torrent settings, and the distinction between published site rules and
 operator choices.
 
-No numerical cover minimum was found in the reviewed pages; 600 × 900 is
-the operator's portrait quality target, with smaller verified covers permitted.
+The reviewed pages specify no numerical cover minimum. Seedbench uses
+600 × 900 as its portrait quality target and permits smaller verified covers.
 The complete image-host allowlist,
 Postimages acceptance in standard preview, and the API's seeding timing remain
 unverified. Do not infer publication behavior from successful draft storage.

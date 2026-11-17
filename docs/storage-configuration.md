@@ -1,9 +1,7 @@
 # Storage configuration
 
-Storage is a deployment configuration. Seedbench works with directories mounted
-into its containers; no host name, Unraid share, or host-specific absolute path
-belongs in application code. George is the initial deployment target, not a
-required filesystem layout or a prerequisite for portable development checks.
+Seedbench uses directories mounted into its containers. Configure host paths
+through Compose. Portable development checks use disposable directories.
 
 ## Host paths and container paths
 

@@ -67,7 +67,7 @@ host and client acceptance still require the selected deployment.
 
 The later [production publication check](c411-api.md#direct-publication-and-personalized-download)
 verified personalized torrent retrieval, paused import, a 100% recheck, and
-tracker acceptance on the operator’s Deluge client.
+tracker acceptance on a live Deluge client.
 
 References: [Deluge web JSON-RPC API](https://deluge.readthedocs.io/en/deluge-2.2.0/reference/webapi.html),
 [Deluge core API](https://deluge.readthedocs.io/en/deluge-2.2.0/reference/api.html),

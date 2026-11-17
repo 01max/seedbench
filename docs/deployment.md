@@ -76,12 +76,11 @@ reverse-proxy routes disabled.
 and [subnet routers](https://tailscale.com/docs/features/subnet-routers).
 
 After starting the stack, verify the published port with `bin/compose ps`.
-Request `/up` and open the login page from each intended network. For George,
-test from a LAN client and a separate tailnet client. From an unintended network
-or interface, verify the web port is unreachable. On the Docker host, check
-the worker has no published ports. Check the router and any existing proxy
-for public forwards to the app. A single successful request does not
-establish the denied paths.
+Request `/up` and open the login page from each intended network. If the
+deployment serves both LAN and tailnet clients, test each route from a separate
+client. From an unintended network or interface, verify the web port is
+unreachable. On the Docker host, check the worker has no published ports.
+Check the router and any existing proxy for public forwards to the app.
 
 ## Initialize and start
 
@@ -110,7 +109,7 @@ C411, Deluge, and Postimages connections if using them. OpenAI is optional.
 Review each default before uploading. Existing releases retain their pinned
 connections. [Provider settings](provider-settings.md)
 
-On the home LAN, plain HTTP sends login and session traffic without TLS.
+On a LAN, plain HTTP sends login and session traffic without TLS.
 Use it only on the trusted LAN. Tailscale protects traffic in transit between
 its peers. For a TLS-terminating private proxy, keep the backend private and
 set `FORCE_SSL=1` and `ASSUME_SSL=1` when the proxy forwards HTTP. With
@@ -216,7 +215,7 @@ URLs, and private release identifiers in the deployment's own records.
 | Check | Evidence to record |
 | --- | --- |
 | Storage and permissions | Web and worker ran as the chosen UID/GID. Their probe hash matched the host bind and the hash Deluge read as its daemon user. Staging rename preserved the inode. |
-| Private network | The LAN and tailnet login pages and `/up` loaded from their intended clients. The port was unreachable from an unintended interface, and no public forwarding or public proxy route exists. |
+| Private network | The login page and `/up` loaded from each intended network. The port was unreachable from an unintended interface, and no public forwarding or public proxy route exists. |
 | Access and restart | Operator login worked from a private client. Both services recovered after a restart with the same state and payload mounts. |
 | Recovery | A matching image restored a protected archive into empty disposable state. The expected keys, edited content, queue and artifacts were usable, and reconciliation held the stack offline on a mismatch. |
 

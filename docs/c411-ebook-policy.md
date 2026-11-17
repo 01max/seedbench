@@ -36,11 +36,11 @@ team cannot be found. Preserve literal format brackets. Series/volume and year
 must be justified; year is required to distinguish versions or reboots.
 
 The guide explicitly distinguishes the listing title from an existing repost's
-payload filename and instructs preserving the latter. Seedbench's explicit
-canonical-rename workflow is an operator choice, not a claim that C411 requires
-all reposted files to be renamed. Existing torrent-bound or published payloads
-must retain their expected names. Keep release, payload, and `.torrent` naming
-separate; the operator's unknown-team torrent suffix is `.NOTAG.torrent`.
+payload filename and instructs preserving the latter. Seedbench supports
+explicit canonical renames during preparation. Existing torrent-bound or
+published payloads must retain their expected names. Keep release, payload, and
+`.torrent` naming separate. Seedbench uses `.NOTAG.torrent` when the source
+team is unknown.
 
 ## Description and NFO
 
@@ -55,11 +55,12 @@ and API upload guide require it. Retain the stricter publication requirement;
 an incomplete draft can exist without satisfying it. The form's optional flag
 does not waive the published rule.
 
-The operator's description format has this label order: cover, centered title,
-`Auteur(s) :`, `Éditeur :`, `Parution :`, `ISBN numérique :`, `Langue :`,
-`Présentation :`, `Fichier(s) :`, `Taille :`, and `Notes supplémentaire :`.
-Preserve the established tags, whitespace, labels, and order. This exact format
-is an operator requirement; the wiki permits presentation customization.
+Seedbench's description template starts with the cover and centered title,
+followed by `Auteur(s) :`, `Éditeur :`, `Parution :`, `ISBN numérique :`,
+`Langue :`, `Présentation :`, `Fichier(s) :`, `Taille :`, and
+`Notes supplémentaire :`.
+Preserve the template's tags, whitespace, labels, and order. The wiki permits
+presentation customization.
 
 Use an actual digital-edition ISBN only. A scan's print ISBN is not a digital
 ISBN; document it separately and use `Non applicable` where appropriate. Report
@@ -85,7 +86,7 @@ The authenticated [API guide](https://c411.org/user/integrations/guide) document
 A tag list does not establish every nesting, escaping, or renderer rule. Literal
 bracket escaping and malformed-tag handling remain unverified. Local preview
 must sanitize active content and unsafe links without claiming exact site
-rendering. The local content policy preserves the operator template and applies
+rendering. The local content policy preserves the Seedbench template and applies
 bounded, conservative tag/attribute rules. Generated literal brackets use numeric
 entities for safe local display; because C411's literal escaping remains unproven,
 those descriptions receive a blocking rendering-review diagnostic before remote
@@ -96,10 +97,9 @@ silently substituted for BBCode.
 
 The reviewed ebook, description, upload, creation, and publication pages require
 a representative image but do not specify a numeric cover-resolution minimum.
-The operator quality target is **600 × 900 native pixels at the exact hosted
-URL**, rather than a minimum requirement. A smaller verified portrait is usable
-when it is the available cover; a small image is preferable to no image. Prefer
-native detail over enlarged thumbnails. Edition correspondence, visible
+Seedbench targets **600 × 900 native pixels at the exact hosted URL**. A smaller
+verified portrait is usable when it is the available cover. Prefer native
+detail over enlarged thumbnails. Edition correspondence, visible
 sharpness, compression artifacts, and watermarks require review. Other aspect
 ratios need documented comparable-detail review; no automatic acceptance
 threshold is asserted for them.

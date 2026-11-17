@@ -1,8 +1,7 @@
 # Provider and tooling observations
 
-Verified on 2026-11-07. Only synthetic text and a generated checkerboard image
-were sent to providers. The supplied ebooks were not sent to either provider,
-and no C411 publication or distribution was started.
+Verified on 2026-11-07. The provider checks sent synthetic text and a generated
+checkerboard image.
 
 ## Postimages
 
@@ -11,13 +10,9 @@ The authenticated helper uploaded a synthetic PNG and returned a direct
 `image/png` and a PNG signature. The source was **600 × 900**, while the hosted
 image was **512 × 768**. The helper also reported that reduction.
 
-Uploading successfully does not preserve native dimensions or establish cover
-adequacy. The hosted result falls below the operator's 600 × 900 portrait-cover
-quality target and can still be used as a smaller cover. Verify returned image
-properties after every upload; source
-properties cannot satisfy a hosted-image check. No larger re-upload was made,
-and no selected ebook cover was hosted. The synthetic URL and image hashes
-remain in the private evidence inventory.
+The hosted result falls below Seedbench's 600 × 900 portrait cover quality
+target and can still be used as a smaller cover. Verify the dimensions of the
+hosted image after each upload.
 
 The [2026-11-08 policy review](c411-ebook-policy.md) found no numerical site cover
 minimum in the reviewed pages. The complete image-host allowlist and C411
@@ -26,8 +21,7 @@ are non-exhaustive.
 
 ## OpenAI
 
-A probe used the existing Windmill OpenAI resource, without copying its key
-into the repository or arguments. The first snapshot requested,
+A probe tested the Responses API. The first model snapshot requested,
 `gpt-4.1-nano-2025-04-14`, returned HTTP 404 with `model_not_found`. A read of
 the accessible model catalog then identified
 `gpt-4.1-mini-2025-04-14` as an available compatible model.
@@ -43,7 +37,6 @@ A second request deliberately omitted `additionalProperties`; the API rejected
 that strict schema with HTTP 400 and `invalid_json_schema`. This verifies the
 tested transport and schema capability. It does not certify factual accuracy,
 the application prompts, provider defaults, or production evidence handling.
-The resource still requires a deliberate application connection assignment.
 
 References: [Responses structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses)
 and [the tested model family](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
@@ -85,21 +78,6 @@ archives, and real-file acceptance still require their own verification.
 
 References: [Calibre metadata CLI](https://manual.calibre-ebook.com/generated/en/ebook-meta.html)
 and [Tesseract CLI](https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html).
-
-## Existing deployment storage observation
-
-A read-only probe in the existing `george-basics` Windmill worker found its
-torrent-inbox mount but no `/data/completed` or `/data/completed/uploads`.
-The worker ran as root; its successful access cannot establish permissions for
-an unprivileged application or Deluge daemon. No file was created, modified,
-renamed, or moved by that probe.
-
-That observation does not define application paths or require George access for
-portable development checks. Host binds, application roots, and client roots
-are [deployment configuration](storage-configuration.md). The selected host's
-actual mounts, service permissions, RPC behavior, and intended network
-interfaces remain deployment acceptance checks. The existing torrent inbox is
-not proof of canonical payload access.
 
 The application now uses the verified Trixie runtime recorded in
 [supported runtime](runtime.md). Its CI repeats the synthetic tooling checks;

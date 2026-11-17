@@ -8,68 +8,29 @@ An authorized existing ebook draft was published and seeded on 2026-11-11.
 See the [API observations](c411-api.md#direct-publication-and-personalized-download)
 for the measured submission, download, and draft behavior.
 
-## Connection inventory
+## Provider checks
 
-| Provider | Observed configuration | Verification still needed |
+| Provider | Observed behavior | Verification still needed |
 | --- | --- | --- |
-| C411 | The production API key is configured as `C411_API_KEY` in the ignored `.env`. Category/options reads and isolated draft create/read/update/delete succeeded. | Profile access returned HTTP 403; API account identity could not be independently confirmed through that endpoint. Team Pending was outside the successful publication test. |
-| Deluge | An isolated Deluge 2.2.0 daemon passed paused import, per-torrent options, recheck, resume, seeding, and tracker acceptance/rejection checks. The `george-basics` Windmill workspace also contains a production connection reference. | The production test also confirmed initial seeding with the selected ebook. Verify the app deployment’s own mount and service-user access separately. |
-| OpenAI | The same workspace contains an OpenAI resource and a secret-variable reference. A synthetic strict-schema request succeeded, and an invalid schema was rejected. | Make a deliberate application connection assignment; the probe does not select production defaults. |
+| C411 | Category and option reads and isolated draft create/read/update/delete requests succeeded. | Profile access returned HTTP 403. Team Pending remains untested. |
+| Deluge | An isolated Deluge 2.2.0 daemon passed paused import, per-torrent options, recheck, resume, seeding, and tracker acceptance/rejection checks. A live test also confirmed initial seeding. | Verify the actual mounts and daemon user access for each deployment. |
+| OpenAI | A synthetic strict-schema request succeeded, and an invalid schema was rejected. | Test the connection and select a default in Seedbench settings. |
 | Postimages | The upload helper authenticated and returned a loadable direct PNG for a synthetic image. | Hosting reduced 600 × 900 to 512 × 768; actual cover quality and C411 host policy remain to be verified. |
-
-No credential values were printed or added to tracked files. The private
-inventory records actual connection references outside version control. The
-local `.env` permissions were tightened to `0600`; private responses use `0600`
-files under a `0700` directory. The entire `tmp/` directory is ignored.
 
 The authenticated C411 documentation is available at
 [the integration guide](https://c411.org/user/integrations/guide). The
 [2026-11-08 ebook policy review](c411-ebook-policy.md) records current rules and
-the remaining undocumented contracts. The discovery draft listing reported
-six existing drafts and a maximum of 15. The discovery mutation test used
-an isolated synthetic draft.
-
-## Existing deployment observations
-
-Read-only inspection of the deployed Windmill torrent-inbox script found:
-
-- A Deluge web connection and JSON-RPC authentication using its secret variable.
-- Candidate Deluge payload directory `/data/completed/uploads`.
-- A Windmill torrent inbox at `/data/torrent-inbox`, with a `c411_uploads`
-  subdirectory that the automation may import, recheck, and resume.
-- A diagnostic option that avoids the normal inbox-processing branch. Its
-  client initialization can connect the web UI to a daemon if disconnected;
-  inspect connection state before relying on it as a strictly read-only probe.
-
-The worker's inbox mount was observed with a read-only probe, but its
-`/data/completed/uploads` path is absent. This is a property of that worker's
-mounts, not a required application layout. Keep disposable artifacts outside
-the watched inbox until their import is intended.
-
-The [storage contract](storage-configuration.md) declares host binds in Compose
-and lets the app and client use independently configured container roots.
-Portable mount validation does not need George access. Actual deployment
-permissions, client access, and LAN/Tailscale bindings still require acceptance
-on the selected deployment host.
+the remaining undocumented contracts.
 
 ## Test-data boundary
 
-The operator supplied nine ebooks in `tmp/ebooks`: seven EPUBs, one PDF, and one
-MOBI. Their paths, sizes, SHA-256 hashes, and available embedded metadata
-candidates are recorded in the private inventory. Original bytes and filenames
-remain unchanged. Metadata candidates have not been certified as edition facts.
-
-The discovery authorization covered inspection and draft tests with those
-nine files. One isolated test draft was created, updated, and deleted. One
-synthetic checkerboard was uploaded to Postimages. The isolated Deluge check
+The discovery check created, updated, and deleted an isolated test draft. The
+Postimages check uploaded a synthetic checkerboard. The isolated Deluge check
 imported and removed three synthetic torrents with external networking disabled.
 
-The later production authorization covered an already existing draft. The
-matching EPUB was staged on the Deluge share and verified against the draft's
-torrent before submission. C411 approved the release and supplied the
-personalized torrent. Deluge verified 100% and the tracker accepted the seed.
-The private evidence records the draft and submission identifiers. No new
-draft was published during the test.
+For the live test, the payload was verified against the draft's torrent before
+submission. C411 approved the release and supplied the personalized torrent.
+Deluge verified 100% of the payload and the tracker accepted the seed.
 
 ## Remaining prerequisites
 
@@ -91,6 +52,5 @@ draft was published during the test.
   application image, with separate real-file, parser-bound, and hostile-input
   checks.
 
-The checkout has an `origin` remote and a containerized Rails foundation.
-`bin/test`, `bin/lint`, and `bin/ci` run isolated checks; no live provider
-credentials or operator ebooks are used by those commands.
+`bin/test`, `bin/lint`, and `bin/ci` run isolated checks with synthetic fixtures
+and stubbed provider requests.
