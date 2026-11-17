@@ -33,6 +33,7 @@ Rails.application.routes.draw do
   end
   resources :provider_connections, path: 'settings/connections', only: :create do
     post :preview, on: :collection
+    post :discover_deluge, on: :collection
     member do
       patch :rotate
       patch :configure

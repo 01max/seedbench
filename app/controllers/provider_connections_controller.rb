@@ -29,6 +29,14 @@ class ProviderConnectionsController < ApplicationController
     render json: { status: 'failed', message: error.message }, status: :unprocessable_content
   end
 
+  def discover_deluge
+    values = params.expect(connection: [ :endpoint, credentials: [ :password ] ])
+    access = Settings::ConnectionConfig.deluge_web(endpoint: values[:endpoint], credentials: values.fetch(:credentials, {}).to_h)
+    render json: { daemons: Providers::Deluge.discover(**access) }
+  rescue Settings::ConnectionConfig::Invalid, Providers::Failure => error
+    render json: { message: error.message }, status: :unprocessable_content
+  end
+
   def configure
     values = configuration_params
     connection = Settings::ConfigureConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false), options: values.fetch(:options, {}).to_h)

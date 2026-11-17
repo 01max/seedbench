@@ -1,9 +1,14 @@
 <% help = "setup-#{definition.provider}-help" %>
-<% fields = provider_field_labels(definition, endpoint: role == 'torrent_client', model: role == 'ai') %>
-<% labels = { label: t('settings.connection.label'), identity: t(role == 'torrent_client' ? 'settings.connection.deluge_identity' : 'settings.connection.account_identity') }.merge(fields) %>
+<% deluge = definition.provider == 'deluge' %>
+<% fields = provider_field_labels(definition, endpoint: deluge, model: role == 'ai') %>
+<% identity_label = t(deluge ? 'settings.connection.deluge_identity' : 'settings.connection.account_identity') %>
+<% labels = { label: t('settings.connection.label') } %>
+<% labels[:identity] = identity_label unless deluge %>
+<% labels.merge!(fields) %>
+<% labels[:identity] = identity_label if deluge %>
 <div class="settings-setup-grid">
   <%= form_with url: provider_connections_path, scope: :connection, namespace: definition.provider, class: 'settings-form',
-        data: connection_test_data(preview_provider_connections_path) do |form| %>
+        data: connection_test_data(preview_provider_connections_path, discover_deluge: deluge) do |form| %>
     <div class="settings-setup-heading">
       <h4><%= t('settings.connection.configure_provider', provider: definition.name) %></h4>
       <%= link_to t('settings.connection.help.title'), "##{help}-title", class: 'settings-help-link' %>
@@ -14,11 +19,14 @@
         <%= form.label :label, labels.fetch(:label) %>
         <%= form.text_field :label, required: true, maxlength: 120, aria: { describedby: "#{help}-label" } %>
       </div>
-      <div class="settings-field">
-        <%= form.label :identity_key, labels.fetch(:identity) %>
-        <%= form.text_field :identity_key, required: true, maxlength: 120, aria: { describedby: "#{help}-identity" } %>
-      </div>
+      <% unless deluge %>
+        <div class="settings-field">
+          <%= form.label :identity_key, identity_label %>
+          <%= form.text_field :identity_key, required: true, maxlength: 120, aria: { describedby: "#{help}-identity" } %>
+        </div>
+      <% end %>
       <%= render 'provider_connections/fields', form: form, definition: definition, labels: fields, help: help %>
+      <%= render 'provider_connections/deluge_daemons', form: form, identity_label: identity_label, help: help if deluge %>
     </div>
     <%= render 'provider_connections/test_actions', form: form, role: role, save: t('settings.connection.save') %>
   <% end %>

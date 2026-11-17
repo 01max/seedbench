@@ -34,18 +34,18 @@ RSpec.describe 'Provider settings' do
     expect(ProviderConnection.count).to eq(0)
   end
 
-  { 'publishing' => /brouillons/, 'torrent_client' => /web\.get_hosts/, 'ai' => /API Responses/, 'image_host' => /32 caractères hexadécimaux/ }.each do |role, instruction|
+  { 'publishing' => /brouillons/, 'torrent_client' => /Rechercher les démons/, 'ai' => /API Responses/, 'image_host' => /32 caractères hexadécimaux/ }.each do |role, instruction|
     it "shows a logo and help for each #{role} input when its provider is selected" do
       definition = Providers::Catalog.fetch(role)
       get settings_provider_path(role)
       picker = response.parsed_body.at_css('.settings-provider-option')
       expect(picker).to have_attributes(text: a_string_including(definition.name))
-      expect(picker.at_css('img')['src']).to include("/providers/#{definition.provider}")
+      expect(picker.at_css('img')['src']).to match(%r{/providers/#{definition.provider}(?:-[0-9a-f]+)?\.svg\z})
       expect(response.parsed_body.at_css('.settings-configuration-help')).to be_nil
 
       get settings_provider_path(role, provider: definition.provider)
       panel = response.parsed_body.at_css("#provider-setup-#{definition.provider}")
-      inputs = panel.css('.settings-field input')
+      inputs = panel.css('.settings-field input, .settings-field select')
       expect(inputs.map { |input| panel.at_css("##{input['aria-describedby']}").text }).to include(a_string_matching(instruction))
       expect(panel.at_css('.translation_missing')).to be_nil
     end

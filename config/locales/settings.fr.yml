@@ -50,7 +50,16 @@ fr:
       add: "Ajouter une connexion"
       configure_provider: "Configurer %{provider}"
       label: "Libellé"
-      deluge_identity: "Identifiant du démon Deluge"
+      deluge_identity: "Démon Deluge"
+      deluge_discovery:
+        button: "Rechercher les démons"
+        placeholder: "Sélectionnez un démon"
+        messages:
+          pending: "Recherche des démons…"
+          single: "Le démon trouvé a été sélectionné."
+          multiple: "Choisissez le démon à utiliser pour les torrents."
+          empty: "Ajoutez un démon dans le gestionnaire de connexions de la WebUI Deluge, puis relancez la recherche."
+          failed: "La recherche des démons a échoué. Réessayez."
       account_identity: "Identité stable du compte ou projet"
       deluge_endpoint: "Adresse du WebUI Deluge (sans /json)"
       password: "Mot de passe WebUI"
@@ -69,7 +78,7 @@ fr:
           identity: "Votre pseudo C411 ou une référence stable qui identifie ce compte."
           api_key: "La clé API de votre compte C411. Elle doit donner accès à la liste de vos brouillons."
         deluge:
-          identity: "Connectez-vous à la WebUI Deluge et ouvrez le gestionnaire de connexions avec l’onglet Réseau du navigateur ouvert. Repérez la requête web.get_hosts et copiez le premier élément de la ligne du démon. C’est son host_id."
+          identity: "Renseignez l’adresse et le mot de passe de la WebUI, puis cliquez sur Rechercher les démons. Seedbench sélectionne le démon automatiquement si la liste n’en contient qu’un."
           endpoint: "L’adresse de base de la WebUI accessible depuis Seedbench, par exemple http://deluge:8112. Si vous utilisez un proxy, incluez son préfixe et arrêtez-vous avant /json."
           password: "Le mot de passe que vous saisissez pour vous connecter à la WebUI Deluge."
         openai:

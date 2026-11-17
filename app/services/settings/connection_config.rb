@@ -13,6 +13,12 @@ module Settings
           endpoint: endpoint_for(role, endpoint, definition), credentials: secrets(credentials, definition), options: options_for(role, options) }
       end
 
+      def deluge_web(endpoint:, credentials:)
+        role = 'torrent_client'
+        definition = Providers::Catalog.fetch(role)
+        { endpoint: endpoint_for(role, endpoint, definition), password: secrets(credentials, definition).fetch('password') }
+      end
+
       private
 
       def text?(value)

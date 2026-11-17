@@ -11,7 +11,7 @@ module Providers
       ANNOUNCE_OK = /(?:\A|: )Announce OK\b/i
 
       def initialize(connection:, info_hash:)
-        @client, @info_hash = Deluge.new(connection), info_hash
+        @client, @info_hash = Deluge.new(endpoint: connection.endpoint), info_hash
         @client.authenticate!(connection.credentials.fetch('password'))
         @client.connect!(connection.identity_key)
       end

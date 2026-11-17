@@ -171,11 +171,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .settings-panel > header p { color: var(--muted); margin-top: 3px; }
 .settings-body { padding: 10px 12px; display: grid; gap: 10px; min-width: 0; overflow-wrap: anywhere; }
 .settings-body + .settings-body { border-top: 1px solid var(--border); }
-.settings-provider-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.settings-provider-option.work-button { min-height: 44px; padding: 5px 12px 5px 6px; gap: 8px; font-size: 12px; font-weight: 550; }
+.settings-provider-picker { display: flex; flex-wrap: wrap; gap: 10px; }
+.settings-provider-option.work-button { min-width: 166px; min-height: 68px; justify-content: flex-start; padding: 8px 16px 8px 8px; gap: 12px; font-size: 14px; font-weight: 600; }
 .settings-provider-option[aria-pressed="true"] { border-color: var(--accent); background: var(--selected); }
-.settings-provider-logo { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 3px; background: #fff; }
-.settings-provider-logo img { width: 24px; height: 24px; object-fit: contain; }
+.settings-provider-logo { display: grid; place-items: center; flex: none; width: 48px; height: 48px; border: 1px solid #796184; border-radius: 8px; background: #282430; }
+.settings-provider-logo img { width: 36px; height: 36px; object-fit: contain; }
 .settings-setup-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .settings-setup-grid .settings-fields { grid-template-columns: minmax(0, 1fr); }
 .settings-setup-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; width: 100%; }

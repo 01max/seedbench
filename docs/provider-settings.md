@@ -11,10 +11,12 @@ saved connection checks and records the result for that saved version.
 
 Each connection has an immutable role/provider, address, and account or daemon
 identity. Use a descriptive label and a stable identity that identifies the
-actual account/project. For Deluge, the identity is the configured daemon's
-host ID from the WebUI. The Deluge address is its HTTP(S) WebUI root, including
-an optional reverse-proxy prefix, without `/json`, credentials, or query
-parameters. Other providers use their official addresses.
+actual account/project. To set up Deluge, enter the WebUI address and password,
+then click **Rechercher les démons**. Seedbench selects a single daemon
+automatically. If the WebUI lists several, choose one by its host and port.
+Seedbench stores its host ID as the connection identity. The address is the
+HTTP(S) WebUI root, including an optional reverse-proxy prefix, without `/json`,
+credentials, or query parameters. Other providers use their official addresses.
 
 Connections retained from earlier versions may have only their identity and
 label. Use **Compléter la configuration** on the existing connection to save its

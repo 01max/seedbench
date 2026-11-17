@@ -9,7 +9,7 @@
         <%= button_to settings_provider_path(role), method: :get, params: { provider: definition.provider },
               class: 'work-button settings-provider-option',
               aria: { pressed: definition == selected_provider, controls: "provider-setup-#{definition.provider}" } do %>
-          <span class="settings-provider-logo"><%= image_tag "providers/#{definition.provider}.png", size: '24', alt: '' %></span>
+          <span class="settings-provider-logo"><%= image_tag "providers/#{definition.provider}.svg", size: '36', alt: '' %></span>
           <%= definition.name %>
         <% end %>
       <% end %>
