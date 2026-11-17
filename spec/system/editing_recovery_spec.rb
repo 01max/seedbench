@@ -25,7 +25,6 @@ RSpec.describe 'Editing races and recovery', type: :system do
     reject_editor_saves
     fill_in 'Présentation', with: 'Preserved despite network failure'
     fill_in 'Rechercher par titre ou auteur', with: 'Second'
-    click_button 'Filtrer', exact: true
 
     expect(page).to have_text('Échec réseau synthétique')
     expect(page).to have_field('Présentation', with: 'Preserved despite network failure')

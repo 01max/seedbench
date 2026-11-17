@@ -61,7 +61,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .work-layout { --work-sidebar-width: 274px; display: grid; grid-template-columns: var(--work-sidebar-width) minmax(0, 1fr); min-height: calc(100dvh - 46px); }
 .work-queue { min-width: 0; border-right: 1px solid var(--border); background: var(--inset); }
 .queue-heading, .queue-footer, .queue-pagination { display: flex; justify-content: space-between; align-items: center; gap: 5px; padding: 8px 10px; }
-.queue-heading > span, .queue-footer, .queue-pagination { color: var(--muted); font-size: 11px; }
+.queue-heading { flex-wrap: wrap; }
+.queue-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.queue-heading-actions, .queue-footer, .queue-pagination { color: var(--muted); font-size: 11px; }
+.queue-help-button.work-button { min-height: 24px; padding: 2px 5px; }
 .queue-search { display: grid; grid-template-columns: minmax(0, 1fr) 105px; gap: 5px; padding: 3px 9px 8px; }
 .queue-search > input, .queue-search > select { min-width: 0; width: 100%; border: 1px solid var(--border); border-radius: 3px; background: var(--panel); padding: 4px 6px; font-size: 11px !important; }
 .queue-search > input[type="submit"] { grid-column: 2; padding: 2px 6px; }
@@ -76,6 +79,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .queue-footer, .queue-pagination { border-top: 1px solid var(--border); }
 .queue-footer > div { display: flex; gap: 3px; }
 .queue-empty { padding: 12px; color: var(--muted); }
+.work-shortcuts { position: fixed; inset: 0; width: min(420px, calc(100% - 24px)); max-height: calc(100dvh - 32px); margin: auto; padding: 0; overflow: auto; color: var(--foreground); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
+.work-shortcuts::backdrop { background: #1d1b2599; }
+.work-shortcuts header { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 9px 12px; background: var(--inset); border-bottom: 1px solid var(--border); }
+.work-shortcuts h2 { font-size: 14px; font-weight: 600; }
+.work-shortcuts dl { margin: 0; padding: 5px 12px; }
+.work-shortcuts dl > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: baseline; gap: 8px; padding-block: 7px; }
+.work-shortcuts dl > div + div { border-top: 1px solid var(--border); }
+.work-shortcuts kbd { display: inline-block; padding: 0 3px; border: 1px solid var(--border); border-radius: 3px; background: var(--inset); font: inherit; }
+.work-shortcuts dd { margin: 0; }
 .work-main { min-width: 0; display: flex; flex-direction: column; background: var(--panel); }
 .release-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 10px 12px 9px; border-bottom: 1px solid var(--border); }
 .release-heading > div { min-width: 0; overflow-wrap: anywhere; }
@@ -136,7 +148,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .operation-state summary, .status-dimensions summary { cursor: pointer; }
 .operation-state pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 10px; }
 .work-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 7px; padding: 7px 9px; background: var(--inset); border-top: 1px solid var(--border); }
-.work-footer > span { color: var(--muted); font-size: 11px; }
 .work-actions { display: flex; flex-wrap: wrap; gap: 5px; }
 .release-facts { display: grid; grid-template-columns: 95px minmax(0, 1fr); gap: 6px; margin: 9px 0 12px; }
 .release-facts dt { color: var(--muted); }
@@ -237,8 +248,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .queue-records { max-height: 168px; }
   .queue-columns, .queue-row { grid-template-columns: minmax(0, 1fr) 38px 68px; }
   .queue-format, .queue-columns > :nth-child(2) { display: block; }
-  .queue-search { grid-template-columns: minmax(0, 1fr) 115px 50px; }
-  .queue-search > input[type="submit"] { grid-column: 3; }
+  .queue-search { grid-template-columns: minmax(0, 1fr) 115px; }
+  .queue-help-button.work-button { min-height: 32px; }
   .queue-pagination { justify-content: center; gap: 12px; }
   .release-heading { flex-wrap: wrap; }
   .editor-area { padding-inline: 9px; }

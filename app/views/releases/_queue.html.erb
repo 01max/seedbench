@@ -1,9 +1,20 @@
-<aside class="work-queue" aria-label="<%= t("workbench.queue.title") %>">
-  <header class="queue-heading"><h2><%= t("workbench.queue.title") %></h2><span><%= t("workbench.queue.total", count: @queue.total) %></span></header>
-  <%= form_with url: root_path, method: :get, class: "queue-search" do |form| %>
-    <%= form.search_field :q, value: @queue.criteria[:q], placeholder: t("workbench.queue.search_placeholder"), aria: { label: t("workbench.queue.search_label") } %>
-    <%= form.select :state, Releases::Queue::STATES.map { |value| [t("workbench.queue.states.#{value}"), value] }, { selected: @queue.criteria[:state] }, aria: { label: t("workbench.queue.filter_label") } %>
-    <%= form.submit t("workbench.queue.filter"), class: "work-button" %>
+<aside class="work-queue" aria-label="<%= t('workbench.queue.title') %>" data-controller="workbench-queue"
+       data-action="keydown@window->workbench-queue#shortcut turbo:before-render@document->workbench-queue#preserveFilters">
+  <header class="queue-heading">
+    <h2><%= t('workbench.queue.title') %></h2>
+    <div class="queue-heading-actions">
+      <span><%= t('workbench.queue.total', count: @queue.total) %></span>
+      <button type="button" class="work-button quiet queue-help-button" hidden aria-haspopup="dialog" aria-controls="workbench-shortcuts"
+              data-workbench-queue-target="helpButton" data-action="workbench-queue#openHelp"><%= t('workbench.shortcuts.title') %></button>
+    </div>
+  </header>
+  <%= form_with url: root_path, method: :get, class: 'queue-search',
+        data: { workbench_queue_target: 'form', turbo_action: 'replace', action: 'turbo:before-fetch-request->workbench-queue#recordFilterRequest' } do |form| %>
+    <%= form.search_field :q, value: @queue.criteria[:q], maxlength: 200, placeholder: t('workbench.queue.search_placeholder'), aria: { label: t('workbench.queue.search_label') },
+          data: { workbench_queue_target: 'search', action: 'input->workbench-queue#scheduleSearch compositionend->workbench-queue#scheduleSearch' } %>
+    <%= form.select :state, Releases::Queue::STATES.map { |value| [t("workbench.queue.states.#{value}"), value] }, { selected: @queue.criteria[:state] },
+          aria: { label: t('workbench.queue.filter_label') }, data: { workbench_queue_target: 'filter', action: 'change->workbench-queue#submitFilters' } %>
+    <%= form.submit t('workbench.queue.filter'), class: 'work-button', data: { workbench_queue_target: 'fallback' } %>
   <% end %>
   <div class="queue-columns" aria-hidden="true"><span><%= t("workbench.queue.book") %></span><span><%= t("workbench.queue.format") %></span><span><%= t("workbench.queue.state") %></span></div>
   <div class="queue-records" aria-label="<%= t("workbench.queue.records_label") %>">
@@ -21,9 +32,10 @@
   </footer>
   <% if @queue.pages > 1 %>
     <nav class="queue-pagination" aria-label="<%= t("workbench.queue.pages_label") %>">
-      <% if @queue.page > 1 %><%= link_to t("workbench.queue.previous_page"), root_path(**@queue.criteria, page: @queue.page - 1) %><% end %>
+      <% if @queue.page > 1 %><%= link_to t("workbench.queue.previous_page"), root_path(**@queue.criteria, page: @queue.page - 1), rel: 'prev' %><% end %>
       <span><%= @queue.page %> / <%= @queue.pages %></span>
-      <% if @queue.page < @queue.pages %><%= link_to t("workbench.queue.next_page"), root_path(**@queue.criteria, page: @queue.page + 1) %><% end %>
+      <% if @queue.page < @queue.pages %><%= link_to t("workbench.queue.next_page"), root_path(**@queue.criteria, page: @queue.page + 1), rel: 'next' %><% end %>
     </nav>
   <% end %>
+  <%= render 'shortcuts', editable: @release && !@release.c411_imported? %>
 </aside>

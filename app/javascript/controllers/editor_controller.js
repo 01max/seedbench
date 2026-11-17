@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["form", "status", "error", "conflict", "serverValues", "archiveAction"]
-  static values = { releaseId: Number, previousUrl: String, nextUrl: String, messages: Object }
+  static values = { releaseId: Number, nextUrl: String, messages: Object }
 
   connect() {
     this.connected = true
@@ -285,12 +285,11 @@ export default class extends Controller {
   }
 
   shortcut(event) {
+    if (event.defaultPrevented || event.target instanceof Element && event.target.closest("dialog[open]")) return
+
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
       event.preventDefault()
       this.flush()
-    } else if (event.altKey && ["ArrowUp", "ArrowDown"].includes(event.key)) {
-      event.preventDefault()
-      this.navigate(event.key === "ArrowUp" ? this.previousUrlValue : this.nextUrlValue)
     }
   }
 

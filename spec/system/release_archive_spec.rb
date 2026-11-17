@@ -15,7 +15,6 @@ RSpec.describe 'Release archive', type: :system do
     expect(page).to have_no_link('Reviewed archive title')
 
     select 'Archives', from: 'Filtrer la file'
-    click_button 'Filtrer'
     expect(page).to have_css('.queue-row[aria-current="page"]', text: /Reviewed archive title.*Archivé/m)
     click_button 'Restaurer'
 

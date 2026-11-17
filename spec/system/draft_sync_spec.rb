@@ -9,11 +9,6 @@ RSpec.describe 'C411 draft review', type: :system do
     click_button 'Brouillon', exact: true
   end
 
-  def filter_queue(label)
-    select label, from: 'Filtrer la file'
-    click_button 'Filtrer'
-  end
-
   before { sign_in_browser }
 
   it 'saves pending BBCode before an explicit update without sending it from navigation' do
@@ -46,12 +41,12 @@ RSpec.describe 'C411 draft review', type: :system do
     set_workbench_viewport(320)
     visit root_path
     expect(page).to have_no_link('Livre distant')
-    filter_queue('Imports C411')
+    select 'Imports C411', from: 'Filtrer la file'
     expect(page).to have_css('.queue-row[aria-current="page"]', text: 'Import C411')
     expect(page.evaluate_script('document.documentElement.scrollWidth')).to be <= 320
     click_button 'Archiver'
     expect(page).to have_no_link('Livre distant')
-    filter_queue('Archives')
+    select 'Archives', from: 'Filtrer la file'
     click_button 'Restaurer'
     expect(page).to have_current_path(release_path(imported, state: 'imported')).and(have_css('.queue-row[aria-current="page"]', text: 'Import C411'))
   ensure

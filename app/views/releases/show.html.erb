@@ -16,7 +16,6 @@
 <main id="workbench" aria-label="<%= t("workbench.title") %>"
       <% if @release && !@release.c411_imported? %>data-controller="editor" data-editor-release-id-value="<%= @release.id %>"
       data-editor-messages-value="<%= t("workbench.editor.messages").to_json %>"
-      data-editor-previous-url-value="<%= @queue.previous_id ? queue_path(@queue.previous_id, criteria: @queue.criteria) : "" %>"
       data-editor-next-url-value="<%= @queue.next_id ? queue_path(@queue.next_id, criteria: @queue.criteria) : "" %>"
       data-action="input->editor#change submit@document->editor#beforeSubmit:capture turbo:before-visit@document->editor#beforeVisit turbo:before-cache@document->editor#remember keydown@window->editor#shortcut workspace-tabs:shown->editor#preview turbo:frame-load->editor#evidenceLoaded"<% end %>>
   <div class="work-layout">
@@ -37,7 +36,6 @@
           <%= render "checklist" %>
         </div>
         <footer class="work-footer">
-          <span><%= t("workbench.actions.shortcuts") %></span>
           <div class="work-actions">
             <%= render 'archive_action', release: @release, editable: true %>
             <button class="work-button" type="submit" form="release-editor" formaction="<%= action_release_path(@release, kind: "prepare") %>" data-prepare-allowed="<%= @snapshot.payload.present? && %w[unpublished failed].include?(@release.publication_state) && @release.seeding_state == "not_started" %>" data-reprepare-label="<%= t("preparation.reprepare") %>" <%= "disabled" if !@snapshot.payload || !%w[unpublished failed].include?(@release.publication_state) || @release.seeding_state != "not_started" || @release.preparation_state == "running" %>><%= @snapshot.preparation ? t("preparation.reprepare") : t("workbench.actions.prepare") %></button>
