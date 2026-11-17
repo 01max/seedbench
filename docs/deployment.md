@@ -1,5 +1,73 @@
 # Private deployment
 
+## Install from a published image on Unraid
+
+In Compose Manager Plus, open **Add New Stack**, name it `seedbench`, and choose
+**Git repository**. Use `https://github.com/01max/seedbench.git`, branch `main`,
+and Compose path `deploy/compose.yaml`. You can also paste that file into a local
+stack using the Compose editor.
+
+In the stack's **Env** tab, set the version tag published in the
+[Seedbench container registry](https://github.com/01max/seedbench/pkgs/container/seedbench)
+and the host path to an existing payload directory. Set the address to your
+Unraid LAN IP for direct LAN access. The default `127.0.0.1` works with a proxy
+on the host. When using Deluge, also set its container-visible path to the same
+directory.
+
+```dotenv
+SEEDBENCH_VERSION=<published version tag>
+SEEDBENCH_BIND_ADDRESS=<private LAN IP>
+SEEDBENCH_PAYLOAD_SOURCE=<absolute host payload directory>
+DELUGE_PAYLOAD_ROOT=<matching path inside Deluge>
+```
+
+The image runs as UID `1000`. Give it write and traverse access to the payload
+directory. Set `SEEDBENCH_GID` if the payloads should use a shared group other
+than `1000`. Deluge needs read and traverse access as its daemon user. State and
+scratch use Compose volumes. See [storage configuration](storage-configuration.md)
+for permissions and capacity.
+
+Save the environment and select **Pull and Redeploy** for a Git-backed stack,
+or **Pull & Up** for a local stack. Seedbench prepares both databases before
+starting the web server, then Compose starts the worker after web is healthy.
+Open the `web` container's console and set the operator password once:
+
+```sh
+RAILS_LOG_LEVEL=error bin/container-entrypoint bin/rails runner script/operator_password.rb
+```
+
+Sign in on the configured address and port (default `3000`), then set up
+provider connections under **Réglages**. Before publishing, verify that Deluge
+can read the same payload bytes as Seedbench with the [storage probe](#verify-the-payload-mapping).
+
+### Update a published-image stack
+
+`main` supplies the Compose file. `SEEDBENCH_VERSION` selects the exact image
+tag the stack runs. A new release leaves your selected version in place.
+
+1. Finish in-flight work, stop the stack, and [back up state](#back-up-and-restore-state).
+2. Change `SEEDBENCH_VERSION` in **Env** to the new published tag. Keep the
+   Compose project name and storage mappings so the stack uses the same data.
+3. Select **Pull & Up** to pull the new version and start the stack. Use **Pull
+   and Redeploy** when you also want to apply changes to the Git-tracked Compose
+   file. Once the services are up, check sign-in, a saved release, and the queue.
+
+For backup and recovery via `bin/state` and `bin/reconcile-state`, run the
+commands from a Seedbench checkout. Set `COMPOSE_FILE` and `SEEDBENCH_COMPOSE_ENV`
+to the stack's Compose file and Env file, and `COMPOSE_PROJECT_NAME` to its
+actual Compose project name. Use absolute file paths. Resume an image stack
+with `bin/compose up -d --wait` after the checks pass.
+
+### Publish a new image version
+
+Push a new `v`-prefixed tag from a commit with the publish workflow. GitHub
+Actions builds and smoke-tests the Linux `amd64` image, then pushes it to
+`ghcr.io/01max/seedbench` under the same tag. After the first publish, set the
+package visibility to **Public** in GitHub so hosts can pull anonymously.
+Tags pushed before the workflow was added do not have a build from this workflow.
+
+## Deploy from a source checkout
+
 Run the web and worker services from the same release checkout and image on the
 Docker host. Use `compose.yaml` for managed volumes, or add `compose.binds.yaml`
 when mounting existing host directories. Deluge needs a view of the same
@@ -31,16 +99,19 @@ Seedbench and `DELUGE_PAYLOAD_ROOT` to the equivalent path in Deluge. See
 [storage configuration](storage-configuration.md) for scratch capacity and
 filesystem requirements.
 
-Build and verify the mapped storage before initializing the application:
+## Verify the payload mapping
+
+For a source checkout, run `bin/compose build web` before the storage probe.
+For a published-image stack, select its Compose files, environment, and project
+as described above and run `bin/compose pull`. Verify the mapped storage:
 
 ```sh
-bin/compose build web
 probe_id=$(openssl rand -hex 16)
 bin/compose run --rm --no-deps -T --entrypoint ruby web script/deployment/storage.rb prepare "$probe_id"
 bin/compose run --rm --no-deps -T --entrypoint ruby worker script/deployment/storage.rb read "$probe_id"
 ```
 
-The first command checks state and scratch writes and an in-place rename
+The `prepare` command checks state and scratch writes and an in-place rename
 from staging to the canonical root. The second reads back the same bytes
 under the worker's configured identity. Compare the reported SHA-256 with
 `sha256sum` of the reported basename under the payload bind on the Docker

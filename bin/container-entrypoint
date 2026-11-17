@@ -10,8 +10,9 @@ FileUtils.mkdir_p(%w[/tmp/rails-home /tmp/rails-tmp /tmp/rails-log])
     path.start_with?("/") && File.directory?(path) && File.writable?(path)
 end
 
+rails_server = ARGV.take(2) == %w[bin/rails server]
 restore_marker = File.join(ENV.fetch('SEEDBENCH_STATE_ROOT'), '.seedbench-restored')
-if ARGV.take(2) == %w[bin/rails server] && (File.exist?(restore_marker) || File.symlink?(restore_marker))
+if rails_server && (File.exist?(restore_marker) || File.symlink?(restore_marker))
   abort 'Restored state requires reconciliation. See the deployment recovery guide.'
 end
 
@@ -51,5 +52,9 @@ if ENV["SEEDBENCH_ENCRYPTION_KEY"].to_s.empty?
   end
 end
 abort "Provider encryption key must be 64 hexadecimal characters" unless ENV["SEEDBENCH_ENCRYPTION_KEY"].match?(/\A[0-9a-fA-F]{64}\z/)
+
+if rails_server && ENV['SEEDBENCH_PREPARE_DATABASE'] == '1'
+  system('bin/rails', 'db:prepare', exception: true)
+end
 
 exec(*ARGV)

@@ -1,0 +1,49 @@
+name: seedbench
+
+x-application: &application
+  image: ghcr.io/01max/seedbench:${SEEDBENCH_VERSION:?Choose a published version tag}
+  user: "1000:${SEEDBENCH_GID:-1000}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  init: true
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,size=256m
+  environment: &environment
+    DELUGE_PAYLOAD_ROOT: ${DELUGE_PAYLOAD_ROOT:-}
+    FORCE_SSL: ${FORCE_SSL:-0}
+    ASSUME_SSL: ${ASSUME_SSL:-0}
+  volumes:
+    - state:/state
+    - scratch:/scratch
+    - type: bind
+      source: ${SEEDBENCH_PAYLOAD_SOURCE:?Choose an existing host payload directory}
+      target: /payloads
+      bind:
+        create_host_path: false
+
+services:
+  web:
+    <<: *application
+    environment:
+      <<: *environment
+      SEEDBENCH_PREPARE_DATABASE: '1'
+    ports:
+      - "${SEEDBENCH_BIND_ADDRESS:-127.0.0.1}:${SEEDBENCH_PORT:-3000}:3000"
+    healthcheck:
+      test: [CMD, ruby, -rnet/http, -e, "exit(Net::HTTP.get_response(URI('http://127.0.0.1:3000/up')).code == '200' ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  worker:
+    <<: *application
+    command: [bin/jobs]
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  state:
+  scratch:

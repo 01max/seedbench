@@ -72,6 +72,8 @@ for current behavior and limits. [C411 draft synchronization](docs/c411-drafts.m
 
 ## Get started
 
+For Unraid, see [installing a published image with Compose Manager Plus](docs/deployment.md#install-from-a-published-image-on-unraid).
+
 Install **Docker Engine** and **Docker Compose 2.24.4 or newer**, using Linux
 containers. Run the commands from a POSIX shell; on Windows, use WSL or a
 compatible shell. Ruby, Node, SQLite, and ebook tools run inside containers.

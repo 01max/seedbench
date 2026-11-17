@@ -1,0 +1,53 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/../.."
+: "${SEEDBENCH_VERSION:?Build the release image locally first}"
+project="seedbench-install-$(date +%s)-$$"
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/seedbench-install.XXXXXX")
+export SEEDBENCH_PAYLOAD_SOURCE="$temporary/payloads"
+export SEEDBENCH_BIND_ADDRESS=127.0.0.1 SEEDBENCH_PORT=0 SEEDBENCH_GID=65534
+export DELUGE_PAYLOAD_ROOT=/downloads/books FORCE_SSL=0 ASSUME_SSL=0
+mkdir "$SEEDBENCH_PAYLOAD_SOURCE"
+chmod 777 "$SEEDBENCH_PAYLOAD_SOURCE"
+
+compose() {
+  docker compose --env-file config/compose.defaults.env -p "$project" -f deploy/compose.yaml "$@"
+}
+
+cleanup() {
+  status=$?
+  trap - EXIT INT TERM
+  if [ "$status" -ne 0 ]; then compose logs --no-color --tail 40 || true; fi
+  compose down --volumes || status=1
+  rm -rf "$temporary"
+  exit "$status"
+}
+trap cleanup EXIT
+trap 'exit 1' INT TERM
+
+compose up -d --pull never --wait --wait-timeout 120
+compose exec -T web sh -ec '
+  test "$(id -g)" = 65534
+  test "$DELUGE_PAYLOAD_ROOT" = /downloads/books
+  test -w /payloads
+'
+operators_table=$(compose exec -T web sqlite3 -readonly /state/production.sqlite3 \
+  "SELECT name FROM sqlite_master WHERE name = 'operators'")
+test "$operators_table" = operators
+
+remaining=30
+until registered=$(compose exec -T web sqlite3 -readonly /state/production_queue.sqlite3 \
+  'SELECT COUNT(*) > 0 FROM solid_queue_processes') && [ "$registered" = 1 ]; do
+  remaining=$((remaining - 1))
+  [ "$remaining" -gt 0 ] || exit 1
+  sleep 1
+done
+
+compose stop
+compose run --rm --no-deps -T --entrypoint ruby web -e 'File.write("/state/.seedbench-restored", "")'
+if compose up -d --pull never --wait --wait-timeout 20; then
+  echo 'The install stack started with restored state awaiting reconciliation.' >&2
+  exit 1
+fi
+compose logs --no-color --no-log-prefix web | grep -Fx 'Restored state requires reconciliation. See the deployment recovery guide.'
+test -z "$(compose ps --status running -q worker)"
