@@ -21,6 +21,17 @@ class ProviderConnectionsController < ApplicationController
     redirect_to settings_provider_path(connection.role, anchor: helpers.dom_id(connection)), status: :see_other
   end
 
+  def import_drafts
+    connection = ProviderConnection.find(params.expect(:id))
+    return head :not_found unless connection.provider == 'c411' && !connection.configuration_incomplete?
+
+    location = settings_provider_path(connection.role, anchor: helpers.dom_id(connection))
+    Drafts::Import.call(connection: connection)
+    redirect_to location, notice: t('settings.connection.drafts_imported'), status: :see_other
+  rescue Providers::Failure, Drafts::Failure => error
+    redirect_to location, alert: t('drafts.sync_failed', connection: connection.label, message: error.message), status: :see_other
+  end
+
   def preview
     attributes = params[:id] ? preview_existing : connection_params
     result = Settings::TestConnection.preview(**attributes)

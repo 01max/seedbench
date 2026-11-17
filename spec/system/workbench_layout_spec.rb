@@ -58,6 +58,21 @@ RSpec.describe 'Dense workbench layout', type: :system do
     expect(measured.fetch('overflow')).to be <= measured.fetch('width')
   end
 
+  it 'keeps the archive footer in view when C411 rate limits the account' do
+    create_connection
+    c411 = stub_request(:get, 'https://c411.org/api/user/drafts').to_return(status: 429)
+    selected.reload.update!(archived_at: Time.current)
+    set_workbench_viewport(1024)
+    visit root_path(q: '', state: 'archived', commit: 'Filtrer')
+    find('#workbench[data-editor-ready="true"]')
+    measured = dimensions
+
+    expect(measured.fetch('footerBottom')).to be <= measured.fetch('height') + 1
+    expect(c411).not_to have_been_requested
+    click_button 'Restaurer'
+    expect(page).to have_button('Archiver')
+  end
+
   [ 320, 390, 736 ].each do |width|
     it "retains the queue, editor, checklist and actions at #{width}px without horizontal scrolling" do
       set_workbench_viewport(width)

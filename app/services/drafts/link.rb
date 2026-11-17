@@ -18,7 +18,9 @@ module Drafts
         [ @source, @target ].sort_by(&:id).each(&:lock!)
         validate!
         link = @source.draft_link
-        snapshot = @source.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(:id).last!
+        snapshot = @source.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(:id).last
+        raise Failure.new(:invalid_link) unless snapshot || (@allowed_operation_id && @source.c411_imported?)
+
         assign(link.provider_connection)
         transfer(link, snapshot)
         @target
@@ -55,7 +57,7 @@ module Drafts
     def transfer(link, snapshot)
       Content.adopt(@target, Content.local(@source)) if @choice == 'remote'
       @target.reload.update!(input_revision: @target.input_revision + 1, draft_state: @source.draft_state)
-      copy_snapshot(snapshot)
+      copy_snapshot(snapshot) if snapshot
       clear_target_link
       link.update!(release_id: @target.id)
       @source.association(:draft_link).reset

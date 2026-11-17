@@ -1,43 +1,27 @@
 module Drafts
-  # Lists a C411 account's drafts and creates local release shells for drafts that lack a link.
+  # Keeps a read-only queue entry for each C411 draft that has no local link.
   class Import
-    def self.call(connection:)
-      client = Providers::C411::Drafts.new(connection)
-      listing = client.list
-      errors = listing.ids.index_with { |id| import_id(connection, client, id) }.compact
-      errors.each do |id, error|
-        raise error unless block_given?
-        yield id, error
-      end
-      listing
-    end
-
     class << self
+      def call(connection:)
+        version = connection.credentials_version
+        listing = Providers::C411::Drafts.new(connection).list
+        connection.with_lock do
+          raise Failure.new(:connection_changed) unless connection.credentials_version == version
+
+          existing = connection.draft_links.where(remote_id: listing.ids).pluck(:remote_id)
+          listing.entries.except(*existing).each { |id, summary| import(connection, id, summary) }
+        end
+        listing
+      end
+
       private
 
-      def import_id(connection, client, id)
-        return if DraftLink.exists?(provider_connection_id: connection.id, remote_id: id)
-        data = client.read(id)
-        connection.with_lock { import(connection, id, data) }
-        nil
-      rescue Providers::Failure, Failure => error
-        error
-      end
-
-      def import(connection, id, data)
-        return if DraftLink.exists?(provider_connection_id: connection.id, remote_id: id)
-        content = Content.remote(data)
-        release = Releases::Create.call(title: content.fetch('title').presence, publishing_connection: connection)
-        Content.adopt(release, content)
-        DraftLink.create!(release: release, provider_connection: connection, remote_id: id)
-        record_snapshot(release, connection, id, data, content)
-        release.update!(draft_state: 'synced')
-        Releases::RecordEvent.call(release_id: release.id, name: 'draft.imported', data: { remote_id: id })
-      end
-
-      def record_snapshot(release, connection, id, data, content)
-        release.remote_snapshots.create!(provider_connection: connection, kind: 'draft', remote_id: id, local_revision: release.reload.input_revision,
-          remote_revision: data['updatedAt'].to_s.first(100), base_content: content, remote_content: content, observed_at: Time.current)
+      def import(connection, id, summary)
+        title = summary.values_at('title', 'name').find { |value| value.is_a?(String) && value.valid_encoding? && value.present? }
+        title = title&.strip&.first(Releases::Save::LIMITS.fetch('title'))
+        release = Release.create!(title: title, search_text: Releases::SearchText.call(title: title), automatic_ai: false, draft_state: 'synced')
+        connection.draft_links.create!(release: release, remote_id: id)
+        Releases::RecordEvent.call(release_id: release.id, name: Release::C411_IMPORT_EVENT, data: { remote_id: id })
       end
     end
   end

@@ -18,7 +18,7 @@ module Releases
     def call
       @total = @scope.count
       locate_page
-      records = @scope.includes(:payload_revisions, :duplicate_decisions).offset((@page - 1) * PAGE_SIZE).limit(PAGE_SIZE).to_a
+      records = @scope.includes(:payload_revisions, :duplicate_decisions, :c411_import_event).offset((@page - 1) * PAGE_SIZE).limit(PAGE_SIZE).to_a
       @selected ||= records.first
       @position ||= records.index(@selected) + 1 + ((@page - 1) * PAGE_SIZE) if records.include?(@selected)
       Page.new(records: records, selected: @selected, total: @total, page: @page, pages: @pages, position: @position,
@@ -47,7 +47,7 @@ module Releases
       scope = scope.where(archived_at: nil)
       case @criteria[:state]
       when 'review' then scope.where.not(publication_state: 'published')
-      when 'inspection' then scope.where(inspection_state: %w[pending running failed])
+      when 'inspection' then scope.where(inspection_state: %w[pending running failed]).where.not(id: ReleaseEvent.where(name: Release::C411_IMPORT_EVENT).select(:release_id))
       when 'prepared' then scope.where(preparation_state: 'prepared')
       when 'published' then scope.where(publication_state: 'published')
       when 'duplicate' then scope.where(id: confirmed_duplicate_ids(scope))

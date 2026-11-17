@@ -5,7 +5,7 @@ RSpec.describe Drafts::Reconcile do
   around { |example| with_committed_cover_database { example.run } }
 
   it 'closes an interrupted pre-transmission operation without sending a provider request' do
-    release = imported_draft
+    release = linked_draft
     operation = Drafts::Request.call(release_id: release.id, expected_revision: release.input_revision)
     token = Workflows::Claim.call(operation_id: operation.id)
     Workflows::Fail.call(operation_id: operation.id, attempt_token: token)
@@ -18,7 +18,7 @@ RSpec.describe Drafts::Reconcile do
   end
 
   it 'retains the approved body and remote identity against SQL changes or deletion' do
-    release = imported_draft
+    release = linked_draft
     operation = Drafts::Request.call(release_id: release.id, expected_revision: release.input_revision)
     write = operation.draft_write
     write.update!(body: { description: 'Approved body' }, state: 'unknown')
@@ -32,7 +32,7 @@ RSpec.describe Drafts::Reconcile do
   end
 
   it 'cancels a stale unstarted write instead of stranding a pending receipt or sending old text' do
-    release = imported_draft
+    release = linked_draft
     operation = Drafts::Request.call(release_id: release.id, expected_revision: release.input_revision)
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: 'Newer human text' })
     Workflows::Execute.call(operation_id: operation.id)

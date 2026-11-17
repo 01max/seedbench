@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Drafts::Import do
-  it 'imports an editable shell once without linking a similar upload or writing remotely' do
+  it 'imports a queue entry once from a draft summary without building an editable release' do
     upload = Releases::Create.call(title: 'Livre distant')
     connection = create_connection
     stub_draft_account
@@ -9,36 +9,38 @@ RSpec.describe Drafts::Import do
     shell = DraftLink.sole.release
 
     expect(shell.id).not_to eq(upload.id)
-    expect(shell.payload_revisions).to be_empty
-    expect(Releases::EditorValues.call(release: shell)).to include('bbcode' => 'Description distante conservée.')
-    expect(shell.provider_assignments.find_by!(role: 'publishing').provider_connection_id).to eq(connection.id)
+    expect(shell).to have_attributes(title: 'Livre distant', automatic_ai: false, c411_imported?: true,
+      payload_revisions: be_empty, content_revisions: be_empty, remote_snapshots: be_empty, provider_assignments: be_empty)
+    expect(WebMock).not_to have_requested(:get, 'https://c411.org/api/user/drafts/draft-1')
     expect(WebMock).not_to have_requested(:post, /c411/)
   end
 
-  it 'refuses malformed remote identifiers and bounded content without creating a shell' do
+  it 'refuses malformed remote identifiers without creating a queue entry' do
     connection = create_connection
     stub_draft_account(draft_data('../escape'))
     expect { described_class.call(connection: connection) }.to raise_error(Providers::Failure)
     expect(DraftLink.count).to eq(0)
   end
 
-  it 'imports an incomplete blank-title draft without fabricating edition facts' do
+  it 'uses the draft name when the title is absent and leaves edition facts empty' do
     connection = create_connection
-    stub_draft_account(draft_data.merge('title' => nil, 'name' => ''))
+    stub_draft_account(draft_data.merge('title' => nil))
     described_class.call(connection: connection)
     shell = DraftLink.sole.release
-    expect(Drafts::Content.local(shell)).to include('title' => '', 'name' => '')
+    expect(shell.title).to eq('Livre distant-NOTAG')
     expect(shell.reviewed_facts).to be_empty
   end
 
-  it 'imports healthy drafts even when another draft detail cannot be read' do
+  it 'retains an archived entry across repeated imports without updating it' do
     connection = create_connection
-    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [ { id: 'bad' }, { id: 'good' } ] }.to_json)
-    stub_request(:get, 'https://c411.org/api/user/drafts/bad').to_return(status: 503)
-    stub_request(:get, 'https://c411.org/api/user/drafts/good').to_return(body: { success: true, data: draft_data('good') }.to_json)
-    expect { described_class.call(connection: connection) }.to raise_error(Providers::Failure, /HTTP 503/)
-    expect(DraftLink.sole.remote_id).to eq('good')
-    expect(WebMock).not_to have_requested(:post, /c411/)
+    stub_draft_account
+    described_class.call(connection: connection)
+    entry = DraftLink.sole.release
+    entry.update!(archived_at: Time.current)
+    stub_draft_account(draft_data.merge('title' => 'Edited remotely'))
+
+    expect { described_class.call(connection: connection) }.not_to change(Release, :count)
+    expect(entry.reload).to have_attributes(title: 'Livre distant', archived_at?: true)
   end
 
   it 'captures the source account at creation even when another C411 connection is the default' do
@@ -47,8 +49,7 @@ RSpec.describe Drafts::Import do
     source = create_connection(identity: 'source-account')
     stub_draft_account
     described_class.call(connection: source)
-    assignment = DraftLink.sole.release.provider_assignments.find_by!(role: 'publishing')
-    expect(assignment.provider_connection_id).to eq(source.id)
+    expect(DraftLink.sole.provider_connection_id).to eq(source.id)
     expect(ProviderDefault.sole.provider_connection_id).to eq(default.id)
   end
 end

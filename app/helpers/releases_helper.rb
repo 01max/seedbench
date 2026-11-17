@@ -4,6 +4,7 @@ module ReleasesHelper
   end
 
   def release_label(release)
+    return t('workbench.c411.badge') if release.c411_imported?
     return t('workbench.queue.labels.archived') if release.archived_at?
     return t('duplicates.confirmed_tag') if Duplicates::Assessment.new(release).confirmed?
     return t('workbench.queue.labels.published') if release.publication_state == 'published'

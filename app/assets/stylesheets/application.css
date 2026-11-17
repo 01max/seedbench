@@ -89,6 +89,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .save-conflict > div { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .release-workspace { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) var(--work-sidebar-width); }
 .editor-area { min-width: 0; padding: 0 11px 12px; }
+.c411-import-summary { flex: 1; overflow-wrap: anywhere; }
 .editor-tabs { display: flex; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); margin-bottom: 9px; }
 .editor-tabs > button { padding: 8px 0 6px; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font-size: 11px !important; cursor: pointer; }
 .editor-tabs > button:has(.ai-icon) { display: inline-flex; align-items: center; gap: 4px; }

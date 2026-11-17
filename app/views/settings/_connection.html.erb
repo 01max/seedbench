@@ -25,6 +25,9 @@
     <p class="settings-hint"><%= t("settings.connection.test_scope.#{role}") %></p>
     <%= button_to t(role == 'image_host' ? 'settings.connection.check_upload' : 'settings.connection.check', name: connection.label), check_provider_connection_path(connection),
           class: 'work-button', form: { data: { turbo: false } } %>
+    <% if role == 'publishing' %>
+      <%= button_to t('settings.connection.import_drafts'), import_drafts_provider_connection_path(connection), class: 'work-button' %>
+    <% end %>
     <% if role == 'ai' %>
       <% model_help = "configure-#{connection.id}-help" %>
       <% model_label = t('settings.connection.model_id') %>

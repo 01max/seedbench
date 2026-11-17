@@ -5,7 +5,7 @@ module DraftFixtures
   end
 
   def stub_draft_account(data = draft_data)
-    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [ { id: data['id'] } ], count: 1, maxAllowed: 15 }.to_json)
+    stub_request(:get, 'https://c411.org/api/user/drafts').to_return(body: { success: true, data: [ data.slice('id', 'name', 'title') ], count: 1, maxAllowed: 15 }.to_json)
     stub_request(:get, "https://c411.org/api/user/drafts/#{data['id']}").to_return(body: { success: true, data: data }.to_json)
   end
 
@@ -23,6 +23,18 @@ module DraftFixtures
     stub_draft_account
     Drafts::Import.call(connection: connection)
     DraftLink.sole.release
+  end
+
+  def linked_draft(data = draft_data, connection: create_connection)
+    stub_draft_account(data)
+    content = Drafts::Content.remote(data)
+    release = Releases::Create.call(title: data['title'], publishing_connection: connection)
+    Drafts::Content.adopt(release, content)
+    DraftLink.create!(release: release, provider_connection: connection, remote_id: data.fetch('id'))
+    release.reload.update!(draft_state: 'synced')
+    release.remote_snapshots.create!(provider_connection: connection, kind: 'draft', remote_id: data.fetch('id'), local_revision: release.input_revision,
+      remote_revision: data['updatedAt'], base_content: content, remote_content: content, observed_at: Time.current)
+    release
   end
 end
 

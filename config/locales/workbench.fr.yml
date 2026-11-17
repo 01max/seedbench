@@ -32,6 +32,10 @@ fr:
       restore: "Restaurer"
       archived: "« %{title} » a été archivé. Vous pouvez le retrouver dans le filtre Archives."
       restored: "« %{title} » a été remis dans la file de travail."
+    c411:
+      badge: "Import C411"
+      source: "Brouillon C411 %{id}"
+      read_only: "Cette entrée provient de C411. Vous pouvez uniquement l’archiver ou la restaurer dans Seedbench."
     uploads:
       add: "Importer des ebooks"
       files: "Fichiers EPUB, PDF ou MOBI"

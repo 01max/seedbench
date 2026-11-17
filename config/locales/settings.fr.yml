@@ -35,6 +35,8 @@ fr:
         failed: "Échec du test"
       check: "Tester %{name}"
       check_upload: "Tester %{name} avec une image"
+      import_drafts: "Importer les brouillons C411"
+      drafts_imported: "La liste des brouillons C411 a été lue. Les nouveaux brouillons apparaissent dans l’atelier en lecture seule."
       test_configuration: "Tester la configuration"
       test_upload: "Tester avec une image"
       test_pending: "Test en cours…"

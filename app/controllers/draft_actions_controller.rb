@@ -37,7 +37,10 @@ class DraftActionsController < ApplicationController
   end
 
   def sync
-    @draft_errors = Drafts::Refresh.call(connection: @release.provider_assignments.find_by!(role: 'publishing').provider_connection)
+    connection = @release.provider_assignments.find_by!(role: 'publishing').provider_connection
+    raise Drafts::Failure.new(:invalid_link) if !connection || connection.configuration_incomplete?
+
+    @draft_errors = Drafts::Refresh.call(connection: connection)
     nil
   end
 

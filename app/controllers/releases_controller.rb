@@ -1,5 +1,6 @@
 class ReleasesController < ApplicationController
   before_action :load_workspace, only: %i[index show]
+  before_action :require_editable_release, only: :update
 
   def index
     render :show
@@ -28,10 +29,9 @@ class ReleasesController < ApplicationController
   end
 
   def load_workspace
-    @draft_sync_errors = Drafts::Refresh.call
     @queue = Releases::Queue.call(**params.permit(:q, :state, :page).to_h.symbolize_keys, release_id: params[:id])
     @release = @queue.selected
-    load_selection if @release
+    load_selection if @release && !@release.c411_imported?
   end
 
   def load_selection

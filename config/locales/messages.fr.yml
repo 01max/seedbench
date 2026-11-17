@@ -29,6 +29,7 @@ fr:
         deluge_a_refuse_la_requete_verifiez: Deluge a refusé la requête; vérifiez
           les droits et le démon.
       http:
+        rate_limited: Trop de requêtes (HTTP 429). Attendez avant de réessayer.
         reponse_http_illisible_du_fournisseur: Réponse HTTP illisible du fournisseur.
         connexion_impossible_ou_delai_depasse_verifiez: Connexion impossible ou délai
           dépassé; vérifiez l’adresse, le réseau et TLS.

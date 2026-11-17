@@ -99,7 +99,8 @@ RSpec.describe Drafts::Request do
     shell_id = DraftLink.sole.release_id
     Drafts::Reconcile.call(release_id: release.id, write_id: write.id, remote_id: 'new-draft', confirmed: true)
     expect(DraftLink.sole.release_id).to eq(release.id)
-    expect(Release.find(shell_id).content_revisions).not_to be_empty
+    expect(Release.find(shell_id)).to be_c411_imported
+    expect(Release.find(shell_id).content_revisions).to be_empty
     expect(sent).to have_been_requested.once
   end
 
@@ -113,8 +114,9 @@ RSpec.describe Drafts::Request do
     end
     expect(DraftLink.sole).to have_attributes(release_id: release.id, remote_id: 'new-draft')
     expect(release.draft_writes.last.workflow_operation).to have_attributes(state: 'succeeded', external_reference: { 'draft_id' => 'new-draft' })
-    expect(shell.reload.content_revisions).not_to be_empty
-    expect(shell.remote_snapshots.pluck(:remote_id).uniq).to eq([ 'new-draft' ])
+    expect(shell.reload).to be_c411_imported
+    expect(shell.content_revisions).to be_empty
+    expect(release.remote_snapshots.pluck(:remote_id).uniq).to eq([ 'new-draft' ])
   end
 
   it 'keeps a timed-out update uncertain when its text and attachments match but an option differs' do
