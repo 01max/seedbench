@@ -10,9 +10,9 @@
       <span><%= render 'shared/ai_icon' %> <%= t('settings.defaults.automatic_ai') %></span>
     </label>
     <div class="settings-fields">
-      <% Providers::Catalog::ROLES.each do |role, definition| %>
+      <% Providers::Catalog::ROLES.each_key do |role| %>
         <div class="settings-field">
-          <%= label_tag "default_#{role}", t('settings.defaults.provider', role: t("settings.roles.#{role}"), provider: definition.name) %>
+          <%= label_tag "default_#{role}", t("settings.roles.#{role}") %>
           <%= select_tag "defaults[connection_ids][#{role}]",
                 options_for_select(@connections.fetch(role, []).map { |connection| [connection.label, connection.id] }, @defaults.connection_ids[role]),
                 include_blank: t('settings.defaults.unconfigured'), id: "default_#{role}" %>

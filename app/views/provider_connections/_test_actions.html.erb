@@ -1,0 +1,8 @@
+<p class="settings-hint"><%= t("settings.connection.test_scope.#{role}") %></p>
+<div class="settings-form-actions">
+  <%= form.submit save, class: 'work-button' %>
+  <%= button_tag t(role == 'image_host' ? 'settings.connection.test_upload' : 'settings.connection.test_configuration'),
+        type: :button, class: 'work-button quiet', disabled: true,
+        data: { connection_test_target: 'button', action: 'connection-test#run' } %>
+</div>
+<p class="settings-test-result" role="status" data-connection-test-target="result"></p>

@@ -18,7 +18,7 @@
     </nav>
     <div class="settings-sections">
       <% if @role %>
-        <%= render 'provider', role: @role, definition: @definition, connections: @provider_connections %>
+        <%= render 'provider', role: @role, definitions: @definitions, selected_provider: @selected_provider, connections: @provider_connections %>
       <% else %>
         <%= render 'defaults' %>
       <% end %>

@@ -1,13 +1,18 @@
+<% help = "complete-#{connection.id}-help" %>
+<% fields = provider_field_labels(definition, endpoint: connection.role == 'torrent_client' && connection.endpoint.nil?, model: connection.role == 'ai') %>
 <details class="settings-disclosure">
   <summary><%= t('settings.connection.complete_title') %></summary>
   <p class="settings-hint"><%= t('settings.connection.complete_hint') %></p>
-  <%= form_with url: complete_provider_connection_path(connection), method: :patch, scope: :completion, namespace: "complete_#{connection.id}", class: 'settings-form' do |form| %>
-    <%= form.hidden_field :expected_version, value: connection.credentials_version %>
-    <div class="settings-fields">
-      <%= render 'provider_connections/fields', form: form, definition: definition, role: connection.role,
-            endpoint_required: connection.role == 'torrent_client' && connection.endpoint.nil?, model: connection.options['model'] %>
-    </div>
-    <label class="settings-checkbox"><%= form.check_box :confirm_identity, required: true %> <%= t('settings.connection.confirm_identity') %></label>
-    <%= form.submit t('settings.connection.complete'), class: 'work-button' %>
-  <% end %>
+  <div class="settings-setup-grid">
+    <%= form_with url: complete_provider_connection_path(connection), method: :patch, scope: :completion, namespace: "complete_#{connection.id}", class: 'settings-form',
+          data: connection_test_data(preview_provider_connection_path(connection, kind: 'completion')) do |form| %>
+      <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+      <div class="settings-fields">
+        <%= render 'provider_connections/fields', form: form, definition: definition, labels: fields, help: help, model: connection.options['model'] %>
+      </div>
+      <label class="settings-checkbox"><%= form.check_box :confirm_identity, required: true, aria: { describedby: "#{help}-confirm_identity" } %> <%= t('settings.connection.confirm_identity') %></label>
+      <%= render 'provider_connections/test_actions', form: form, role: connection.role, save: t('settings.connection.complete') %>
+    <% end %>
+    <%= render 'provider_connections/configuration_help', provider: definition.provider, help: help, labels: fields.merge(confirm_identity: t('settings.connection.help.confirm_label')) %>
+  </div>
 </details>

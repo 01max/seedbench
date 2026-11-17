@@ -10,10 +10,12 @@ class SettingsController < ApplicationController
 
   def provider
     @role = params.expect(:role)
-    @definition = Providers::Catalog::ROLES[@role]
-    return head :not_found unless @definition
+    definition = Providers::Catalog::ROLES[@role]
+    return head :not_found unless definition
 
-    @provider_connections = ProviderConnection.where(role: @role).order(:id)
+    @definitions = [ definition ]
+    @selected_provider = @definitions.find { |item| item.provider == params[:provider] }
+    @provider_connections = ProviderConnection.where(role: @role).order(:id).group_by(&:provider)
     render :show
   end
 

@@ -4,20 +4,23 @@ fr:
     back: "Retour à l’atelier"
     sections: "Sections des réglages"
     roles:
-      publishing: "Site de publication"
-      torrent_client: "Client torrent"
-      ai: "API Assistance IA"
-      image_host: "Hébergement d’images"
+      publishing: "Sites de publication"
+      torrent_client: "Clients torrent"
+      ai: "Services d’assistance IA"
+      image_host: "Hébergeurs d’images"
     defaults:
       navigation: "Choix par défaut"
       title: "Choix pour les prochains livres"
       hint: "Les livres existants conservent leurs connexions et leurs réglages."
       automatic_ai: "Premier passage IA automatique"
-      provider: "%{role} (%{provider})"
       unconfigured: "Non configuré"
       save: "Enregistrer les choix par défaut"
     connection:
-      test_scope: "Les tests de connexion n’effectuent ni publication, ni envoi de fichier, ni démarrage de torrent."
+      test_scope:
+        publishing: "Le test lit la liste des brouillons du compte C411."
+        torrent_client: "Le test se connecte au démon Deluge sans démarrer de torrent."
+        ai: "Le test envoie une courte consigne de test au modèle OpenAI configuré et peut utiliser des crédits API."
+        image_host: "Le test envoie une petite image générée à Postimages et peut utiliser une unité du quota du compte."
       empty: "Aucune connexion configurée."
       identity: "Identité"
       endpoint: "Adresse"
@@ -31,6 +34,11 @@ fr:
         limited: "Test partiel"
         failed: "Échec du test"
       check: "Tester %{name}"
+      check_upload: "Tester %{name} avec une image"
+      test_configuration: "Tester la configuration"
+      test_upload: "Tester avec une image"
+      test_pending: "Test en cours…"
+      test_unavailable: "Le test n’a pas pu aboutir. Réessayez."
       change_model: "Changer de modèle"
       model_id: "Identifiant exact du modèle"
       save_model: "Enregistrer le modèle"
@@ -39,7 +47,8 @@ fr:
       new_secret: "Nouveau secret"
       confirm_identity: "Je confirme la même identité de compte ou de démon."
       rotate: "Remplacer le secret"
-      add: "Ajouter une connexion %{provider}"
+      add: "Ajouter une connexion"
+      configure_provider: "Configurer %{provider}"
       label: "Libellé"
       deluge_identity: "Identifiant du démon Deluge"
       account_identity: "Identité stable du compte ou projet"
@@ -50,6 +59,26 @@ fr:
       complete_title: "Compléter la configuration"
       complete_hint: "Renseignez les éléments manquants pour la même identité. Les livres déjà liés conservent cette connexion."
       complete: "Compléter la connexion"
+      help:
+        title: "Aide à la configuration"
+        confirm_label: "Confirmation de l’identité"
+        common:
+          label: "Un nom pour reconnaître cette connexion dans Seedbench, par exemple « Compte principal »."
+          confirm_identity: "Cochez la case si ces identifiants appartiennent au compte ou démon déjà associé à cette connexion."
+        c411:
+          identity: "Votre pseudo C411 ou une référence stable qui identifie ce compte."
+          api_key: "La clé API de votre compte C411. Elle doit donner accès à la liste de vos brouillons."
+        deluge:
+          identity: "Connectez-vous à la WebUI Deluge et ouvrez le gestionnaire de connexions avec l’onglet Réseau du navigateur ouvert. Repérez la requête web.get_hosts et copiez le premier élément de la ligne du démon. C’est son host_id."
+          endpoint: "L’adresse de base de la WebUI accessible depuis Seedbench, par exemple http://deluge:8112. Si vous utilisez un proxy, incluez son préfixe et arrêtez-vous avant /json."
+          password: "Le mot de passe que vous saisissez pour vous connecter à la WebUI Deluge."
+        openai:
+          identity: "L’identifiant du projet OpenAI auquel appartient la clé, généralement préfixé par proj_."
+          api_key: "Une clé API de ce projet autorisée à appeler l’API Responses."
+          model: "Copiez l’identifiant exact d’un modèle compatible avec l’API Responses et accessible au projet. Incluez le suffixe de version si vous en utilisez un."
+        postimages:
+          identity: "Votre nom de compte Postimages ou une référence stable qui identifie ce compte."
+          api_key: "La clé API de votre compte Postimages. Elle comporte 32 caractères hexadécimaux (0 à 9 et A à F)."
     assignment:
       title: "Connexions du livre"
       back: "Retour au livre"

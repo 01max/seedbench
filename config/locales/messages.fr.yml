@@ -38,13 +38,12 @@ fr:
           (HTTP %{status}); vérifiez les droits et le filtrage réseau.
         reponse_du_fournisseur_trop_volumineuse: Réponse du fournisseur trop volumineuse.
       openai:
-        le_modele_demande_na_pas_pu: Le modèle demandé n’a pas pu être vérifié.
-        acces_au_modele_verifie_generation_et: Accès au modèle vérifié. Génération
-          et sorties structurées non testées.
+        test_prompt: "Répondez uniquement par le mot OK."
+        test_response_received: "Le modèle configuré a renvoyé une réponse de test."
+        test_response_invalid: "Le modèle configuré n’a pas renvoyé de réponse de test complète."
       postimages:
-        la_page_postimages_na_pas_pu: La page Postimages n’a pas pu être reconnue.
-        site_accessible_cle_et_envoi_non: Site accessible. Clé et envoi non testés;
-          aucune image envoyée.
+        test_image_uploaded: "Clé API vérifiée. Postimages a confirmé l’envoi de l’image de test (%{page})."
+        test_upload_unconfirmed: "Postimages n’a pas confirmé l’envoi de l’image de test. Vérifiez la clé API et le quota du compte."
     releases:
       event_metadata:
         event_metadata_must_contain_only_bounded: Les données de l’événement doivent respecter les limites de taille et ne contenir aucun secret.

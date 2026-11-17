@@ -10,7 +10,7 @@ class ProviderConnectionsController < ApplicationController
   end
 
   def rotate
-    values = params.expect(rotation: [ :expected_version, :confirm_identity, credentials: %i[api_key password] ])
+    values = rotation_params
     connection = Settings::RotateCredentials.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
       confirm_identity: values[:confirm_identity] == '1', credentials: values.fetch(:credentials, {}).to_h)
     redirect_to settings_provider_path(connection.role), notice: t('settings.secret_rotated'), status: :see_other
@@ -21,14 +21,22 @@ class ProviderConnectionsController < ApplicationController
     redirect_to settings_provider_path(connection.role, anchor: helpers.dom_id(connection)), status: :see_other
   end
 
+  def preview
+    attributes = params[:id] ? preview_existing : connection_params
+    result = Settings::TestConnection.preview(**attributes)
+    render json: result.to_h
+  rescue Settings::ConnectionConfig::Invalid => error
+    render json: { status: 'failed', message: error.message }, status: :unprocessable_content
+  end
+
   def configure
-    values = params.expect(configuration: [ :expected_version, options: [ :model ] ])
+    values = configuration_params
     connection = Settings::ConfigureConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false), options: values.fetch(:options, {}).to_h)
     redirect_to settings_provider_path(connection.role), notice: t('settings.options_updated'), status: :see_other
   end
 
   def complete
-    values = params.expect(completion: [ :expected_version, :confirm_identity, :endpoint, credentials: %i[api_key password], options: [ :model ] ]).to_h.symbolize_keys
+    values = completion_params
     connection = Settings::CompleteConnection.call(connection_id: params[:id], expected_version: Integer(values[:expected_version].to_s, exception: false),
       confirm_identity: values[:confirm_identity] == '1', endpoint: values[:endpoint], credentials: values.fetch(:credentials, {}), options: values.fetch(:options, {}))
     Drafts::Connect.call(connection: connection)
@@ -37,9 +45,31 @@ class ProviderConnectionsController < ApplicationController
 
   private
 
+  def preview_existing
+    connection = ProviderConnection.find(params.expect(:id))
+    attributes = connection.attributes.symbolize_keys.slice(:role, :label, :identity_key, :endpoint, :credentials, :options)
+    attributes.merge(preview_edits(connection))
+  end
+
+  def preview_edits(connection)
+    case params.expect(:kind)
+    when 'rotation'
+      { credentials: rotation_params.fetch(:credentials, {}).to_h }
+    when 'configuration'
+      { options: configuration_params.fetch(:options, {}).to_h }
+    when 'completion'
+      values = completion_params
+      { endpoint: connection.endpoint || values[:endpoint], credentials: values.fetch(:credentials, {}), options: values.fetch(:options, {}) }
+    else
+      raise ActionController::ParameterMissing, :kind
+    end
+  end
+
   def redirect_with_error(error)
     role = @requested_role || ProviderConnection.find_by(id: params[:id])&.role
-    location = Providers::Catalog::ROLES.key?(role) ? settings_provider_path(role) : settings_path
+    definition = Providers::Catalog::ROLES[role]
+    provider = definition&.provider if @requested_role
+    location = definition ? settings_provider_path(role, provider: provider) : settings_path
     redirect_to location, alert: error.message, status: :see_other
   end
 
@@ -48,5 +78,17 @@ class ProviderConnectionsController < ApplicationController
     values[:credentials] = values.fetch(:credentials, {})
     values[:options] = values.fetch(:options, {})
     values
+  end
+
+  def rotation_params
+    params.expect(rotation: [ :expected_version, :confirm_identity, credentials: %i[api_key password] ])
+  end
+
+  def configuration_params
+    params.expect(configuration: [ :expected_version, options: [ :model ] ])
+  end
+
+  def completion_params
+    params.expect(completion: [ :expected_version, :confirm_identity, :endpoint, credentials: %i[api_key password], options: [ :model ] ]).to_h.symbolize_keys
   end
 end

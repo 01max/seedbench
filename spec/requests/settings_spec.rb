@@ -11,7 +11,7 @@ RSpec.describe 'Provider settings' do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('Synthetic C411', '••••••••')
     expect(response.body).not_to include('Synthetic OpenAI', 'synthetic-private-credential', 'Enregistrer les choix par défaut')
-    expect(response.parsed_body.at_css('.settings-sidebar [aria-current="page"]').text.strip).to eq('Site de publication')
+    expect(response.parsed_body.at_css('.settings-sidebar [aria-current="page"]').text.strip).to eq('Sites de publication')
   end
 
   it 'creates a connection and immediately imports drafts using read requests' do
@@ -25,12 +25,30 @@ RSpec.describe 'Provider settings' do
 
   it 'does not reflect rejected credentials into the response' do
     post provider_connections_path, params: { connection: connection_attributes.merge(options: { model: 'invalid' }) }
-    expect(response).to redirect_to(settings_provider_path('publishing'))
+    expect(response).to redirect_to(settings_provider_path('publishing', provider: 'c411'))
     follow_redirect!
 
     expect(response.body).to include('Options de connexion invalides')
     expect(response.body).not_to include('synthetic-private-credential')
+    expect(response.parsed_body.at_css('#provider-setup-c411 .settings-configuration-help')).to be_present
     expect(ProviderConnection.count).to eq(0)
+  end
+
+  { 'publishing' => /brouillons/, 'torrent_client' => /web\.get_hosts/, 'ai' => /API Responses/, 'image_host' => /32 caractères hexadécimaux/ }.each do |role, instruction|
+    it "shows a logo and help for each #{role} input when its provider is selected" do
+      definition = Providers::Catalog.fetch(role)
+      get settings_provider_path(role)
+      picker = response.parsed_body.at_css('.settings-provider-option')
+      expect(picker).to have_attributes(text: a_string_including(definition.name))
+      expect(picker.at_css('img')['src']).to include("/providers/#{definition.provider}")
+      expect(response.parsed_body.at_css('.settings-configuration-help')).to be_nil
+
+      get settings_provider_path(role, provider: definition.provider)
+      panel = response.parsed_body.at_css("#provider-setup-#{definition.provider}")
+      inputs = panel.css('.settings-field input')
+      expect(inputs.map { |input| panel.at_css("##{input['aria-describedby']}").text }).to include(a_string_matching(instruction))
+      expect(panel.at_css('.translation_missing')).to be_nil
+    end
   end
 
   it 'rotates a secret only with explicit identity confirmation' do
@@ -51,6 +69,15 @@ RSpec.describe 'Provider settings' do
 
     expect(response.body).to include('HTTP 403', 'Échec du test')
     expect(response.body).not_to include('private provider payload', 'synthetic-private-credential')
+  end
+
+  it 'asks for a fresh test when the saved result only checked model access' do
+    connection = create_connection('ai')
+    connection.update!(check_status: 'passed', check_code: 'model_read', check_message: 'Legacy model check', checked_at: Time.current)
+    get settings_provider_path('ai')
+
+    expect(response.parsed_body.at_css('.settings-status')['data-status']).to eq('untested')
+    expect(response.body).not_to include('Legacy model check')
   end
 
   it 'replaces a passing check with a sanitized protocol failure' do

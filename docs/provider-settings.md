@@ -1,13 +1,13 @@
 # Provider settings
 
-Sign in and open **Réglages**. Choose **Site de publication** for C411,
-**Client torrent** for Deluge, **API Assistance IA** for OpenAI, or
-**Hébergement d’images** for Postimages. Set defaults for future books in
-**Choix par défaut**.
-Only these implementations are offered. Creating a connection saves local
-configuration; a separate **Tester** action performs its bounded connection
-check. Settings never publishes, changes torrent options, starts a torrent,
-generates AI output, or uploads an image.
+Sign in and open **Réglages**. Choose **Sites de publication**, **Clients
+torrent**, **Services d’assistance IA**, or **Hébergeurs d’images**, then select a
+provider by its name and logo. The configuration help explains each field next
+to its form. Set defaults for future books in **Choix par défaut**.
+Only these implementations are offered. **Tester la configuration** checks the
+current form values before saving. Its result appears beside the form, and the
+fields stay available for correction. The separate **Tester** button for a
+saved connection checks and records the result for that saved version.
 
 Each connection has an immutable role/provider, address, and account or daemon
 identity. Use a descriptive label and a stable identity that identifies the
@@ -31,12 +31,13 @@ The four checks report their actual scope:
 | --- | --- | --- |
 | C411 | Bearer-key access to `GET /api/user/drafts` and its response envelope | Publication, personalized torrent retrieval, submission state |
 | Deluge | Web password login, configured daemon presence, connection, connected state | Payload mapping, torrent operations, recheck, tracker/seeding outcome |
-| OpenAI | Read access to the exact configured model using `GET /v1/models/{model}` | Generation, structured outputs, project identity, factual accuracy |
-| Postimages | Public service-page reachability | API key validity, upload, hosted image properties |
+| OpenAI | A completed text response from the configured model using `POST /v1/responses` | Structured outputs, project identity, factual accuracy |
+| Postimages | Account key accepts an upload and returns the test image page | Cover quality, hosted image properties |
 
-Postimages credentials use the account upload key, not an anonymous fallback.
-Its check has a visibly limited status because no read-only credential test is
-established. Uploading an image belongs to an explicit image-hosting workflow.
+The OpenAI test sends a fixed prompt with response storage disabled and can
+consume API credits. **Tester avec une image** sends a generated 32 × 32 PNG to
+Postimages using the account key and may consume upload quota. The result
+includes the test image page. Neither test sends ebook or release data.
 C411 HTTP 403 can indicate scope or upstream filtering; it is not automatically
 classified as an invalid key. Raw provider bodies and exceptions are never
 rendered or stored as diagnostic messages. HTTP redirects are refused, TLS

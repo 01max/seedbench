@@ -1,18 +1,26 @@
-<details class="settings-disclosure">
-  <summary><%= t('settings.connection.add', provider: definition.name) %></summary>
-  <%= form_with url: provider_connections_path, scope: :connection, namespace: role, class: 'settings-form' do |form| %>
+<% help = "setup-#{definition.provider}-help" %>
+<% fields = provider_field_labels(definition, endpoint: role == 'torrent_client', model: role == 'ai') %>
+<% labels = { label: t('settings.connection.label'), identity: t(role == 'torrent_client' ? 'settings.connection.deluge_identity' : 'settings.connection.account_identity') }.merge(fields) %>
+<div class="settings-setup-grid">
+  <%= form_with url: provider_connections_path, scope: :connection, namespace: definition.provider, class: 'settings-form',
+        data: connection_test_data(preview_provider_connections_path) do |form| %>
+    <div class="settings-setup-heading">
+      <h4><%= t('settings.connection.configure_provider', provider: definition.name) %></h4>
+      <%= link_to t('settings.connection.help.title'), "##{help}-title", class: 'settings-help-link' %>
+    </div>
     <%= form.hidden_field :role, value: role %>
     <div class="settings-fields">
       <div class="settings-field">
-        <%= form.label :label, t('settings.connection.label') %>
-        <%= form.text_field :label, required: true, maxlength: 120 %>
+        <%= form.label :label, labels.fetch(:label) %>
+        <%= form.text_field :label, required: true, maxlength: 120, aria: { describedby: "#{help}-label" } %>
       </div>
       <div class="settings-field">
-        <%= form.label :identity_key, t(role == 'torrent_client' ? 'settings.connection.deluge_identity' : 'settings.connection.account_identity') %>
-        <%= form.text_field :identity_key, required: true, maxlength: 120 %>
+        <%= form.label :identity_key, labels.fetch(:identity) %>
+        <%= form.text_field :identity_key, required: true, maxlength: 120, aria: { describedby: "#{help}-identity" } %>
       </div>
-      <%= render 'provider_connections/fields', form: form, definition: definition, role: role, endpoint_required: role == 'torrent_client' %>
+      <%= render 'provider_connections/fields', form: form, definition: definition, labels: fields, help: help %>
     </div>
-    <%= form.submit t('settings.connection.save'), class: 'work-button' %>
+    <%= render 'provider_connections/test_actions', form: form, role: role, save: t('settings.connection.save') %>
   <% end %>
-</details>
+  <%= render 'provider_connections/configuration_help', provider: definition.provider, help: help, labels: labels %>
+</div>

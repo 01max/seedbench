@@ -8,10 +8,11 @@ RSpec.describe 'Provider settings', type: :system do
 
     set_workbench_viewport(320)
     click_button 'Mode clair'
-    within('nav.settings-sidebar') { click_link 'API Assistance IA' }
+    within('nav.settings-sidebar') { click_link 'Services d’assistance IA' }
     expect(page).to have_current_path(settings_provider_path('ai'))
-    find('summary', text: 'Ajouter une connexion OpenAI').click
+    click_button 'OpenAI'
     expect(page).to have_field('Identifiant exact du modèle')
+    expect(page).to have_css('.settings-configuration-help', text: 'Aide à la configuration')
     expect(page.evaluate_script('document.documentElement.scrollWidth === document.documentElement.clientWidth')).to be(true)
     save_workbench_screenshot('settings-light-mobile.png')
     click_link 'Retour à l’atelier'
@@ -31,12 +32,30 @@ RSpec.describe 'Provider settings', type: :system do
     expect(page).to have_css(%(##{anchor} .settings-status[data-status="passed"]), text: 'Test réussi')
   end
 
+  it 'tests an unsaved OpenAI configuration and clears its result after an edit' do
+    sign_in_browser
+    stub_openai_connection_check(api_key: 'entered-test-key')
+    visit settings_provider_path('ai')
+    click_button 'OpenAI'
+    fill_in 'Libellé', with: 'OpenAI de test'
+    fill_in 'Identité stable du compte ou projet', with: 'test-project'
+    fill_in 'Clé API', with: 'entered-test-key'
+    fill_in 'Identifiant exact du modèle', with: 'synthetic-model'
+    click_button 'Tester la configuration'
+
+    expect(page).to have_css('.settings-test-result[data-status="passed"]', text: 'Le modèle configuré a renvoyé une réponse de test.')
+    expect(ProviderConnection.count).to eq(0)
+    fill_in 'Identifiant exact du modèle', with: 'different-model'
+    expect(page).to have_no_css('.settings-test-result[data-status="passed"]')
+  end
+
   it 'completes a legacy AI connection with its secret and model together' do
     sign_in_browser
     connection = ProviderConnection.create!(role: 'ai', provider: 'openai', identity_key: 'legacy-project', label: 'Legacy AI')
     visit settings_provider_path('ai')
     within("article[aria-label='Legacy AI']") do
       find('summary', text: 'Compléter la configuration').click
+      expect(page).to have_css('.settings-configuration-help', text: 'Confirmation de l’identité')
       fill_in 'Clé API', with: 'completed-browser-secret'
       fill_in 'Identifiant exact du modèle', with: 'synthetic-model'
       check 'Je confirme la même identité de compte ou de démon.'
@@ -83,7 +102,7 @@ RSpec.describe 'Provider settings', type: :system do
     sign_in_browser
     visit settings_provider_path('publishing')
     within("section[aria-labelledby='role-publishing']") do
-      find('summary', text: 'Ajouter une connexion C411').click
+      click_button 'C411'
       fill_in 'Libellé', with: 'Browser C411'
       fill_in 'Identité stable du compte ou projet', with: 'browser-account'
       fill_in 'Clé API', with: 'browser-private-credential'

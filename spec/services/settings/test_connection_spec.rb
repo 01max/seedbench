@@ -11,31 +11,43 @@ RSpec.describe Settings::TestConnection do
     expect(connection.check_message).to include('Publication et téléchargement non testés')
   end
 
-  it 'checks the exact OpenAI model without starting a generation' do
+  it 'requests a synthetic OpenAI response from the configured model' do
     connection = create_connection('ai')
-    stub_request(:get, 'https://api.openai.com/v1/models/synthetic-model').with(headers: { 'Authorization' => 'Bearer synthetic-private-credential' })
-      .to_return(body: { id: 'synthetic-model', object: 'model' }.to_json)
+    request = stub_openai_connection_check
     described_class.call(connection_id: connection.id)
 
-    expect(connection.reload.check_code).to eq('model_read')
-    expect(connection.check_message).to include('sorties structurées non testées')
-  end
-
-  it 'reports Postimages reachability without sending its key or an image' do
-    connection = create_connection('image_host')
-    request = stub_request(:get, 'https://postimages.org/').to_return(body: '<html>Postimages</html>')
-    described_class.call(connection_id: connection.id)
-
-    expect(connection.reload.check_status).to eq('limited')
-    expect(connection.check_message).to include('Clé et envoi non testés')
+    expect(connection.reload.check_code).to eq('response_received')
     expect(request).to have_been_requested.once
   end
 
-  def stub_deluge(results)
-    %w[auth.login web.get_hosts web.connect web.connected].zip(results).each_with_index do |(method, result), index|
-      stub_request(:post, 'http://deluge.test:8112/json').with { |request| JSON.parse(request.body)['method'] == method }
-        .to_return(body: { id: index + 1, result: result, error: nil }.to_json, headers: { 'Set-Cookie' => '_session_id=synthetic; HttpOnly' })
-    end
+  it 'does not pass an OpenAI response that contains no generated text' do
+    connection = create_connection('ai')
+    stub_request(:post, 'https://api.openai.com/v1/responses')
+      .to_return(body: { id: 'resp_synthetic_check', model: 'synthetic-model', status: 'completed', output: [] }.to_json)
+    described_class.call(connection_id: connection.id)
+
+    expect(connection.reload.check_code).to eq('invalid_response')
+  end
+
+  it 'verifies a Postimages upload with its key and a synthetic PNG' do
+    connection = create_connection('image_host')
+    request = stub_request(:post, 'https://api.postimage.org/1/upload').with(body: hash_including('key' => 'a' * 32, 'type' => 'png'))
+      .to_return(body: '<data success="1" status="200"><url>https://postimg.cc/abc123</url></data>')
+    described_class.call(connection_id: connection.id)
+
+    expect(connection.reload.check_status).to eq('passed')
+    expect(connection.check_message).to include('https://postimg.cc/abc123')
+    expect(request).to have_been_requested.once
+  end
+
+  it 'treats Postimages API errors as failures even when HTTP succeeds' do
+    connection = create_connection('image_host')
+    stub_request(:post, 'https://api.postimage.org/1/upload')
+      .to_return(body: '<data success="0" status="403"><error>Private API error</error></data>')
+    described_class.call(connection_id: connection.id)
+
+    expect(connection.reload.check_status).to eq('failed')
+    expect(connection.check_message).not_to include('Private API error')
   end
 
   it 'authenticates to Deluge and verifies the explicitly identified daemon' do

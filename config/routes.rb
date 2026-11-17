@@ -32,11 +32,13 @@ Rails.application.routes.draw do
     resource :connections, controller: 'release_connections', only: %i[show update]
   end
   resources :provider_connections, path: 'settings/connections', only: :create do
+    post :preview, on: :collection
     member do
       patch :rotate
       patch :configure
       patch :complete
       post :check
+      post :preview
     end
   end
 end
