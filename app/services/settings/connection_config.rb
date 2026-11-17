@@ -5,7 +5,7 @@ module Settings
     class Invalid < StandardError; end
 
     class << self
-      def call(role:, label:, identity_key:, endpoint: nil, credentials: {}, options: {})
+      def call(role: nil, label: nil, identity_key: nil, endpoint: nil, credentials: {}, options: {})
         definition = Providers::Catalog::ROLES[role]
         raise Invalid, I18n.t('messages.settings.connection_config.role_libelle_ou_identite_de_connexion') unless definition && text?(label) && text?(identity_key)
 

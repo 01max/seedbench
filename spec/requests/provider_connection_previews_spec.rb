@@ -89,4 +89,14 @@ RSpec.describe 'Provider connection previews' do
     expect(response.parsed_body).to include('status' => 'failed')
     expect(WebMock).not_to have_requested(:post, 'https://api.openai.com/v1/responses')
   end
+
+  it 'reports omitted required connection fields without contacting the API' do
+    sign_in_operator
+    attributes = connection_attributes('ai').except(:label, :identity_key)
+    post preview_provider_connections_path, params: { connection: attributes }, as: :json
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.parsed_body).to include('status' => 'failed', 'message' => I18n.t('messages.settings.connection_config.role_libelle_ou_identite_de_connexion'))
+    expect(WebMock).not_to have_requested(:post, 'https://api.openai.com/v1/responses')
+  end
 end
