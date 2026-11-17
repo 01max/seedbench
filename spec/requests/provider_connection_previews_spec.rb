@@ -23,14 +23,15 @@ RSpec.describe 'Provider connection previews' do
     expect(DraftLink.count).to eq(0)
   end
 
-  it 'checks the entered Deluge settings against the configured daemon' do
+  it 'checks the entered Deluge settings without switching the WebUI daemon' do
     sign_in_operator
-    stub_deluge([ true, [ [ 'synthetic-account' ] ], [], true ])
+    stub_deluge([ true, [ [ 'synthetic-account' ] ] ])
     preview('torrent_client')
 
-    expect(response.parsed_body).to include('status' => 'passed', 'code' => 'daemon_connected')
+    expect(response.parsed_body).to include('status' => 'passed', 'code' => 'daemon_listed')
     expect(WebMock).to have_requested(:post, 'http://deluge.test:8112/json')
       .with(body: hash_including('method' => 'auth.login', 'params' => [ 'synthetic-private-credential' ])).once
+    expect(WebMock).not_to have_requested(:post, 'http://deluge.test:8112/json').with(body: hash_including('method' => 'web.connect'))
     expect(ProviderConnection.count).to eq(0)
   end
 

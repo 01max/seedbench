@@ -21,8 +21,7 @@ fr:
         role_de_fournisseur_inconnu: Rôle de fournisseur inconnu.
       deluge:
         invalid_daemon_list: Deluge n’a pas renvoyé une liste de démons lisible.
-        authentification_et_connexion_au_demon_verifiees: Authentification et connexion
-          au démon vérifiées. Fichiers, recheck et seeding non testés.
+        daemon_listed: Authentification WebUI réussie. Le démon figure dans la liste de la WebUI.
         mot_de_passe_deluge_refuse: Mot de passe Deluge refusé.
         le_demon_deluge_enregistre_est_absent: Le démon Deluge enregistré est absent;
           vérifiez son identifiant.

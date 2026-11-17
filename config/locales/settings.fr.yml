@@ -18,7 +18,7 @@ fr:
     connection:
       test_scope:
         publishing: "Le test lit la liste des brouillons du compte C411."
-        torrent_client: "Le test se connecte au démon Deluge sans démarrer de torrent."
+        torrent_client: "Le test vérifie le mot de passe de la WebUI et la présence du démon dans sa liste."
         ai: "Le test envoie une courte consigne de test au modèle OpenAI configuré et peut utiliser des crédits API."
         image_host: "Le test envoie une petite image générée à Postimages et peut utiliser une unité du quota du compte."
       empty: "Aucune connexion configurée."

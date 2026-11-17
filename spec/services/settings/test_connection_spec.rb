@@ -52,11 +52,12 @@ RSpec.describe Settings::TestConnection do
 
   it 'authenticates to Deluge and verifies the explicitly identified daemon' do
     connection = create_connection('torrent_client')
-    stub_deluge([ true, [ [ 'synthetic-account', 'deluge', 58846, 'Online' ] ], [], true ])
+    stub_deluge([ true, [ [ 'synthetic-account', 'deluge', 58846, 'localclient' ] ] ])
     described_class.call(connection_id: connection.id)
 
-    expect(connection.reload.check_code).to eq('daemon_connected')
-    expect(WebMock).to have_requested(:post, 'http://deluge.test:8112/json').with(headers: { 'Cookie' => '_session_id=synthetic' }).times(3)
+    expect(connection.reload.check_code).to eq('daemon_listed')
+    expect(WebMock).to have_requested(:post, 'http://deluge.test:8112/json').with(headers: { 'Cookie' => '_session_id=synthetic' }).once
+    expect(WebMock).not_to have_requested(:post, 'http://deluge.test:8112/json').with(body: hash_including('method' => 'web.connect'))
   end
 
   it 'reports Deluge password rejection without leaking raw protocol errors' do
@@ -67,14 +68,11 @@ RSpec.describe Settings::TestConnection do
     expect(connection.reload.check_code).to eq('authentication_failed')
   end
 
-  it 'distinguishes absent and disconnected Deluge daemons' do
+  it 'reports a daemon absent from the WebUI host list' do
     connection = create_connection('torrent_client')
-    stub_deluge([ true, [], [], false ])
+    stub_deluge([ true, [] ])
     described_class.call(connection_id: connection.id)
     expect(connection.reload.check_code).to eq('daemon_missing')
-    stub_deluge([ true, [ [ 'synthetic-account' ] ], [], false ])
-    described_class.call(connection_id: connection.id)
-    expect(connection.reload.check_code).to eq('daemon_disconnected')
   end
 
   it 'sanitizes HTTP failures and refuses redirects' do

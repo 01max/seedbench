@@ -4,9 +4,9 @@ module Providers
     def self.check(connection:)
       client = new(endpoint: connection.endpoint)
       client.authenticate!(connection.credentials.fetch('password'))
-      client.connect!(connection.identity_key)
+      client.require_daemon!(connection.identity_key)
 
-      CheckResult.new(status: 'passed', code: 'daemon_connected', message: I18n.t('messages.providers.deluge.authentification_et_connexion_au_demon_verifiees'))
+      CheckResult.new(status: 'passed', code: 'daemon_listed', message: I18n.t('messages.providers.deluge.daemon_listed'))
     end
 
     def self.discover(endpoint:, password:)
@@ -23,9 +23,12 @@ module Providers
       raise Failure.new('authentication_failed', I18n.t('messages.providers.deluge.mot_de_passe_deluge_refuse')) unless rpc('auth.login', [ password ]) == true
     end
 
-    def connect!(identity)
+    def require_daemon!(identity)
       raise Failure.new('daemon_missing', I18n.t('messages.providers.deluge.le_demon_deluge_enregistre_est_absent')) unless hosts.any? { |host| host.is_a?(Array) && host.first == identity }
+    end
 
+    def connect!(identity)
+      require_daemon!(identity)
       rpc('web.connect', [ identity ])
       raise Failure.new('daemon_disconnected', I18n.t('messages.providers.deluge.le_demon_deluge_nest_pas_connecte')) unless rpc('web.connected') == true
     end

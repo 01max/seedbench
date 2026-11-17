@@ -32,7 +32,7 @@ The four checks report their actual scope:
 | Provider | Checked | Still unverified by this action |
 | --- | --- | --- |
 | C411 | Bearer-key access to `GET /api/user/drafts` and its response envelope | Publication, personalized torrent retrieval, submission state |
-| Deluge | Web password login, configured daemon presence, connection, connected state | Payload mapping, torrent operations, recheck, tracker/seeding outcome |
+| Deluge | Web password login and presence of the configured daemon in the host list | Daemon connection, payload mapping, torrent operations, recheck, tracker/seeding outcome |
 | OpenAI | A completed text response from the configured model using `POST /v1/responses` | Structured outputs, project identity, factual accuracy |
 | Postimages | Account key accepts an upload and returns the test image page | Cover quality, hosted image properties |
 
