@@ -6,7 +6,7 @@ RSpec.describe 'Private access boundary' do
   it 'blocks release/settings reads and all configuration writes without a session' do
     release = Releases::Create.call(title: 'Private book title')
     connection = create_connection
-    [ root_path, settings_path, release_connections_path(release) ].each do |path|
+    [ root_path, settings_path, settings_provider_path('ai'), release_connections_path(release) ].each do |path|
       get path
       expect(response).to redirect_to(new_operator_session_path)
       expect(response.body).not_to include('Private book title', 'synthetic-private-credential')

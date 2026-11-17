@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Drafts::Link do
-  let(:shell) { imported_draft }
+  let(:shell) { linked_draft }
 
   def payload_release
     release = Releases::Create.call(title: 'Local upload')

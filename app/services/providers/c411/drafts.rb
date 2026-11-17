@@ -2,7 +2,11 @@ module Providers
   class C411
     # Wraps authenticated C411 draft listing, reads and mutations for a publishing connection.
     class Drafts
-      Listing = Data.define(:ids, :count, :maximum)
+      Listing = Data.define(:entries, :count, :maximum) do
+        def ids
+          entries.keys
+        end
+      end
       PATH = '/api/user/drafts'.freeze
 
       def initialize(connection)
@@ -12,11 +16,12 @@ module Providers
       def list
         data = request(:get, PATH)
         invalid! unless data['data'].is_a?(Array) && data['data'].size <= 100
-        ids = data['data'].map do |item|
+        entries = data['data'].to_h do |item|
           invalid! unless item.is_a?(Hash)
-          identity(item.fetch('id'))
+
+          [ identity(item.fetch('id')), item.slice('title', 'name') ]
         end
-        Listing.new(ids: ids.uniq, count: data['count'], maximum: data['maxAllowed'])
+        Listing.new(entries: entries, count: data['count'], maximum: data['maxAllowed'])
       rescue KeyError, TypeError
         invalid!
       end

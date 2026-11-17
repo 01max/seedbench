@@ -1,0 +1,75 @@
+<% incomplete = connection.configuration_incomplete? %>
+<% previous_scope = %w[model_read reachability_only].include?(connection.check_code) %>
+<% status = previous_scope ? 'untested' : connection.check_status %>
+<% status = 'incomplete' if incomplete %>
+<article class="settings-body" id="<%= dom_id(connection) %>" aria-label="<%= connection.label %>" tabindex="-1">
+  <div class="settings-connection-heading">
+    <h3><%= connection.label %></h3>
+    <span class="settings-status" data-status="<%= status %>"><%= t("settings.connection.status.#{status}") %></span>
+  </div>
+  <dl class="settings-facts">
+    <dt><%= t('settings.connection.identity') %></dt><dd><%= connection.identity_key %></dd>
+    <% if connection.endpoint %><dt><%= t('settings.connection.endpoint') %></dt><dd><%= connection.endpoint %></dd><% end %>
+    <dt><%= t('settings.connection.secret') %></dt>
+    <dd><%= t(connection.credentials.present? ? 'settings.connection.secret_set' : 'settings.defaults.unconfigured') %></dd>
+    <% if connection.options['model'] %><dt><%= t('settings.connection.model') %></dt><dd><%= connection.options['model'] %></dd><% end %>
+  </dl>
+  <% if connection.checked_at && !previous_scope %>
+    <p class="settings-hint">
+      <time datetime="<%= connection.checked_at.iso8601 %>"><%= l(connection.checked_at, format: :short) %></time> · <%= connection.check_message %>
+    </p>
+  <% end %>
+  <% if incomplete %>
+    <%= render 'provider_connections/completion', connection: connection, definition: definition %>
+  <% else %>
+    <p class="settings-hint"><%= t("settings.connection.test_scope.#{role}") %></p>
+    <%= button_to t(role == 'image_host' ? 'settings.connection.check_upload' : 'settings.connection.check', name: connection.label), check_provider_connection_path(connection),
+          class: 'work-button', form: { data: { turbo: false } } %>
+    <% if role == 'publishing' %>
+      <%= button_to t('settings.connection.import_drafts'), import_drafts_provider_connection_path(connection), class: 'work-button' %>
+    <% end %>
+    <% if role == 'ai' %>
+      <% model_help = "configure-#{connection.id}-help" %>
+      <% model_label = t('settings.connection.model_id') %>
+      <details class="settings-disclosure">
+        <summary><%= t('settings.connection.change_model') %></summary>
+        <div class="settings-setup-grid">
+          <%= form_with url: configure_provider_connection_path(connection), method: :patch, scope: :configuration, namespace: "configure_#{connection.id}", class: 'settings-form',
+                data: connection_test_data(preview_provider_connection_path(connection, kind: 'configuration')) do |form| %>
+            <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+            <%= form.fields_for :options do |fields| %>
+              <div class="settings-field">
+                <%= fields.label :model, model_label %>
+                <%= fields.text_field :model, value: connection.options['model'], required: true, aria: { describedby: "#{model_help}-model" } %>
+              </div>
+            <% end %>
+            <%= render 'provider_connections/test_actions', form: form, role: role, save: t('settings.connection.save_model') %>
+          <% end %>
+          <%= render 'provider_connections/configuration_help', provider: definition.provider, help: model_help, labels: { model: model_label } %>
+        </div>
+      </details>
+    <% end %>
+    <% rotate_help = "rotate-#{connection.id}-help" %>
+    <% secret_label = t('settings.connection.new_secret') %>
+    <details class="settings-disclosure">
+      <summary><%= t('settings.connection.rotate_title') %></summary>
+      <p class="settings-hint"><%= t('settings.connection.rotate_hint') %></p>
+      <div class="settings-setup-grid">
+        <%= form_with url: rotate_provider_connection_path(connection), method: :patch, scope: :rotation, namespace: "rotate_#{connection.id}", class: 'settings-form',
+              data: connection_test_data(preview_provider_connection_path(connection, kind: 'rotation')) do |form| %>
+          <%= form.hidden_field :expected_version, value: connection.credentials_version %>
+          <%= form.fields_for :credentials do |fields| %>
+            <div class="settings-field">
+              <%= fields.label definition.secret, secret_label %>
+              <%= fields.password_field definition.secret, required: true, autocomplete: 'new-password', aria: { describedby: "#{rotate_help}-#{definition.secret}" } %>
+            </div>
+          <% end %>
+          <label class="settings-checkbox"><%= form.check_box :confirm_identity, required: true, aria: { describedby: "#{rotate_help}-confirm_identity" } %> <%= t('settings.connection.confirm_identity') %></label>
+          <%= render 'provider_connections/test_actions', form: form, role: role, save: t('settings.connection.rotate') %>
+        <% end %>
+        <%= render 'provider_connections/configuration_help', provider: definition.provider, help: rotate_help,
+              labels: { definition.secret.to_sym => secret_label, confirm_identity: t('settings.connection.help.confirm_label') } %>
+      </div>
+    </details>
+  <% end %>
+</article>

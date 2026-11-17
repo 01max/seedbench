@@ -1,7 +1,10 @@
 <section class="editor-area" aria-label="<%= t("workbench.editor.label") %>" data-controller="workspace-tabs">
   <div class="editor-tabs" role="tablist" aria-label="<%= t("workbench.editor.sections_label") %>">
     <% %w[review bbcode nfo files history evidence covers duplicates ai draft preview].each_with_index do |key, index| %>
-      <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate"><%= t("workbench.tabs.#{key}") %></button>
+      <button type="button" role="tab" id="tab-<%= key %>" aria-controls="panel-<%= key %>" aria-selected="<%= index.zero? %>" tabindex="<%= index.zero? ? 0 : -1 %>" data-workspace-tabs-target="tab" data-panel="<%= key %>" data-action="workspace-tabs#show keydown->workspace-tabs#navigate">
+        <%= render 'shared/ai_icon' if key == 'ai' %>
+        <%= t("workbench.tabs.#{key}") %>
+      </button>
     <% end %>
   </div>
   <%= render "content_frame" %>

@@ -7,7 +7,7 @@ RSpec.describe Drafts::Write do
   let(:remote) { draft_data }
 
   def writable_shell
-    release = imported_draft
+    release = linked_draft
     stub_request(:get, 'https://c411.org/api/user/drafts/draft-1').to_return { { body: { success: true, data: remote }.to_json } }
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: 'Reviewed local description', nfo: 'Reviewed local NFO' })
     release.reload

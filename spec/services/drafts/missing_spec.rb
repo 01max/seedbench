@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Drafts::Missing do
   it 'preserves text, payload and history after a confirmed remote 404 and never recreates implicitly' do
-    release = imported_draft
+    release = linked_draft
     values = Releases::EditorValues.call(release: release)
     stub_request(:get, 'https://c411.org/api/user/drafts/draft-1').to_return(status: 404)
     Drafts::Sync.call(link: release.draft_link)
@@ -14,7 +14,7 @@ RSpec.describe Drafts::Missing do
   end
 
   it 'keeps an authentication or service failure distinct from remote deletion' do
-    release = imported_draft
+    release = linked_draft
     stub_request(:get, 'https://c411.org/api/user/drafts/draft-1').to_return(status: 403)
     expect { Drafts::Sync.call(link: release.draft_link) }.to raise_error(Providers::Failure)
     expect(release.reload.draft_state).to eq('synced')

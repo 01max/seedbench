@@ -72,6 +72,7 @@ module Providers
       end
 
       def read(response)
+        raise Failure.new('http_429', I18n.t('messages.providers.http.rate_limited')) if response.code == '429'
         raise Failure.new("http_#{response.code}", I18n.t('messages.providers.http.acces_refuse_ou_service_indisponible_http', status: response.code)) unless response.is_a?(Net::HTTPSuccess)
 
         body = +''

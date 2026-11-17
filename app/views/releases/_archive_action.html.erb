@@ -1,0 +1,7 @@
+<% editor_data = { editor_target: 'archiveAction' } if editable %>
+<% if release.archived_at? %>
+  <%= button_to t('workbench.archive.restore'), release_archive_path(release), method: :delete, class: 'work-button', disabled: editable, data: editor_data %>
+<% else %>
+  <% archive_path = release_archive_path(release, **@queue.criteria, page: (@queue.page if @queue.page > 1)) %>
+  <%= button_to t('workbench.archive.action'), archive_path, class: 'work-button', disabled: editable, data: editor_data %>
+<% end %>

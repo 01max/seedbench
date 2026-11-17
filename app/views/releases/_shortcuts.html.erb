@@ -1,0 +1,20 @@
+<dialog id="workbench-shortcuts" class="work-shortcuts" aria-labelledby="workbench-shortcuts-title" data-workbench-queue-target="help">
+  <header>
+    <h2 id="workbench-shortcuts-title"><%= t('workbench.shortcuts.title') %></h2>
+    <button type="button" class="work-button quiet" data-action="workbench-queue#closeHelp"><%= t('workbench.shortcuts.close') %></button>
+  </header>
+  <dl>
+    <div><dt><kbd>Alt</kbd> <kbd>↑</kbd></dt><dd><%= t('workbench.shortcuts.previous') %></dd></div>
+    <div><dt><kbd>Alt</kbd> <kbd>↓</kbd></dt><dd><%= t('workbench.shortcuts.next') %></dd></div>
+    <div><dt><kbd>Alt</kbd> <kbd><%= t('workbench.shortcuts.page_up') %></kbd></dt><dd><%= t('workbench.shortcuts.previous_page') %></dd></div>
+    <div><dt><kbd>Alt</kbd> <kbd><%= t('workbench.shortcuts.page_down') %></kbd></dt><dd><%= t('workbench.shortcuts.next_page') %></dd></div>
+    <div><dt><kbd>/</kbd></dt><dd><%= t('workbench.shortcuts.search') %></dd></div>
+    <div><dt><kbd>?</kbd></dt><dd><%= t('workbench.shortcuts.show') %></dd></div>
+    <div><dt><kbd><%= t('workbench.shortcuts.escape') %></kbd></dt><dd><%= t('workbench.shortcuts.dismiss') %></dd></div>
+    <% if editable %>
+      <div><dt><kbd>Ctrl</kbd> / <kbd>⌘</kbd> <kbd>S</kbd></dt><dd><%= t('workbench.shortcuts.save') %></dd></div>
+      <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd><%= t('workbench.shortcuts.tabs') %></dd></div>
+      <div><dt><kbd><%= t('workbench.shortcuts.home') %></kbd> / <kbd><%= t('workbench.shortcuts.end') %></kbd></dt><dd><%= t('workbench.shortcuts.tab_edges') %></dd></div>
+    <% end %>
+  </dl>
+</dialog>

@@ -39,12 +39,10 @@ RSpec.describe Settings::CompleteConnection do
   it 'checks the completed legacy model with its saved credentials' do
     connection = legacy_connection('ai')
     complete(connection)
-    request = stub_request(:get, 'https://api.openai.com/v1/models/synthetic-model')
-      .with(headers: { 'Authorization' => 'Bearer synthetic-private-credential' })
-      .to_return(body: { id: 'synthetic-model', object: 'model' }.to_json)
+    request = stub_openai_connection_check
     Settings::TestConnection.call(connection_id: connection.id)
 
-    expect(connection.reload.check_code).to eq('model_read')
+    expect(connection.reload.check_code).to eq('response_received')
     expect(request).to have_been_requested.once
   end
 

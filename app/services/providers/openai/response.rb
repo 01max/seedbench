@@ -5,14 +5,20 @@ module Providers
     class Response
       class << self
         def call(data:, purpose:, pack:)
+          output = Ai::Output.call(purpose: purpose, output: JSON.parse(text(data: data)), pack: pack)
+          { 'output' => output, 'response_model' => data['model'], 'response_id' => data['id'], 'usage' => usage(data) }
+        rescue JSON::ParserError, KeyError, TypeError
+          raise Ai::Failure.new(:invalid_output), cause: nil
+        end
+
+        def text(data:)
           validate_envelope!(data)
           content = message_content(data.fetch('output'))
           text = content.fetch('text')
           raise Ai::Failure.new(:invalid_output) unless text.is_a?(String) && text.bytesize <= 32_768
 
-          output = Ai::Output.call(purpose: purpose, output: JSON.parse(text), pack: pack)
-          { 'output' => output, 'response_model' => data['model'], 'response_id' => data['id'], 'usage' => usage(data) }
-        rescue JSON::ParserError, KeyError, TypeError
+          text
+        rescue KeyError, TypeError
           raise Ai::Failure.new(:invalid_output), cause: nil
         end
 

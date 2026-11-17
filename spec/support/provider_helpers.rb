@@ -13,6 +13,20 @@ module ProviderHelpers
     end
     Settings::CreateConnection.call(**connection_attributes(role, identity: identity))
   end
+
+  def stub_openai_connection_check(model: 'synthetic-model', api_key: 'synthetic-private-credential')
+    stub_request(:post, 'https://api.openai.com/v1/responses')
+      .with(headers: { 'Authorization' => "Bearer #{api_key}" }, body: hash_including(model: model, store: false, max_output_tokens: 512))
+      .to_return(body: { id: 'resp_synthetic_check', model: model, status: 'completed',
+                         output: [ { type: 'message', role: 'assistant', content: [ { type: 'output_text', text: 'OK' } ] } ] }.to_json)
+  end
+
+  def stub_deluge(results)
+    %w[auth.login web.get_hosts web.connect web.connected].zip(results).each_with_index do |(method, result), index|
+      stub_request(:post, 'http://deluge.test:8112/json').with { |request| JSON.parse(request.body)['method'] == method }
+        .to_return(body: { id: index + 1, result: result, error: nil }.to_json, headers: { 'Set-Cookie' => '_session_id=synthetic; HttpOnly' })
+    end
+  end
 end
 
 RSpec.configure { |config| config.include ProviderHelpers }

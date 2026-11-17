@@ -3,22 +3,15 @@ module Drafts
   # drafts.
   class Refresh
     class << self
-      def call(connection: nil)
-        return refresh(connection) if connection
-        ProviderConnection.where(provider: 'c411').reject(&:configuration_incomplete?).flat_map do |candidate|
-          refresh(candidate)
-        end
-      end
-
-      private
-
-      def refresh(connection)
-        errors = []
-        Import.call(connection: connection) { |id, error| errors << draft_failure(connection, id, error) }
-        errors.concat(connection.draft_links.includes(:release).find_each.filter_map { |link| refresh_link(link) })
+      def call(connection:)
+        Import.call(connection: connection)
+        imported = ReleaseEvent.where(name: Release::C411_IMPORT_EVENT).select(:release_id)
+        connection.draft_links.where.not(release_id: imported).includes(:release).find_each.filter_map { |link| refresh_link(link) }
       rescue Providers::Failure, Failure => error
         [ I18n.t('drafts.sync_failed', connection: connection.label, message: error.message) ]
       end
+
+      private
 
       def refresh_link(link)
         Sync.call(link: link)

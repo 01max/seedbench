@@ -8,14 +8,13 @@ module Drafts
         snapshot = release.remote_snapshots.where(kind: 'draft', remote_id: link.remote_id).order(:id).last if link
         candidates = PayloadCandidates.call(release: release, query: payload_query)
         State.new(proposed_ids: candidates.proposed_ids, writes: release.draft_writes.includes(:workflow_operation).order(id: :desc).limit(20).to_a, link: link, snapshot: snapshot, local: Content.local(release), candidates: candidates.records,
-          configured: configured?(release))
+          configured: configured?(link))
       end
 
       private
 
-      def configured?(release)
-        connection = release.provider_assignments.find_by(role: 'publishing')&.provider_connection
-        connection && !connection.configuration_incomplete?
+      def configured?(link)
+        link.present? && !link.provider_connection.configuration_incomplete?
       end
     end
   end

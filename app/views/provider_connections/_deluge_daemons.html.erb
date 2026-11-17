@@ -1,0 +1,10 @@
+<div class="settings-field">
+  <div class="settings-setup-heading">
+    <%= form.label :identity_key, identity_label %>
+    <%= button_tag t('settings.connection.deluge_discovery.button'), type: :button, class: 'work-button', disabled: true,
+          data: { deluge_daemons_target: 'button', action: 'deluge-daemons#run' } %>
+  </div>
+  <%= form.select :identity_key, [], { include_blank: t('settings.connection.deluge_discovery.placeholder') },
+        required: true, aria: { describedby: "#{help}-identity" }, data: { deluge_daemons_target: 'choice' } %>
+  <p class="settings-hint" role="status" data-deluge-daemons-target="result"></p>
+</div>

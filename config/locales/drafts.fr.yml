@@ -76,6 +76,7 @@ fr:
       reconcile_mismatch: Le brouillon distant ne correspond pas au contenu envoyé. Aucun nouvel envoi ni changement de lien effectué.
       category_changed: Les catégories ou options C411 ont changé. Aucun envoi effectué.
       connection_required: Affectez une connexion C411 configurée à cette fiche.
+      link_required: Associez un brouillon C411 à cette fiche pour le synchroniser.
       conflict_required: Résolvez le conflit avec C411 avant tout envoi.
       remote_missing: Le brouillon a disparu. Sa recréation nécessite une action explicite.
       payload_required: Liez un fichier avant de créer un brouillon.

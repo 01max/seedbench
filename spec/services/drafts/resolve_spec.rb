@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Drafts::Resolve do
   def conflicted_release
-    release = imported_draft
+    release = linked_draft
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: 'Human local edit' })
     stub_draft_account(draft_data(description: 'Remote change'))
     Drafts::Sync.call(link: release.draft_link)

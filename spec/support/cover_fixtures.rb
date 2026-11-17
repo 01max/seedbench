@@ -26,7 +26,7 @@ module CoverFixtures
 
   def stub_cover_hosting(bytes: cover_bytes(width: 512, height: 768))
     %w[postimg.cc i.postimg.cc].each { |host| allow(Resolv).to receive(:getaddresses).with(host).and_return([ '93.184.216.34' ]) }
-    stub_request(:post, 'https://api.postimage.org/1/upload').to_return(body: '{"url":"https://postimg.cc/abc123"}')
+    stub_request(:post, 'https://api.postimage.org/1/upload').to_return(body: '{"success":true,"url":"https://postimg.cc/abc123"}')
     stub_request(:get, 'https://postimg.cc/abc123').to_return(body: '<input id="direct" value="https://i.postimg.cc/abc123/cover.png">')
     stub_request(:get, 'https://i.postimg.cc/abc123/cover.png').to_return(body: bytes, headers: { 'Content-Type' => 'image/png' })
   end

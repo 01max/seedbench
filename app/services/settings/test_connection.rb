@@ -14,6 +14,10 @@ module Settings
         connection
       end
 
+      def preview(**attributes)
+        check(ProviderConnection.new(**ConnectionConfig.call(**attributes)))
+      end
+
       private
 
       def check(connection)

@@ -10,13 +10,17 @@
       <% %w[assessment prose].each do |purpose| %>
         <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-#{purpose}" do |form| %>
           <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %><%= form.hidden_field :purpose, value: purpose %>
-          <%= form.submit t("ai.actions.#{purpose}"), class: "work-button", disabled: !workspace.configured || workspace.catalog.empty? %>
+          <%= button_tag type: 'submit', class: 'work-button', disabled: !workspace.configured || workspace.catalog.empty? do %>
+            <%= render 'shared/ai_icon' %> <%= t("ai.actions.#{purpose}") %>
+          <% end %>
         <% end %>
       <% end %>
-      <%= link_to t("ai.refresh"), release_ai_action_path(@release), class: "work-button quiet" %>
+      <%= link_to release_ai_action_path(@release), class: 'work-button quiet' do %>
+        <%= render 'shared/ai_icon' %> <%= t('ai.refresh') %>
+      <% end %>
     </div>
     <% if workspace.catalog.any? %>
-      <details class="source-detail"><summary><%= t("ai.targeted") %></summary><p class="editor-hint"><%= t("ai.targeted_scope") %></p>
+      <details class="source-detail"><summary><%= render 'shared/ai_icon' %> <%= t("ai.targeted") %></summary><p class="editor-hint"><%= t("ai.targeted_scope") %></p>
         <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-targeted", class: "ai-targeted" do |form| %>
           <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
           <%= form.label :purpose, t("ai.purpose") %><%= form.select :purpose, %w[assessment prose].map { |key| [t("ai.purposes.#{key}"), key] } %>
@@ -25,7 +29,9 @@
             <% workspace.catalog.each do |item| %><label class="cover-review"><%= check_box_tag "assistance[scope][evidence_ids][]", item["id"], false, id: "ai-evidence-#{item['id']}" %> <%= item["source"] %> · <%= t("ai.kinds.#{item['kind']}") %></label><details><summary><%= t("ai.excerpt") %></summary><pre><%= item["text"] %></pre></details><% end %>
             <%= scope.label :note, t("ai.scope_note") %><%= scope.text_area :note, minlength: 20, maxlength: 500, rows: 2, required: true %>
           <% end %>
-          <%= form.submit t("ai.targeted_submit"), class: "work-button", disabled: !workspace.configured %>
+          <%= button_tag type: 'submit', class: 'work-button', disabled: !workspace.configured do %>
+            <%= render 'shared/ai_icon' %> <%= t('ai.targeted_submit') %>
+          <% end %>
         <% end %>
       </details>
     <% end %>

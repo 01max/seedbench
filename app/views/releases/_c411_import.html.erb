@@ -1,0 +1,16 @@
+<section class="work-main" aria-label="<%= t('workbench.selected_release') %>" data-release-id="<%= release.id %>">
+  <header class="release-heading">
+    <div>
+      <h1><%= release.title.presence || t('workbench.untitled') %></h1>
+      <p><%= t('workbench.c411.source', id: release.c411_import_event.data.fetch('remote_id')) %></p>
+    </div>
+    <div class="release-heading-status">
+      <span class="archive-badge"><%= t('workbench.c411.badge') %></span>
+      <% if release.archived_at? %><span class="archive-badge"><%= t('workbench.queue.labels.archived') %></span><% end %>
+    </div>
+  </header>
+  <div class="editor-area c411-import-summary"><p><%= t('workbench.c411.read_only') %></p></div>
+  <footer class="work-footer">
+    <div class="work-actions"><%= render 'archive_action', release: release, editable: false %></div>
+  </footer>
+</section>

@@ -34,7 +34,8 @@ ISBN checksum validity alone does not establish edition authenticity. See
 [inspection limits and evidence](ebook-inspection.md).
 
 The queue pages through 40 releases at a time and searches actual titles and
-authors without case or accent distinctions. State filters and previous/next
+authors without case or accent distinctions. It updates when the category changes
+or after a short pause in typing. State filters and previous/next
 navigation retain the current search. The desktop layout keeps the compact
 queue, full-text editor, and review checklist together; narrow screens stack
 them without horizontal page scrolling. The toolbar opens upload, Settings,
@@ -59,10 +60,12 @@ edits show the saved values and require a deliberate choice to load that version
 or save the entered values against its revision. Successful saves append durable
 content and fact revisions rather than replacing history.
 
-Keyboard controls:
+Open **Raccourcis clavier** in the queue header or press `?` to view the shortcut sheet. `Esc` closes it.
 
 - Ctrl/Command S saves the current text.
 - Alt Up/Down saves and selects the previous/next matching release.
+- Alt Page Up/Page Down moves between pages of the current queue.
+- `/` focuses the queue search when you are outside an input.
 - Left/Right and Home/End move between focused workspace tabs.
 - Tab reaches native fields, links, checklist controls, and actions.
 

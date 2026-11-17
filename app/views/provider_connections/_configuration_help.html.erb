@@ -1,0 +1,11 @@
+<aside class="settings-configuration-help" aria-labelledby="<%= help %>-title">
+  <h4 id="<%= help %>-title"><%= t('settings.connection.help.title') %></h4>
+  <dl>
+    <% labels.each do |field, label| %>
+      <div>
+        <dt><%= label %></dt>
+        <dd id="<%= help %>-<%= field %>"><%= t("settings.connection.help.#{provider}.#{field}", default: :"settings.connection.help.common.#{field}") %></dd>
+      </div>
+    <% end %>
+  </dl>
+</aside>

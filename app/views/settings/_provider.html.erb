@@ -1,0 +1,31 @@
+<section class="settings-panel" aria-labelledby="role-<%= role %>">
+  <header>
+    <h2 id="role-<%= role %>"><%= t("settings.roles.#{role}") %></h2>
+  </header>
+  <div class="settings-body">
+    <h3 id="provider-picker-<%= role %>"><%= t('settings.connection.add') %></h3>
+    <div class="settings-provider-picker" role="group" aria-labelledby="provider-picker-<%= role %>">
+      <% definitions.each do |definition| %>
+        <%= button_to settings_provider_path(role), method: :get, params: { provider: definition.provider },
+              class: 'work-button settings-provider-option',
+              aria: { pressed: definition == selected_provider, controls: "provider-setup-#{definition.provider}" } do %>
+          <span class="settings-provider-logo"><%= image_tag "providers/#{definition.provider}.svg", size: '36', alt: '' %></span>
+          <%= definition.name %>
+        <% end %>
+      <% end %>
+    </div>
+    <% definitions.each do |definition| %>
+      <%= tag.div id: "provider-setup-#{definition.provider}", hidden: definition != selected_provider do %>
+        <% if definition == selected_provider %>
+          <%= render 'new_connection', role: role, definition: definition %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+  <% definitions.each do |definition| %>
+    <%= render partial: 'connection', collection: connections.fetch(definition.provider, []), locals: { role: role, definition: definition } %>
+  <% end %>
+  <% if connections.empty? %>
+    <div class="settings-body"><p class="settings-hint"><%= t('settings.connection.empty') %></p></div>
+  <% end %>
+</section>

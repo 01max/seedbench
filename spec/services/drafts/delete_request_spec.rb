@@ -5,7 +5,7 @@ RSpec.describe Drafts::DeleteRequest do
   around { |example| with_committed_cover_database { example.run } }
 
   it 'alerts on a post-publication leftover and deletes only after explicit confirmation' do
-    release = imported_draft
+    release = linked_draft
     release.update!(publication_state: 'published')
     expect(Drafts::AfterPublication.call(release_id: release.id)).to be(true)
     snapshot = release.remote_snapshots.last
@@ -22,7 +22,7 @@ RSpec.describe Drafts::DeleteRequest do
   end
 
   it 'rejects cleanup if sync records an edit after the displayed snapshot' do
-    release = imported_draft
+    release = linked_draft
     release.update!(publication_state: 'published')
     shown = release.remote_snapshots.last
     revision = release.input_revision
@@ -38,7 +38,7 @@ RSpec.describe Drafts::DeleteRequest do
   end
 
   it 'reconciles a deletion timeout by reading absence without sending delete twice' do
-    release = imported_draft
+    release = linked_draft
     release.update!(publication_state: 'published')
     operation = described_class.call(release_id: release.id, expected_revision: release.input_revision, remote_id: 'draft-1',
       snapshot_id: release.remote_snapshots.last.id, confirmed: true)

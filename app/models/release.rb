@@ -3,6 +3,7 @@
 # Table name: releases
 #
 #  id                :integer          not null, primary key
+#  archived_at       :datetime
 #  author            :string
 #  automatic_ai      :boolean          default(TRUE), not null
 #  draft_state       :string           default("unlinked"), not null
@@ -19,6 +20,9 @@
 #  updated_at        :datetime         not null
 #
 class Release < ApplicationRecord
+  C411_IMPORT_EVENT = 'draft.imported'.freeze
+
+  has_one :c411_import_event, -> { where(name: C411_IMPORT_EVENT) }, class_name: 'ReleaseEvent', inverse_of: :release, dependent: :restrict_with_exception
   has_many :draft_writes, dependent: :restrict_with_exception
   has_one :draft_link, dependent: :restrict_with_exception
   has_many :cover_uploads, dependent: :restrict_with_exception
@@ -48,4 +52,8 @@ class Release < ApplicationRecord
   validates :publication_state, inclusion: { in: %w[unpublished submitting published outcome_unknown failed] }
   validates :seeding_state, inclusion: { in: %w[not_started checking seeding succeeded failed unknown] }
   validates :input_revision, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  def c411_imported?
+    c411_import_event.present?
+  end
 end

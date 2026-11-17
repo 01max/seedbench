@@ -13,13 +13,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Docker quality gates
+  rspec:
+    name: RSpec
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Verify application and disposable runtime
-        run: bin/ci
+      - name: Run specs and verify coverage enforcement
+        run: bin/ci rspec
+
+  rubocop:
+    name: RuboCop
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run RuboCop and verify lint enforcement
+        run: bin/ci rubocop
+
+  rails:
+    name: Rails and tooling
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify Rails boot, databases, annotations, SSL, and ebook tools
+        run: bin/ci rails
+
+  runtime:
+    name: Compose runtime and recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify disposable runtime and recovery
+        run: bin/ci runtime

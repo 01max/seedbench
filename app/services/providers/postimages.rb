@@ -1,11 +1,17 @@
-module Providers
-  # Reports the connection-check capability for Postimages without uploading an image.
-  class Postimages
-    def self.check(**)
-      response = Http.call(endpoint: 'https://postimages.org', path: '/')
-      raise Failure.new('invalid_response', I18n.t('messages.providers.postimages.la_page_postimages_na_pas_pu')) unless response.body.include?('postimages') || response.body.include?('Postimages')
+require 'base64'
 
-      CheckResult.new(status: 'limited', code: 'reachability_only', message: I18n.t('messages.providers.postimages.site_accessible_cle_et_envoi_non'))
+module Providers
+  # Checks the account upload key with a generated image that contains no release data.
+  class Postimages
+    TEST_PNG = Base64.strict_decode64(
+      'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAL0lEQVR4nO3OIQEAAAgDMAJRiCLUhxg3E/Ornr2kEhAQEBAQEBAQEBAQEBAQSAceIDPoavxLZhQAAAAASUVORK5CYII='
+    ).freeze
+
+    def self.check(connection:)
+      page = Upload.call(connection: connection, bytes: TEST_PNG, media_type: 'image/png', name: 'seedbench-connection-test')
+      CheckResult.new(status: 'passed', code: 'test_image_uploaded', message: I18n.t('messages.providers.postimages.test_image_uploaded', page: page))
+    rescue Covers::Failure
+      raise Failure.new('test_upload_unconfirmed', I18n.t('messages.providers.postimages.test_upload_unconfirmed')), cause: nil
     end
   end
 end

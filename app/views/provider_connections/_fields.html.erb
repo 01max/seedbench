@@ -1,0 +1,20 @@
+<% if labels.key?(:endpoint) %>
+  <div class="settings-field">
+    <%= form.label :endpoint, labels.fetch(:endpoint) %>
+    <%= form.url_field :endpoint, required: true, aria: { describedby: "#{help}-endpoint" } %>
+  </div>
+<% end %>
+<%= form.fields_for :credentials do |fields| %>
+  <div class="settings-field">
+    <%= fields.label definition.secret, labels.fetch(definition.secret.to_sym) %>
+    <%= fields.password_field definition.secret, required: true, autocomplete: 'new-password', aria: { describedby: "#{help}-#{definition.secret}" } %>
+  </div>
+<% end %>
+<% if labels.key?(:model) %>
+  <%= form.fields_for :options do |fields| %>
+    <div class="settings-field">
+      <%= fields.label :model, labels.fetch(:model) %>
+      <%= fields.text_field :model, value: local_assigns[:model], required: true, aria: { describedby: "#{help}-model" } %>
+    </div>
+  <% end %>
+<% end %>

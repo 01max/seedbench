@@ -1,11 +1,30 @@
 #!/bin/sh
 set -eu
-bundle exec rails db:prepare db:migrate zeitwerk:check
-bundle exec annotaterb models --frozen
-RAILS_ENV=production bundle exec rails db:prepare
-RAILS_ENV=production FORCE_SSL=1 ASSUME_SSL=0 bundle exec rails runner script/quality/check_ssl.rb
-bundle exec rspec
-script/quality/verify_coverage
-bin/rubocop --cache false
-script/quality/verify_lint
-python3 script/tooling/verify.py
+
+rails() {
+  bundle exec rails db:prepare db:migrate zeitwerk:check
+  bundle exec annotaterb models --frozen
+  RAILS_ENV=production bundle exec rails db:prepare
+  RAILS_ENV=production FORCE_SSL=1 ASSUME_SSL=0 bundle exec rails runner script/quality/check_ssl.rb
+  python3 script/tooling/verify.py
+}
+
+rspec() {
+  bundle exec rspec
+  script/quality/verify_coverage
+}
+
+rubocop() {
+  bin/rubocop --cache false
+  script/quality/verify_lint
+}
+
+case "${1:-all}" in
+  all)
+    rails
+    rspec
+    rubocop
+    ;;
+  rails|rspec|rubocop) "$1" ;;
+  *) echo 'Usage: script/quality/ci [rspec|rubocop|rails]' >&2; exit 2 ;;
+esac

@@ -1,7 +1,7 @@
 module Releases
   class Queue
     PAGE_SIZE = 40
-    STATES = %w[all review inspection prepared published duplicate].freeze
+    STATES = %w[all review inspection prepared published duplicate imported archived].freeze
     Page = Data.define(:records, :selected, :total, :page, :pages, :position, :previous_id, :next_id, :criteria)
 
     def self.call(q: '', state: 'all', page: 1, release_id: nil)
@@ -18,7 +18,7 @@ module Releases
     def call
       @total = @scope.count
       locate_page
-      records = @scope.includes(:payload_revisions, :duplicate_decisions).offset((@page - 1) * PAGE_SIZE).limit(PAGE_SIZE).to_a
+      records = @scope.includes(:payload_revisions, :duplicate_decisions, :c411_import_event).offset((@page - 1) * PAGE_SIZE).limit(PAGE_SIZE).to_a
       @selected ||= records.first
       @position ||= records.index(@selected) + 1 + ((@page - 1) * PAGE_SIZE) if records.include?(@selected)
       Page.new(records: records, selected: @selected, total: @total, page: @page, pages: @pages, position: @position,
@@ -42,19 +42,29 @@ module Releases
     end
 
     def filter(scope)
+      return scope.where.not(archived_at: nil) if @criteria[:state] == 'archived'
+
+      scope = scope.where(archived_at: nil)
+      imports = ReleaseEvent.where(name: Release::C411_IMPORT_EVENT).select(:release_id)
+      return scope.where(id: imports) if @criteria[:state] == 'imported'
+
+      filter_active(scope.where.not(id: imports))
+    end
+
+    def filter_active(scope)
       case @criteria[:state]
       when 'review' then scope.where.not(publication_state: 'published')
       when 'inspection' then scope.where(inspection_state: %w[pending running failed])
       when 'prepared' then scope.where(preparation_state: 'prepared')
       when 'published' then scope.where(publication_state: 'published')
-      when 'duplicate' then scope.where(id: confirmed_duplicate_ids)
+      when 'duplicate' then scope.where(id: confirmed_duplicate_ids(scope))
       else scope
       end
     end
 
-    def confirmed_duplicate_ids
+    def confirmed_duplicate_ids(scope)
       possible = DuplicateDecision.where(decision: 'confirmed').select(:release_id)
-      Release.where(id: possible).select { |release| Duplicates::Assessment.new(release).confirmed? }.map(&:id)
+      scope.where(id: possible).select { |release| Duplicates::Assessment.new(release).confirmed? }.map(&:id)
     end
 
     def neighbor(comparison, order)

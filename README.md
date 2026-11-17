@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/01max/seedbench/actions/workflows/ci.yml"><img src="https://github.com/01max/seedbench/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status on main"></a>
   <a href="#how-it-runs"><img src="https://img.shields.io/badge/deployment-Docker%20Compose-74507d?style=flat-square" alt="Deployment: Docker Compose"></a>
-  <a href="#features"><img src="https://img.shields.io/badge/status-development%20preview-b88632?style=flat-square" alt="Status: development preview"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/status-development%20preview-805809?style=flat-square" alt="Status: development preview"></a>
 </p>
 
 <p align="center">
@@ -100,6 +100,9 @@ without echo. The default bind is loopback, and the app has one operator account
    explains safe moves, local torrents, and recovery; this makes no remote write.
 4. **Save and move on.** Use **Enregistrer et suivant** to save pending edits
    before selecting the next book. A failed save keeps you on the current one.
+   Use **Archiver** to remove a book from the working queue while keeping its
+   files and history. Find it again with the **Archives** filter and choose
+   **Restaurer** to bring it back.
 
 | Shortcut | Action |
 | :--- | :--- |
@@ -190,9 +193,10 @@ synthetic fixtures, no operator mounts, and no external network.
 | `bin/ci` | Check tests, coverage/lint enforcement, migrations, annotations, assets, tools, and actual container recovery. |
 | `bin/annotate` | Refresh model schema comments with AnnotateRb after model or migration changes. |
 
-GitHub Actions runs `bin/ci` on pull requests and pushes to `main`. Runtime checks
-cover default named volumes, alternate roots and UID/GID, and bind paths
-containing spaces. See [quality checks](docs/testing.md) and
+GitHub Actions runs four independent jobs on pull requests and pushes to `main`.
+Run an individual job locally with `bin/ci rspec`, `bin/ci rubocop`, `bin/ci rails`,
+or `bin/ci runtime`. Runtime checks cover default named volumes, alternate roots
+and UID/GID, and bind paths containing spaces. See [quality checks](docs/testing.md) and
 [supported runtime](docs/runtime.md) for the verification details and tool versions.
 
 Source changes require an image rebuild; `bin/dev` rebuilds and starts both

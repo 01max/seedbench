@@ -10,7 +10,9 @@
       <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-fact-#{run.id}-#{index}" do |form| %>
         <%= form.hidden_field :kind, value: "adopt_fact" %><%= form.hidden_field :run_id, value: run.id %><%= form.hidden_field :candidate_index, value: index %>
         <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
-        <%= form.submit t("ai.adopt"), class: "work-button", disabled: !current %>
+        <%= button_tag type: 'submit', class: 'work-button', disabled: !current do %>
+          <%= render 'shared/ai_icon' %> <%= t('ai.adopt') %>
+        <% end %>
       <% end %>
     </section>
   <% end %>
@@ -25,7 +27,9 @@
       <%= form_with url: release_ai_action_path(@release), scope: :assistance, namespace: "ai-prose-#{run.id}-#{field}" do |form| %>
         <%= form.hidden_field :kind, value: "accept_prose" %><%= form.hidden_field :run_id, value: run.id %><%= form.hidden_field :field, value: field %>
         <%= form.hidden_field :expected_revision, value: @release.input_revision, data: { release_revision: true } %>
-        <%= form.submit t("ai.accept_#{field}"), class: "work-button", disabled: !eligible %>
+        <%= button_tag type: 'submit', class: 'work-button', disabled: !eligible do %>
+          <%= render 'shared/ai_icon' %> <%= t("ai.accept_#{field}") %>
+        <% end %>
       <% end %>
     </section>
   <% end %>

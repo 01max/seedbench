@@ -6,7 +6,8 @@ RSpec.describe 'Application shell' do
     get root_path
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include('<html lang="fr">', 'Seedbench', 'Préparez')
+    expect(response.parsed_body.at_css('html')['lang']).to eq('fr')
+    expect(response.body).to include('Seedbench', 'Préparez')
     expect(response.body).to include('type="importmap"', '/assets/tailwind-')
   end
 

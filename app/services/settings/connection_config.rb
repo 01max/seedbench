@@ -5,12 +5,18 @@ module Settings
     class Invalid < StandardError; end
 
     class << self
-      def call(role:, label:, identity_key:, endpoint: nil, credentials: {}, options: {})
+      def call(role: nil, label: nil, identity_key: nil, endpoint: nil, credentials: {}, options: {})
         definition = Providers::Catalog::ROLES[role]
         raise Invalid, I18n.t('messages.settings.connection_config.role_libelle_ou_identite_de_connexion') unless definition && text?(label) && text?(identity_key)
 
         { role: role, provider: definition.provider, label: label, identity_key: identity_key,
           endpoint: endpoint_for(role, endpoint, definition), credentials: secrets(credentials, definition), options: options_for(role, options) }
+      end
+
+      def deluge_web(endpoint:, credentials:)
+        role = 'torrent_client'
+        definition = Providers::Catalog.fetch(role)
+        { endpoint: endpoint_for(role, endpoint, definition), password: secrets(credentials, definition).fetch('password') }
       end
 
       private

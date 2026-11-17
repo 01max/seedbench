@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'C411 draft review', type: :system do
-  let(:release) { imported_draft }
+  let(:release) { linked_draft }
 
   def open_draft
     visit release_path(release)
@@ -9,10 +9,7 @@ RSpec.describe 'C411 draft review', type: :system do
     click_button 'Brouillon', exact: true
   end
 
-  before do
-    release
-    sign_in_browser
-  end
+  before { sign_in_browser }
 
   it 'saves pending BBCode before an explicit update without sending it from navigation' do
     open_draft
@@ -28,6 +25,7 @@ RSpec.describe 'C411 draft review', type: :system do
     Releases::Save.call(release_id: release.id, expected_revision: release.input_revision, changes: { bbcode: 'Copie humaine locale à conserver.' })
     stub_draft_account(draft_data(description: '<script>alert(1)</script>Copie distante différente.'))
     open_draft
+    click_button 'Synchroniser maintenant'
     expect(page).to have_text('Résoudre le conflit')
     expect(page).to have_text('Copie humaine locale à conserver.')
     expect(page).to have_text('<script>alert(1)</script>Copie distante différente.')
@@ -38,20 +36,19 @@ RSpec.describe 'C411 draft review', type: :system do
     expect(WebMock).not_to have_requested(:patch, /c411/)
   end
 
-  it 'keeps the unlinked payload selection and confirmation accessible at mobile width' do
-    target = Releases::Create.call(title: 'Livre distant')
-    target.payload_revisions.create!(number: 1, original_filename: 'Synthetic.epub', format: 'epub', size_bytes: 42, sha256: 'a' * 64, locator: 'staging/synthetic.epub')
-    open_draft
+  it 'keeps C411 imports in their own filter and restores them there from Archives' do
+    imported = imported_draft
     set_workbench_viewport(320)
-    find('summary', text: 'Lier un fichier importé').click
-    expect(page).to have_text('Des titres proches sont proposés')
+    visit root_path
+    expect(page).to have_no_link('Livre distant')
+    select 'Imports C411', from: 'Filtrer la file'
+    expect(page).to have_css('.queue-row[aria-current="page"]', text: 'Import C411')
     expect(page.evaluate_script('document.documentElement.scrollWidth')).to be <= 320
-    select "Proposition · ##{target.id} · Livre distant · Synthetic.epub", from: 'Fichier importé (100 résultats maximum par recherche)'
-    check 'Je confirme que ce fichier correspond à ce brouillon.'
-    save_workbench_screenshot('draft-link-mobile.png')
-    click_button 'Confirmer le lien'
-    expect(page).to have_current_path(release_path(target))
-    expect(target.reload.draft_link.remote_id).to eq('draft-1')
+    click_button 'Archiver'
+    expect(page).to have_no_link('Livre distant')
+    select 'Archives', from: 'Filtrer la file'
+    click_button 'Restaurer'
+    expect(page).to have_current_path(release_path(imported, state: 'imported')).and(have_css('.queue-row[aria-current="page"]', text: 'Import C411'))
   ensure
     page.driver.browser.execute_cdp('Emulation.clearDeviceMetricsOverride')
   end

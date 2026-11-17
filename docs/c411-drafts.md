@@ -1,12 +1,13 @@
 # C411 drafts
 
-Connecting C411 imports its drafts as separate unlinked release shells. Opening
-the workbench or choosing **Synchroniser maintenant** reads account state. A
-similar title never links an uploaded file automatically. The link form requires
-a file, a content choice and confirmation; it moves the active association onto
-that file's release and preserves the former shell's content and history.
-Unlinked shells can edit their name, title, description and NFO, but cannot prepare
-or publish without a payload.
+Connecting C411 or clicking **Importer les brouillons C411** in publishing
+settings reads the account's draft list. New entries appear under **Imports
+C411** with their remote draft ID. Seedbench keeps a title and the draft reference
+for each entry. Archiving an import moves it to **Archives**, and restoring it
+returns it to **Imports C411**. **File active** contains local releases.
+Opening the workbench and switching filters use the local queue without contacting
+C411. The draft panel on a local release with a linked draft has an explicit
+**Synchroniser maintenant** action that reads the linked draft directly.
 
 Synchronization compares local text and remote text with the retained common
 base. Remote-only changes become local revisions; local-only changes stay unsent.
@@ -28,12 +29,6 @@ torrent verification, a freshly verified selected cover, and reviewed BBCode/NFO
 The first attempt may host the cover and stop until its URL is accepted through
 the content review controls. Run the draft action again after acceptance. Hosting
 receipts are reused and reverified instead of uploading the image again.
-
-An unlinked shell updates only its reviewed name, title, description and changed
-UTF-8 NFO. It preserves remote category/options, torrent and unrelated metadata.
-It never invents a file or attaches another draft's torrent. New image URLs must
-match a freshly verified selected cover. Imported NFO attachments use the API's
-flat base64 write fields and object-shaped read representation; malformed or oversized content is rejected visibly.
 
 Writes retain the connection version, exact approved content, operation identity,
 transmitted JSON and receipt. Categories/options for linked ebooks are resolved
@@ -62,14 +57,13 @@ payload or local release. A deletion timeout blocks another delete; reconciliati
 only reads until absence is confirmed. This hook is tested with synthetic local
 publication state; actual publication is still unavailable and unverified.
 
-The link chooser proposes similar titles and supports searching the full queue;
-proposals never commit an association. Each conflict copy displays French field
-labels and escaped BBCode/NFO. Sync responses use the existing editor revision
+Each conflict copy displays French field labels and escaped BBCode/NFO. Sync
+responses use the existing editor revision
 check: unsaved browser text stays in place and requires a save-conflict choice
 if remote-only adoption changed the saved revision.
 
-Validation includes isolated CRUD, linking, conflict/stale reads, remote deletion,
-slot errors, authenticated/CSRF requests, actual Turbo forms at desktop/mobile
+Validation includes isolated CRUD, read-only imports, conflict/stale reads, remote
+deletion, slot errors, authenticated/CSRF requests, Turbo forms at desktop/mobile
 sizes, migration rollback/reapply, SQL request/body history guards, and durable
 unknown-write/conflict records across all three disposable Compose layouts.
 The 2026-11-10 live check used only synthetic torrent/NFO bytes and removed its
